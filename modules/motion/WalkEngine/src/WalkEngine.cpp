@@ -51,8 +51,6 @@ namespace motion {
     using messages::behaviour::ServoCommand;
     using messages::behaviour::WalkOptimiserCommand;
     using messages::behaviour::WalkConfigSaved;
-    // using messages::behaviour::RegisterAction;
-    // using messages::behaviour::ActionPriorites;
     using messages::input::LimbID;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
@@ -76,34 +74,6 @@ namespace motion {
 
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
-        // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
-
-        // emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
-        //     subsumptionId,
-        //     "Walk Engine",
-        //     {
-        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
-        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
-        //     },
-        //     [this] (const std::set<LimbID>& givenLimbs) {
-        //         if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
-        //             // legs are available, start
-        //             stanceReset(); // reset stance as we don't know where our limbs are
-        //             interrupted = false;
-        //             updateHandle.enable();
-        //         }
-        //     },
-        //     [this] (const std::set<LimbID>& takenLimbs) {
-        //         if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
-        //             // legs are no longer available, reset walking (too late to stop walking)
-        //             updateHandle.disable();
-        //             interrupted = true;
-        //         }
-        //     },
-        //     [this] (const std::set<ServoID>&) {
-        //         // nothing
-        //     }
-        // }));
 
         on<Trigger<EnableWalkEngineCommand>>([this](const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;
@@ -134,12 +104,9 @@ namespace motion {
 
         on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
             start();
-            // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
         });
 
         on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
-            // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
-            // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
         });
 
@@ -357,7 +324,6 @@ namespace motion {
 
     void WalkEngine::stop() {
         state = State::STOPPED;
-        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());
         emit(std::make_unique<std::vector<ServoCommand>>());
@@ -454,7 +420,7 @@ namespace motion {
             leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second);
         }
 
-        //TODO:is this a Debug?
+        // Emit walk engine odometry as localisation for debugging.
         if (emitLocalisation) {
             localise(uTorsoActual);
         }

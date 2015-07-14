@@ -60,6 +60,8 @@ namespace motion {
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
 
+            double now = getTime();
+
             // velocity-based support point modulation
             /*toeTipCompensation = 0;
             if (velocityDifference[0] > 0) {
