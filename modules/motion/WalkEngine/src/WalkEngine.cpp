@@ -159,6 +159,7 @@ namespace motion {
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
         zmpTime = walkCycle["zmp_time"].as<Expression>();
+        rampTime = walkCycle["ramp_time"].as<Expression>();
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
@@ -308,8 +309,10 @@ namespace motion {
 
     void WalkEngine::start() {
         if (state != State::WALKING) {
+            double now = getTime();
             swingLeg = swingLegInitial;
-            beginStepTime = getTime();
+            beginStepTime = now;
+            beginWalkTime = now;
             initialStep = 2;
             state = State::WALKING;
         }
@@ -378,10 +381,15 @@ namespace motion {
         //Get unitless phases for x and z motion
         arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
 
+        double now = getTime();
+        double scale = std::min(1.0, (now - beginWalkTime) / rampTime);
+        foot[0] *= scale;
+        foot[2] *= scale;
+
         // don't lift foot at initial step, TODO: review
-        if (initialStep > 0) {
+        /*if (initialStep > 0) {
             foot[2] = 0;
-        }
+        }*/
 
         //Interpolate Transform2D from start to destination
         if (swingLeg == LimbID::RIGHT_LEG) {

@@ -20,6 +20,7 @@
 #include "WalkEngine.h"
 
 #include "utility/motion/RobotModels.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
 namespace motion {
@@ -27,6 +28,7 @@ namespace motion {
     using messages::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
+    using utility::nubugger::graph;
 
     void WalkEngine::calculateNewStep() {
         updateVelocity();
@@ -59,8 +61,6 @@ namespace motion {
             } else {
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
-
-            double now = getTime();
 
             // velocity-based support point modulation
             /*toeTipCompensation = 0;
@@ -119,6 +119,10 @@ namespace motion {
         velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
+
+        double now = getTime();
+        double scale = std::min(1.0, (now - beginWalkTime) / rampTime);
+        velocityDifference *= scale;
 
         velocityCurrent.x()     += velocityDifference.x();
         velocityCurrent.y()     += velocityDifference.y();

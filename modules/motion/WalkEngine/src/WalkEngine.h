@@ -103,6 +103,8 @@ namespace motion {
         bool startFromStep;
         // The time when the current step begun
         double beginStepTime;
+        // The time when the current walk begun (e.g. from standstill)
+        double beginWalkTime;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
         // Current torso position
@@ -163,6 +165,7 @@ namespace motion {
         double stepHeight;
         double phase1Single;
         double phase2Single;
+        double rampTime;
         arma::vec2 footOffset;
         // standard offset
         Transform2D uLRFootOffset;
@@ -186,7 +189,7 @@ namespace motion {
         // servoControlPGains are the constant proportionality
         // constants which define the current values of jointGains based on the robot's balance state
         std::map<ServoID, float> servoControlPGains;
-        
+
         utility::motion::Balancer balancer;
 
         /*arma::vec4 ankleImuParamX;
@@ -265,7 +268,6 @@ namespace motion {
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
          * This is used to 'ease' the foot path through its trajectory.
          * The params phase1Single and phase2Single are used to tune the amount of time the robot spends on two feet
-         * Note: Only x/z are used currently and y is always 0
          * See: http://easings.net/ to reference common easing functions
          *
          * @param phase The input to the easing function, with a range of [0,1].

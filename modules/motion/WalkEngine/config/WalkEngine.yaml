@@ -7,21 +7,21 @@ stance:
   arms:
       left:
         start:
-          -  90 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
+          -   90 * pi / 180 # Shoulder Pitch
+          -    0 * pi / 180 # Shoulder Roll
           - -140 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
+          -   90 * pi / 180 # Shoulder Pitch
+          -    0 * pi / 180 # Shoulder Roll
           - -140 * pi / 180 # Elbow
       right:
         start:
-          -   90 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
+          -    90 * pi / 180 # Shoulder Pitch
+          -    0 * pi / 180 # Shoulder Roll
           - -140 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
+          -   90 * pi / 180 # Shoulder Pitch
+          -    0 * pi / 180 # Shoulder Roll
           - -140 * pi / 180 # Elbow
 
   foot_offset:
@@ -39,6 +39,9 @@ walk_cycle:
   step_time: 0.35
   # ???
   zmp_time: 0.365
+  # number of seconds to 'ramp up' to full speed after the walk engine starting
+  ramp_time: 3
+  # Radians to compensate for the hip rolling during the walk, greatly increases stability
   hip_roll_compensation: 4 * pi / 180
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
@@ -106,7 +109,7 @@ walk_cycle:
       # -
       #   id: "ANKLE_ROLL"
       #   p: 100
-      
+
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
     # velFastTurn: 0.15
