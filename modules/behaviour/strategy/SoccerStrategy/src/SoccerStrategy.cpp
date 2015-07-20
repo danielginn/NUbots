@@ -296,15 +296,15 @@ namespace strategy {
                 goalieWalk(selfs, balls);
                 currentState = Behaviour::GOALIE_WALK;
             } else {
-                if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
-                    standStill();
-                    find({FieldTarget::BALL});
-                    if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration) {
-                        lastLocalised = NUClear::clock::now();
-                    }
-                    currentState = Behaviour::LOCALISING;
-                }
-                else if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
+                // if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
+                //     standStill();
+                //     find({FieldTarget::BALL});
+                //     if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration) {
+                //         lastLocalised = NUClear::clock::now();
+                //     }
+                //     currentState = Behaviour::LOCALISING;
+                // }
+                /*else */if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
                     find({FieldTarget::BALL});
                     walkTo(fieldDescription, FieldTarget::BALL);
                     currentState = Behaviour::WALK_TO_BALL;

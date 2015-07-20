@@ -35,14 +35,18 @@
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
+#include "messages/vision/VisionObjects.h"
+#include "utility/math/coordinates.";
 
 namespace modules {
 namespace behaviour {
 namespace skills {
 
+    using utility::math::coordinates::sphericalToCartesian;
     using messages::support::Configuration;
     using Self = messages::localisation::Self;
     using Ball = messages::localisation::Ball;
+    using VisionBall = messages::vision::Ball;
 
     using messages::behaviour::MotionCommand;
     using messages::behaviour::WalkPath;
@@ -155,19 +159,22 @@ namespace skills {
 
         followPathReaction = on<Trigger<Every<20, Per<std::chrono::seconds>>>,
             With<std::vector<Self>>,
-            With<Ball>,
+            With<std::vector<VisionBall>>,
+            // With<Ball>,
             // With<WalkPath>,
             Options<Sync<WalkPathFollower>, Single>
            >("Follow current path plan", [this] (
              const NUClear::clock::time_point& /*current_time*/,
              const std::vector<Self>& selfs,
-             const Ball& ball
+             const std::vector<VisionBall>& balls
+             // const Ball& ball
              // const WalkPath& walkPath
              ) {
             if (selfs.empty() || currentPath.states.empty()) {
                 return;
             }
             auto self = selfs.front();
+            auto ball = balls.front();
 
             // Get the robot's current state as a Transform2D:
             Transform2D currentState = {self.position, vectorToBearing(self.heading)};
@@ -198,7 +205,7 @@ namespace skills {
             // RoboCup HACK - Just aim for the goal state:
             Transform2D targetState;
             if (currentPath.command.type == MotionCommand::Type::BallApproach) {
-                arma::vec2 worldBall = currentState.localToWorld({ball.position, 0}).xy();
+                arma::vec2 worldBall = currentState.localToWorld({sphericalToCartesian(ball.measurements[0].position).rows(0,1), 0}).xy();
                 Transform2D currentBallSpace = Transform2D::lookAt(worldBall, currentPath.command.kickTarget);
                 targetState = currentBallSpace;
             } else {
@@ -207,12 +214,12 @@ namespace skills {
 
 
             std::unique_ptr<WalkCommand> walkCommand;
-            if (isGoalClose(currentState, targetState)) { // TODO: Consider only doing walkBetweenFar/walkBetweenNear.
-                walkCommand = std::make_unique<WalkCommand>(walkBetweenNear(currentState, targetState));
-            } else {
+            // if (isGoalClose(currentState, targetState)) { // TODO: Consider only doing walkBetweenFar/walkBetweenNear.
+            //     walkCommand = std::make_unique<WalkCommand>(walkBetweenNear(currentState, targetState));
+            // } else {
                 // Make a walk command to move towards the target state
                 walkCommand = std::make_unique<WalkCommand>(walkBetweenFar(currentState, targetState));
-            }
+            // }
 
             // emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", currentState.localToWorld(walkCommand->command), {1,1,1}, 1));
             arma::vec2 arrowTip = currentState.localToWorld(walkCommand->command).xy();
