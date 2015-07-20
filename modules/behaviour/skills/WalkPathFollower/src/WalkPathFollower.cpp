@@ -36,7 +36,7 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
 #include "messages/vision/VisionObjects.h"
-#include "utility/math/coordinates.";
+#include "utility/math/coordinates.h"
 
 namespace modules {
 namespace behaviour {
@@ -170,7 +170,7 @@ namespace skills {
              // const Ball& ball
              // const WalkPath& walkPath
              ) {
-            if (selfs.empty() || currentPath.states.empty()) {
+            if (selfs.empty() || currentPath.states.empty() || balls.empty()) {
                 return;
             }
             auto self = selfs.front();
