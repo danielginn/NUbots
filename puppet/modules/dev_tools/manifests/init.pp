@@ -30,6 +30,7 @@ class dev_tools {
   package { 'python-dev': ensure => latest, }
   package { 'python-pip': ensure => latest, }
   package { 'libncurses5-dev': ensure => latest, }
+  package { 'libpcre3-dev': ensure => latest, }
   package { 'gcc-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gfortran-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
@@ -37,6 +38,7 @@ class dev_tools {
   package { 'binutils-dev': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'yasm': ensure => latest, }
+  package { 'byacc': ensure => latest, }
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   Package['python-pip'] -> Package <| provider == 'pip' |>

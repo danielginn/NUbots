@@ -89,6 +89,9 @@ node nubotsvmbuild {
                                 prebuild => 'cp portaudio19.h portaudio.h',
                                 environment => ['AUDIO=PORTAUDIO'],
                                 require => [ Installer['portaudio'] ], }
+  installer { 'swig':           url => 'http://prdownloads.sourceforge.net/swig/swig-3.0.7.tar.gz',
+                                creates => '/nubots/toolchain/bin/swig',
+                                require => [ Installer['boost'] ], }
   # Patch armadillo
   file { 'armadillo_config':    path => '/nubots/toolchain/include/armadillo_bits/config.hpp',
                                 source => 'puppet:///modules/files/nubots/toolchain/include/armadillo_bits/config.hpp',

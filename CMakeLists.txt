@@ -48,13 +48,12 @@ INCLUDE(SharedLibraries)
 INCLUDE(NUClearModuleBuilder)
 
 # Include our shared messages etc headers
-INCLUDE_DIRECTORIES("shared")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/shared")
 INCLUDE_DIRECTORIES("${CMAKE_BINARY_DIR}/shared")
 
 # This will generate any .proto files in the messages folder
-ADD_SUBDIRECTORY(shared/messages)
-# This will build our Utilities library (common functionality)
-ADD_SUBDIRECTORY(shared/utility)
+# Add our shared directory to be built
+ADD_SUBDIRECTORY(shared)
 
 # Add these to our shared libraries (started in our shared libraries cmake)
 # We include utility again at the end for any "shim" functions that are needed in libraries
