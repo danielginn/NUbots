@@ -26,7 +26,6 @@
 
 #include "messages/input/Image.h"
 #include "messages/input/Sensors.h"
-#include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
 
 namespace utility {
