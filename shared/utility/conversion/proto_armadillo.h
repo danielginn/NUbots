@@ -17,12 +17,19 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_PROTO_ARMADILLO_H
-#define UTILITY_SUPPORT_PROTO_ARMADILLO_H
+#ifndef UTILITY_CONVERSION_PROTO_ARMADILLO_H
+#define UTILITY_CONVERSION_PROTO_ARMADILLO_H
 
 #include <armadillo>
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Rotation2D.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Transform2D.h"
+
 #include "messages/Vector.pb.h"
 #include "messages/Matrix.pb.h"
+#include "messages/Rotation.pb.h"
+#include "messages/Transform.pb.h"
 
 /**
  * @brief This type maps protocol buffer vector types to their armadillo equivliants
@@ -31,18 +38,18 @@
  */
 template <typename T>
 struct ProtoArmaVecMap;
-template <> struct ProtoArmaVecMap<messages::vec2>   { using type = arma::vec2;   };
-template <> struct ProtoArmaVecMap<messages::vec3>   { using type = arma::vec3;   };
-template <> struct ProtoArmaVecMap<messages::vec4>   { using type = arma::vec4;   };
-template <> struct ProtoArmaVecMap<messages::fvec2>  { using type = arma::fvec2;  };
-template <> struct ProtoArmaVecMap<messages::fvec3>  { using type = arma::fvec3;  };
-template <> struct ProtoArmaVecMap<messages::fvec4>  { using type = arma::fvec4;  };
-template <> struct ProtoArmaVecMap<messages::ivec2>  { using type = arma::ivec2;  };
-template <> struct ProtoArmaVecMap<messages::ivec3>  { using type = arma::ivec3;  };
-template <> struct ProtoArmaVecMap<messages::ivec4>  { using type = arma::ivec4;  };
-template <> struct ProtoArmaVecMap<messages::uvec2>  { using type = arma::uvec2;  };
-template <> struct ProtoArmaVecMap<messages::uvec3>  { using type = arma::uvec3;  };
-template <> struct ProtoArmaVecMap<messages::uvec4>  { using type = arma::uvec4;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::vec2>   { using type = arma::vec2;   };
+template <> struct ProtoArmaVecMap<protobuf::messages::vec3>   { using type = arma::vec3;   };
+template <> struct ProtoArmaVecMap<protobuf::messages::vec4>   { using type = arma::vec4;   };
+template <> struct ProtoArmaVecMap<protobuf::messages::fvec2>  { using type = arma::fvec2;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::fvec3>  { using type = arma::fvec3;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::fvec4>  { using type = arma::fvec4;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::ivec2>  { using type = arma::ivec2;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::ivec3>  { using type = arma::ivec3;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::ivec4>  { using type = arma::ivec4;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::uvec2>  { using type = arma::uvec2;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::uvec3>  { using type = arma::uvec3;  };
+template <> struct ProtoArmaVecMap<protobuf::messages::uvec4>  { using type = arma::uvec4;  };
 template <typename T>
 using ProtoArmaVec = typename ProtoArmaVecMap<T>::type;
 
@@ -53,18 +60,18 @@ using ProtoArmaVec = typename ProtoArmaVecMap<T>::type;
  */
 template <typename T>
 struct ArmaProtoVecMap;
-template <> struct ArmaProtoVecMap<arma::vec2>   { using type = messages::vec2;   };
-template <> struct ArmaProtoVecMap<arma::vec3>   { using type = messages::vec3;   };
-template <> struct ArmaProtoVecMap<arma::vec4>   { using type = messages::vec4;   };
-template <> struct ArmaProtoVecMap<arma::fvec2>  { using type = messages::fvec2;  };
-template <> struct ArmaProtoVecMap<arma::fvec3>  { using type = messages::fvec3;  };
-template <> struct ArmaProtoVecMap<arma::fvec4>  { using type = messages::fvec4;  };
-template <> struct ArmaProtoVecMap<arma::ivec2>  { using type = messages::ivec2;  };
-template <> struct ArmaProtoVecMap<arma::ivec3>  { using type = messages::ivec3;  };
-template <> struct ArmaProtoVecMap<arma::ivec4>  { using type = messages::ivec4;  };
-template <> struct ArmaProtoVecMap<arma::uvec2>  { using type = messages::uvec2;  };
-template <> struct ArmaProtoVecMap<arma::uvec3>  { using type = messages::uvec3;  };
-template <> struct ArmaProtoVecMap<arma::uvec4>  { using type = messages::uvec4;  };
+template <> struct ArmaProtoVecMap<arma::vec2>   { using type = protobuf::messages::vec2;   };
+template <> struct ArmaProtoVecMap<arma::vec3>   { using type = protobuf::messages::vec3;   };
+template <> struct ArmaProtoVecMap<arma::vec4>   { using type = protobuf::messages::vec4;   };
+template <> struct ArmaProtoVecMap<arma::fvec2>  { using type = protobuf::messages::fvec2;  };
+template <> struct ArmaProtoVecMap<arma::fvec3>  { using type = protobuf::messages::fvec3;  };
+template <> struct ArmaProtoVecMap<arma::fvec4>  { using type = protobuf::messages::fvec4;  };
+template <> struct ArmaProtoVecMap<arma::ivec2>  { using type = protobuf::messages::ivec2;  };
+template <> struct ArmaProtoVecMap<arma::ivec3>  { using type = protobuf::messages::ivec3;  };
+template <> struct ArmaProtoVecMap<arma::ivec4>  { using type = protobuf::messages::ivec4;  };
+template <> struct ArmaProtoVecMap<arma::uvec2>  { using type = protobuf::messages::uvec2;  };
+template <> struct ArmaProtoVecMap<arma::uvec3>  { using type = protobuf::messages::uvec3;  };
+template <> struct ArmaProtoVecMap<arma::uvec4>  { using type = protobuf::messages::uvec4;  };
 template <typename T>
 using ArmaProtoVec = typename ArmaProtoVecMap<T>::type;
 
@@ -75,18 +82,18 @@ using ArmaProtoVec = typename ArmaProtoVecMap<T>::type;
  */
 template <typename T>
 struct ProtoArmaMatMap;
-template <> struct ProtoArmaMatMap<messages::mat22>  { using type = arma::mat22;  };
-template <> struct ProtoArmaMatMap<messages::mat33>  { using type = arma::mat33;  };
-template <> struct ProtoArmaMatMap<messages::mat44>  { using type = arma::mat44;  };
-template <> struct ProtoArmaMatMap<messages::fmat22> { using type = arma::fmat22; };
-template <> struct ProtoArmaMatMap<messages::fmat33> { using type = arma::fmat33; };
-template <> struct ProtoArmaMatMap<messages::fmat44> { using type = arma::fmat44; };
-template <> struct ProtoArmaMatMap<messages::imat22> { using type = arma::imat22; };
-template <> struct ProtoArmaMatMap<messages::imat33> { using type = arma::imat33; };
-template <> struct ProtoArmaMatMap<messages::imat44> { using type = arma::imat44; };
-template <> struct ProtoArmaMatMap<messages::umat22> { using type = arma::umat22; };
-template <> struct ProtoArmaMatMap<messages::umat33> { using type = arma::umat33; };
-template <> struct ProtoArmaMatMap<messages::umat44> { using type = arma::umat44; };
+template <> struct ProtoArmaMatMap<protobuf::messages::mat22>  { using type = arma::mat22;  };
+template <> struct ProtoArmaMatMap<protobuf::messages::mat33>  { using type = arma::mat33;  };
+template <> struct ProtoArmaMatMap<protobuf::messages::mat44>  { using type = arma::mat44;  };
+template <> struct ProtoArmaMatMap<protobuf::messages::fmat22> { using type = arma::fmat22; };
+template <> struct ProtoArmaMatMap<protobuf::messages::fmat33> { using type = arma::fmat33; };
+template <> struct ProtoArmaMatMap<protobuf::messages::fmat44> { using type = arma::fmat44; };
+template <> struct ProtoArmaMatMap<protobuf::messages::imat22> { using type = arma::imat22; };
+template <> struct ProtoArmaMatMap<protobuf::messages::imat33> { using type = arma::imat33; };
+template <> struct ProtoArmaMatMap<protobuf::messages::imat44> { using type = arma::imat44; };
+template <> struct ProtoArmaMatMap<protobuf::messages::umat22> { using type = arma::umat22; };
+template <> struct ProtoArmaMatMap<protobuf::messages::umat33> { using type = arma::umat33; };
+template <> struct ProtoArmaMatMap<protobuf::messages::umat44> { using type = arma::umat44; };
 template <typename T>
 using ProtoArmaMat = typename ProtoArmaMatMap<T>::type;
 
@@ -97,18 +104,18 @@ using ProtoArmaMat = typename ProtoArmaMatMap<T>::type;
  */
 template <typename T>
 struct ArmaProtoMatMap;
-template <> struct ArmaProtoMatMap<arma::mat22>  { using type = messages::mat22;  };
-template <> struct ArmaProtoMatMap<arma::mat33>  { using type = messages::mat33;  };
-template <> struct ArmaProtoMatMap<arma::mat44>  { using type = messages::mat44;  };
-template <> struct ArmaProtoMatMap<arma::fmat22> { using type = messages::fmat22; };
-template <> struct ArmaProtoMatMap<arma::fmat33> { using type = messages::fmat33; };
-template <> struct ArmaProtoMatMap<arma::fmat44> { using type = messages::fmat44; };
-template <> struct ArmaProtoMatMap<arma::imat22> { using type = messages::imat22; };
-template <> struct ArmaProtoMatMap<arma::imat33> { using type = messages::imat33; };
-template <> struct ArmaProtoMatMap<arma::imat44> { using type = messages::imat44; };
-template <> struct ArmaProtoMatMap<arma::umat22> { using type = messages::umat22; };
-template <> struct ArmaProtoMatMap<arma::umat33> { using type = messages::umat33; };
-template <> struct ArmaProtoMatMap<arma::umat44> { using type = messages::umat44; };
+template <> struct ArmaProtoMatMap<arma::mat22>  { using type = protobuf::messages::mat22;  };
+template <> struct ArmaProtoMatMap<arma::mat33>  { using type = protobuf::messages::mat33;  };
+template <> struct ArmaProtoMatMap<arma::mat44>  { using type = protobuf::messages::mat44;  };
+template <> struct ArmaProtoMatMap<arma::fmat22> { using type = protobuf::messages::fmat22; };
+template <> struct ArmaProtoMatMap<arma::fmat33> { using type = protobuf::messages::fmat33; };
+template <> struct ArmaProtoMatMap<arma::fmat44> { using type = protobuf::messages::fmat44; };
+template <> struct ArmaProtoMatMap<arma::imat22> { using type = protobuf::messages::imat22; };
+template <> struct ArmaProtoMatMap<arma::imat33> { using type = protobuf::messages::imat33; };
+template <> struct ArmaProtoMatMap<arma::imat44> { using type = protobuf::messages::imat44; };
+template <> struct ArmaProtoMatMap<arma::umat22> { using type = protobuf::messages::umat22; };
+template <> struct ArmaProtoMatMap<arma::umat33> { using type = protobuf::messages::umat33; };
+template <> struct ArmaProtoMatMap<arma::umat44> { using type = protobuf::messages::umat44; };
 template <typename T>
 using ArmaProtoMat = typename ArmaProtoMatMap<T>::type;
 
@@ -282,11 +289,28 @@ inline Proto& operator<< (Proto& proto, const ProtoArmaVec<Proto>& vector) {
     return proto;
 }
 
-inline messages::vec& operator<< (messages::vec& proto, const arma::vec vector) {
+template <typename Proto, typename Vec>
+inline Proto& set_protocol_buffer_from_armadillo_vector(Proto& proto, const Vec& vector) {
     for (auto& v : vector) {
         proto.add_v(v);
     }
     return proto;
+}
+
+inline protobuf::messages::vec& operator<< (protobuf::messages::vec& proto, const arma::vec& vector) {
+    return set_protocol_buffer_from_armadillo_vector(proto, vector);
+}
+
+inline protobuf::messages::fvec& operator<< (protobuf::messages::fvec& proto, const arma::fvec& vector) {
+    return set_protocol_buffer_from_armadillo_vector(proto, vector);
+}
+
+inline protobuf::messages::ivec& operator<< (protobuf::messages::ivec& proto, const arma::ivec& vector) {
+    return set_protocol_buffer_from_armadillo_vector(proto, vector);
+}
+
+inline protobuf::messages::uvec& operator<< (protobuf::messages::uvec& proto, const arma::uvec& vector) {
+    return set_protocol_buffer_from_armadillo_vector(proto, vector);
 }
 
 template <typename Vector>
@@ -298,13 +322,28 @@ Vector& operator<< (Vector& vector, const ArmaProtoVec<Vector>& proto) {
     return vector;
 }
 
-inline arma::vec& operator<< (arma::vec& vector, const messages::vec proto) {
+template <typename Vector, typename Proto>
+inline Vector& set_armadillo_vector_from_protocol_buffer(Vector& vector, const Proto& proto) {
     vector.set_size(proto.v_size());
     for (uint i = 0; i < vector.n_elem; ++i) {
         vector[i] = proto.v(i);
     }
     return vector;
 }
+
+inline arma::vec& operator<< (arma::vec& vector, const protobuf::messages::vec& proto) {
+    return set_armadillo_vector_from_protocol_buffer(vector, proto);
+}
+inline arma::fvec& operator<< (arma::fvec& vector, const protobuf::messages::fvec& proto) {
+    return set_armadillo_vector_from_protocol_buffer(vector, proto);
+}
+inline arma::ivec& operator<< (arma::ivec& vector, const protobuf::messages::ivec& proto) {
+    return set_armadillo_vector_from_protocol_buffer(vector, proto);
+}
+inline arma::uvec& operator<< (arma::uvec& vector, const protobuf::messages::uvec& proto) {
+    return set_armadillo_vector_from_protocol_buffer(vector, proto);
+}
+
 
 /**
  * @brief Generalised function for streaming armadillo square matricies into protocol buffers
@@ -327,7 +366,8 @@ inline Proto& operator<< (Proto& proto, const ProtoArmaMat<Proto>& matrix) {
     return proto;
 }
 
-inline messages::mat& operator<< (messages::mat& proto, const arma::mat matrix) {
+template <typename Proto, typename Matrix>
+inline Proto& set_protocol_buffer_from_armadillo_matrix(Proto& proto, const Matrix& matrix) {
     for (uint x = 0; x < matrix.n_cols; ++x) {
         auto col = proto.add_v();
         for (uint y = 0; y < matrix.n_rows; ++y) {
@@ -335,6 +375,19 @@ inline messages::mat& operator<< (messages::mat& proto, const arma::mat matrix) 
         }
     }
     return proto;
+}
+
+inline protobuf::messages::mat& operator<< (protobuf::messages::mat& proto, const arma::mat matrix) {
+    return set_protocol_buffer_from_armadillo_matrix(proto, matrix);
+}
+inline protobuf::messages::fmat& operator<< (protobuf::messages::fmat& proto, const arma::fmat matrix) {
+    return set_protocol_buffer_from_armadillo_matrix(proto, matrix);
+}
+inline protobuf::messages::imat& operator<< (protobuf::messages::imat& proto, const arma::imat matrix) {
+    return set_protocol_buffer_from_armadillo_matrix(proto, matrix);
+}
+inline protobuf::messages::umat& operator<< (protobuf::messages::umat& proto, const arma::umat matrix) {
+    return set_protocol_buffer_from_armadillo_matrix(proto, matrix);
 }
 
 template <typename Matrix>
@@ -346,7 +399,8 @@ Matrix& operator<< (Matrix& matrix, const ArmaProtoMat<Matrix>& proto) {
     return matrix;
 }
 
-inline arma::mat& operator<< (arma::mat& matrix, const messages::mat proto) {
+template <typename Proto, typename Matrix>
+inline Matrix& set_armadillo_matrix_from_protocol_buffer(Matrix& matrix, const Proto& proto) {
     matrix.set_size(proto.v_size(), proto.v_size());
 
     for (uint x = 0; x < matrix.n_cols; ++x) {
@@ -358,4 +412,18 @@ inline arma::mat& operator<< (arma::mat& matrix, const messages::mat proto) {
     return matrix;
 }
 
-#endif
+inline arma::mat& operator<< (arma::mat& matrix, const protobuf::messages::mat proto) {
+    return set_armadillo_matrix_from_protocol_buffer(matrix, proto);
+}
+inline arma::fmat& operator<< (arma::fmat& matrix, const protobuf::messages::fmat proto) {
+    return set_armadillo_matrix_from_protocol_buffer(matrix, proto);
+}
+inline arma::imat& operator<< (arma::imat& matrix, const protobuf::messages::imat proto) {
+    return set_armadillo_matrix_from_protocol_buffer(matrix, proto);
+}
+inline arma::umat& operator<< (arma::umat& matrix, const protobuf::messages::umat proto) {
+    return set_armadillo_matrix_from_protocol_buffer(matrix, proto);
+}
+
+
+#endif  // UTILITY_CONVERSION_PROTO_ARMADILLO_H

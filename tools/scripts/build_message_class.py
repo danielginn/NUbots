@@ -35,9 +35,24 @@ class Field:
         self.name = f.name
         self.number = f.number
 
-        if f.type in [ f.TYPE_MESSAGE, f.TYPE_ENUM, f.TYPE_GROUP ]:
+        # Some booleans to describe the type
+        self.map_type = f.type_name in Field.map_types
+        self.repeated = f.label == f.LABEL_REPEATED
+        self.pointer = f.options.Extensions[pointer]
+        self.bytes_type = f.type == f.TYPE_BYTES;
+        # Basic types are treated as primatives by the library
+        self.basic = f.type not in [ f.TYPE_MESSAGE, f.TYPE_GROUP, f.TYPE_BYTES ]
+
+        # Map types are special and a little more difficult to spot
+        if f.type_name in Field.map_types:
+            self.type = Field.map_types[f.type_name]
+
+        # Normal message types
+        elif f.type in [ f.TYPE_MESSAGE, f.TYPE_ENUM, f.TYPE_GROUP ]:
             self.type = f.type_name
             self.default_value = f.default_value
+
+        # Protobuf basic types
         else:
             # Work out what primitive type we have
             # and the default default for that field
@@ -62,94 +77,100 @@ class Field:
             self.type = type_info[0]
             self.default_value = f.default_value if f.default_value else type_info[1]
 
-        # Now we add custom type information
-        self.repeated = f.label == f.LABEL_REPEATED
-        self.pointer = f.options.Extensions[pointer]
-
         # If we are repeated or a pointer our default is changed
         if self.repeated:
             self.default_value = ''
         elif self.pointer:
             self.default_value = 'nullptr'
 
-    def cpp_type(self):
+        # Since our cpp_type is used a lot, precalculate it
+        self.cpp_type, self.special_cpp_type = self.get_cpp_type_info()
 
-        cpp_type = self.type
-        is_map = False
+    def get_cpp_type_info(self):
+
+        t = self.type
+
+        # We are special unless we are not
+        special = True
 
         vector_regex = re.compile(r'^\.messages\.([fiu]?)vec([2-4]?)$');
         matrix_regex = re.compile(r'^\.messages\.([fiu]?)mat([2-4]{0,2})$');
 
-        # Vector types map to armadillo
-        if vector_regex.match(cpp_type):
-            r = vector_regex.match(cpp_type)
-            cpp_type = '::arma::{}vec{}'.format(r.group(1), r.group(2));
-        elif matrix_regex.match(cpp_type):
-            r = matrix_regex.match(cpp_type)
-            cpp_type = '::arma::{}mat{}'.format(r.group(1), r.group(2));
+        # Check if it is a map field
+        if self.map_type:
+            t = '::std::map<{}, {}>'.format(t[0].cpp_type, t[1].cpp_type)
+
+        # Check for armadillo types
+        elif vector_regex.match(t):
+            r = vector_regex.match(t)
+            t = '::arma::{}vec{}'.format(r.group(1), r.group(2));
+        elif matrix_regex.match(t):
+            r = matrix_regex.match(t)
+            t = '::arma::{}mat{}'.format(r.group(1), r.group(2));
 
         # Transform and rotation types map to the Transform classes
-        elif cpp_type == '.messages.Transform2D':
-            cpp_type = '::utility::math::matrix::Transform2D'
-        elif cpp_type == '.messages.Transform3D':
-            cpp_type = '::utility::math::matrix::Transform3D'
-        elif cpp_type == '.messages.Rotation2D':
-            cpp_type = '::utility::math::matrix::Rotation2D'
-        elif cpp_type == '.messages.Rotation3D':
-            cpp_type = '::utility::math::matrix::Rotation3D'
+        elif t == '.messages.Transform2D':
+            t = '::utility::math::matrix::Transform2D'
+        elif t == '.messages.Transform3D':
+            t = '::utility::math::matrix::Transform3D'
+        elif t == '.messages.Rotation2D':
+            t = '::utility::math::matrix::Rotation2D'
+        elif t == '.messages.Rotation3D':
+            t = '::utility::math::matrix::Rotation3D'
 
         # Timestamps and durations map to real time/duration classes
-        elif cpp_type == '.google.protobuf.Timestamp':
-            cpp_type = '::NUClear::clock::time_point'
-        elif cpp_type == '.google.protobuf.Duration':
-            cpp_type = '::NUClear::clock::duration'
+        elif t == '.google.protobuf.Timestamp':
+            t = '::NUClear::clock::time_point'
+        elif t == '.google.protobuf.Duration':
+            t = '::NUClear::clock::duration'
 
         # Struct types map to YAML nodes
-        elif cpp_type == '.google.protobuf.Struct':
-            cpp_type = '::YAML::Node'
+        elif t == '.google.protobuf.Struct':
+            t = '::YAML::Node'
 
         # Standard types get mapped to their appropriate type
-        elif cpp_type in [ 'double', 'float', 'bool' ]:
+        elif t in [ 'double', 'float', 'bool' ]:
+            special = False
             pass # double and float and bool are fine as is
-        elif cpp_type in [ 'int64', 'sint64', 'sfixed64' ]:
-            cpp_type = 'int64_t'
-        elif cpp_type in [ 'uint64', 'fixed64' ]:
-            cpp_type = 'uint64_t'
-        elif cpp_type in [ 'int32', 'sint32', 'sfixed32' ]:
-            cpp_type = 'int32_t'
-        elif cpp_type in [ 'uint32', 'fixed32' ]:
-            cpp_type = 'uint32_t'
-        elif cpp_type in [ 'string' ]:
-            cpp_type = '::std::string'
-        elif cpp_type in [ 'bytes' ]:
-            cpp_type = '::std::vector<char>'
-
-        # Check if it is a map field
-        elif cpp_type in self.map_types:
-            is_map = True
-            cpp_type = '::std::map<{}, {}>'.format(self.map_types[cpp_type][0].cpp_type(), self.map_types[cpp_type][1].cpp_type())
-
+        elif t in [ 'int64', 'sint64', 'sfixed64' ]:
+            t = 'int64_t'
+            special = False
+        elif t in [ 'uint64', 'fixed64' ]:
+            t = 'uint64_t'
+            special = False
+        elif t in [ 'int32', 'sint32', 'sfixed32' ]:
+            t = 'int32_t'
+            special = False
+        elif t in [ 'uint32', 'fixed32' ]:
+            t = 'uint32_t'
+            special = False
+        elif t in [ 'string' ]:
+            t = '::std::string'
+            special = False
+        elif t in [ 'bytes' ]:
+            t = '::std::vector<char>'
         # Otherwise we assume it's a normal type and let it work out its scoping
         else:
-            cpp_type = '::'.join(cpp_type.split('.'));
+            t = '::'.join(t.split('.'));
+            special = False
 
         # If we are using a pointer type do the manipulation here
         if self.pointer == PointerType['RAW']:
-            cpp_type = '{}*'.format(cpp_type)
+            t = '{}*'.format(t)
         elif self.pointer == PointerType['SHARED']:
-            cpp_type = '::std::shared_ptr<{}>'.format(cpp_type)
+            t = '::std::shared_ptr<{}>'.format(t)
         elif self.pointer == PointerType['UNIQUE']:
-            cpp_type = '::std::unique_ptr<{}>'.format(cpp_type)
+            t = '::std::unique_ptr<{}>'.format(t)
 
         # If it's a repeated field, and not a map, it's a vector
-        if self.repeated and not is_map:
-            cpp_type = '::std::vector<{}>'.format(cpp_type)
+        if self.repeated and not self.map_type:
+            t = '::std::vector<{}>'.format(t)
 
-        return cpp_type
+        return (t, special)
 
 
     def generate_cpp_header(self):
-        return '{} {};'.format(self.cpp_type(), to_camel_case(self.name))
+        return '{} {};'.format(self.cpp_type, to_camel_case(self.name))
 
     def __repr__(self):
         return "%r" % (self.__dict__)
@@ -168,11 +189,6 @@ class Message:
         for n in m.nested_type:
             if n.options.map_entry:
                 Field.map_types['{}.{}'.format(self.fqn, n.name)] = (Field(n.field[0], self), Field(n.field[1], self))
-
-        # TODO WORK OUT ONEOF
-        # TODO WORK OUT m.options.map_type if true this is a map from
-        # m.field[0] to m.field[1] type
-
 
         # All fields that are not a part of oneof
         self.fields = [Field(f, self) for f in m.field if f.oneof_index == 0]
@@ -216,7 +232,7 @@ class Message:
             constructors.append('{}() : {} {{}}'.format(self.name, field_defaults))
 
             # ELEMENT WISE CONSTRUCTOR
-            field_list = ', '.join(['{} const& _{}'.format(v.cpp_type(), to_camel_case(v.name)) for v in self.fields])
+            field_list = ', '.join(['{} const& _{}'.format(v.cpp_type, to_camel_case(v.name)) for v in self.fields])
             field_set = ', '.join(['{0}(_{0})'.format(to_camel_case(v.name)) for v in self.fields])
             constructors.append('{}({}) : {} {{}}'.format(self.name, field_list, field_set))
 
@@ -224,10 +240,49 @@ class Message:
             protobuf_constructor = []
             protobuf_constructor.append('{}(const {}& proto) {{'.format(self.name, protobuf_name));
             for v in self.fields:
-                if v.repeated:
-                    protobuf_constructor.append(indent('{0}.insert(std::end({0}), std::begin({1}), std::end({1}));'.format(to_camel_case(v.name), v.name)))
+
+                if v.pointer:
+                    print 'TODO HANDLE POINTER CASES'
+
+                elif v.map_type:
+                    if v.type[1].bytes_type:
+                        print "AOIFJEOIFJSEOIFJOIESJFOISEJF"
+
+                    elif v.type[1].special_cpp_type:
+                        protobuf_constructor.append(indent('for (auto& _v : proto.{}()) {{'.format(v.name)))
+                        protobuf_constructor.append(indent('{}[_v.first] << _v.second;'.format(to_camel_case(v.name)), 8))
+                        protobuf_constructor.append(indent('}'))
+
+                    else: # Basic and other types are handled the same
+                        protobuf_constructor.append(indent('{0}.insert(std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name), 8))
+
+                elif v.repeated:
+                    if v.bytes_type:
+                        protobuf_constructor.append(indent('{}.resize(proto.{}_size());'.format(to_camel_case(v.name), v.name)))
+                        protobuf_constructor.append(indent('for (size_t _i = 0; _i < {}.size(); ++_i) {{'.format(to_camel_case(v.name))))
+                        protobuf_constructor.append(indent('{0}[_i].insert(std::end({0}[_i]), std::begin(proto.{1}(_i)), std::end(proto.{1}(_i)));'.format(to_camel_case(v.name), v.name), 8))
+                        protobuf_constructor.append(indent('}'))
+
+                    elif v.special_cpp_type:
+                        # Add the top of our for loop for the repeated field
+                        protobuf_constructor.append(indent('{}.resize(proto.{}_size());'.format(to_camel_case(v.name), v.name)))
+                        protobuf_constructor.append(indent('for (size_t _i = 0; _i < {}.size(); ++_i) {{'.format(to_camel_case(v.name))))
+                        protobuf_constructor.append(indent('{}[_i] << proto.{}(_i);'.format(to_camel_case(v.name), v.name), 8))
+                        protobuf_constructor.append(indent('}'))
+
+                    else: # Basic and other types are handled the same
+                        protobuf_constructor.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name)))
+
                 else:
-                    protobuf_constructor.append(indent('{} = proto.{}();'.format(to_camel_case(v.name), v.name)))
+                    if v.bytes_type:
+                        protobuf_constructor.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name)))
+
+                    elif v.special_cpp_type:
+                        protobuf_constructor.append(indent('{} << proto.{}();'.format(to_camel_case(v.name), v.name)))
+
+                    else: # Basic and other types are handled the same
+                        protobuf_constructor.append(indent('{} = proto.{}();'.format(to_camel_case(v.name), v.name)))
+
             protobuf_constructor.append('}')
             constructors.append('\n'.join(protobuf_constructor))
 
@@ -238,33 +293,60 @@ class Message:
         # If we don't have any fields, it is all very easy
         if not self.fields:
             # PROTOBUF CONVERTER
-            converters.append('inline operator {}() const {{}}'.format(protobuf_name))
+            converters.append('inline operator {0}() const {{ return {0}(); }}'.format(protobuf_name))
         else:
             # PROTOBUF CONVERTER
             protobuf_converter = []
             protobuf_converter.append('inline operator {}() const {{'.format(protobuf_name))
             protobuf_converter.append(indent('{} proto;'.format(protobuf_name)))
             for v in self.fields:
-                if v.repeated:
-                    protobuf_converter.append(indent('for (auto& v : {}) {{'.format(to_camel_case(v.name))))
-                    protobuf_converter.append(indent('*proto.add_{}() = v'.format(v.name), 8))
+
+                if v.pointer:
+                    print 'TODO HANDLE POINTER CASES'
+
+                elif v.map_type:
+                    # Add the top of our for loop for the repeated field
+                    protobuf_converter.append(indent('for (auto& _v : {}) {{'.format(to_camel_case(v.name))))
+
+                    if v.type[1].bytes_type:
+                        protobuf_converter.append(indent('(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.format(v.name), 8))
+                    elif v.type[1].special_cpp_type:
+                        protobuf_converter.append(indent('(*proto.mutable_{}())[_v.first] << _v.second;'.format(v.name), 8))
+                    else: # Basic and others are handled the same
+                        protobuf_converter.append(indent('(*proto.mutable_{}())[_v.first] = _v.second;'.format(v.name), 8))
+
                     protobuf_converter.append(indent('}'))
-                    pass
+
+                elif v.repeated:
+                    # Add the top of our for loop for the repeated field
+                    protobuf_converter.append(indent('for (auto& _v : {}) {{'.format(to_camel_case(v.name))))
+
+                    if v.bytes_type:
+                        protobuf_converter.append(indent('proto.add_{}()->append(std::begin(_v), std::end(_v));'.format(v.name), 8))
+                    elif v.special_cpp_type:
+                        protobuf_converter.append(indent('*proto.add_{}() << _v;'.format(v.name), 8))
+                    elif v.basic:
+                        protobuf_converter.append(indent('proto.add_{}(_v);'.format(v.name), 8))
+                    else:
+                        protobuf_converter.append(indent('*proto.add_{}() = _v;'.format(v.name), 8))
+
+                    protobuf_converter.append(indent('}'))
+
                 else:
-                    protobuf_converter.append(indent('*proto.mutable_{}() = {};'.format(v.name, to_camel_case(v.name))))
+                    if v.bytes_type:
+                        protobuf_converter.append(indent('proto.mutable_{0}()->append(std::begin({1}), std::end({1}));'.format(v.name, to_camel_case(v.name)), 8))
+                    elif v.special_cpp_type:
+                        protobuf_converter.append(indent('*proto.mutable_{}() << {};'.format(v.name, to_camel_case(v.name))))
+                    elif v.basic:
+                        protobuf_converter.append(indent('proto.set_{}({});'.format(v.name, to_camel_case(v.name))))
+                    else:
+                        protobuf_converter.append(indent('*proto.mutable_{}() = {};'.format(v.name, to_camel_case(v.name))))
+
+            protobuf_converter.append('return proto;')
             protobuf_converter.append('}')
             converters.append('\n'.join(protobuf_converter))
-            # loop through fields
-            # if repeated, do a foreach and set add() = thing
-            # Otherwise set mutable->bla = thing
-            #
 
         converters = indent('\n\n'.join(converters))
-
-
-        # TODO make our converters
-        # Converter to protobuf
-
 
         template = textwrap.dedent("""\
             struct {name} {{
@@ -339,6 +421,8 @@ class Enum:
                 Value value;
 
                 {name}() : value(Value::{default_value}) {{}}
+
+                {name}(const int& v) : value(static_cast<Value>(v)) {{}}
 
                 {name}(const Value& value)
                 : value(value) {{}}
@@ -419,16 +503,21 @@ class File:
         for d in self.dependencies:
             if d in ['messages/Vector.proto', 'messages/Matrix.proto']:
                 includes.add('3<armadillo>')
+                includes.add('4"utility/conversion/proto_armadillo.h"')
             if d in ['messages/Transform.proto']:
                 includes.add('4"utility/math/matrix/Transform2D.h"')
                 includes.add('4"utility/math/matrix/Transform3D.h"')
+                includes.add('4"utility/conversion/proto_transform.h"')
             if d in ['messages/Rotation.proto']:
                 includes.add('4"utility/math/matrix/Rotation2D.h"')
                 includes.add('4"utility/math/matrix/Rotation3D.h"')
+                includes.add('4"utility/conversion/proto_rotation.h"')
             elif d in ['google/protobuf/timestamp.proto', 'google/protobuf/duration.proto']:
                 includes.add('3<nuclear_bits/clock.hpp>')
+                includes.add('4"utility/conversion/proto_time.h"')
             elif d in ['google/protobuf/struct.proto']:
                 includes.add('3<yaml-cpp/yaml.h>')
+                includes.add('4"utility/conversion/proto_yaml.h"')
             else:
                 includes.add('4"{}"'.format(d[:-6] + '.h'))
         # Don't forget to remove the first character
@@ -486,7 +575,7 @@ with open('{}.pb'.format(base_file), 'r') as f:
     with open('{}.h'.format(base_file), 'w') as f:
         f.write(b.generate_cpp_header())
 
-    print highlight(b.generate_cpp_header(), CppLexer(), Terminal256Formatter())
+    # print highlight(b.generate_cpp_header(), CppLexer(), Terminal256Formatter())
 
 
 # Basically you need to make a struct for each of the messages here

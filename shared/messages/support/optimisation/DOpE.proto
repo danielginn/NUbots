@@ -40,7 +40,7 @@ message OptimiserParameters {
 
 message RequestParameters {
     string group = 1;
-    int32 nSamples = 2;
+    int32 n_samples = 2;
 };
 
 message Parameters {

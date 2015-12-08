@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_yaml_expression_H
-#define UTILITY_SUPPORT_yaml_expression_H
+#ifndef UTILITY_CONVERSION_YAML_EXPRESSION_H
+#define UTILITY_CONVERSION_YAML_EXPRESSION_H
 
 #include <iostream>
 #include <yaml-cpp/yaml.h>
@@ -70,4 +70,4 @@ namespace YAML {
 
 }
 
-#endif
+#endif  // UTILITY_CONVERSION_YAML_EXPRESSION_H

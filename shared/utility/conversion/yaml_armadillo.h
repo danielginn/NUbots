@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_YAML_ARMADILLO_H
-#define UTILITY_SUPPORT_YAML_ARMADILLO_H
+#ifndef UTILITY_CONVERSION_YAML_ARMADILLO_H
+#define UTILITY_CONVERSION_YAML_ARMADILLO_H
 
 #include <armadillo>
 #include <iostream>
@@ -111,4 +111,4 @@ namespace YAML {
     };
 }
 
-#endif // UTILITY_SUPPORT_yaml_armadillo_H
+#endif // UTILITY_CONVERSION_YAML_ARMADILLO_H

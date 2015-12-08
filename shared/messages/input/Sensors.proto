@@ -89,8 +89,8 @@ message Sensors {
     mat22 robot_to_imu = 200;
     mat22 odometry_covariance = 201;
     float body_centre_height = 202;
-    Transform3D orientationBodyToGround = 203;
-    Transform3D orientationCamToGround = 204;
-    Transform3D kinematicsBodyToGround = 205;
-    Transform3D kinematicsCamToGround = 206;
+    Transform3D orientation_body_to_ground = 203;
+    Transform3D orientation_cam_to_ground = 204;
+    Transform3D kinematics_body_to_ground = 205;
+    Transform3D kinematics_cam_to_ground = 206;
 }

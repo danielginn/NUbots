@@ -28,5 +28,5 @@ message Rotation3D {
 }
 
 message Rotation2D {
-    mat22 transform = 1;
+    mat22 rotation = 1;
 }

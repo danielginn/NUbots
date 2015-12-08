@@ -30,5 +30,5 @@ package messages.motion;
 message HeadCommand {
     float pitch = 1;
     float yaw = 2;
-    bool robotSpace = 3;
+    bool robot_space = 3;
 }

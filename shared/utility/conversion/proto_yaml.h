@@ -14,26 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-syntax = "proto3";
+#ifndef UTILITY_CONVERSION_PROTO_YAML_H
+#define UTILITY_CONVERSION_PROTO_YAML_H
 
-package messages.support.nuclear;
+#include <yaml-cpp/yaml.h>
+#include <google/protobuf/struct.pb.h>
 
-import "google/protobuf/timestamp.proto";
-
-message ReactionStatistics {
-    string name = 1;
-    string reactor_name = 2;
-    string trigger_name = 3;
-    string function_name = 4;
-    uint64 reaction_id = 5;
-    uint64 task_id = 6;
-    uint64 cause_reaction_id = 7;
-    uint64 cause_task_id = 8;
-
-    google.protobuf.Timestamp emitted = 9;
-    google.protobuf.Timestamp started = 10;
-    google.protobuf.Timestamp finished = 11;
+google::protobuf::Struct& operator<< (google::protobuf::Struct& proto, const YAML::Node& node) {
+    return proto;
 }
+
+YAML::Node& operator<< (YAML::Node& node, const google::protobuf::Struct& proto) {
+    return node;
+}
+
+#endif  // UTILITY_CONVERSION_PROTO_YAML_H
