@@ -35,37 +35,44 @@ class Field:
         self.name = f.name
         self.number = f.number
 
-        if f.type in [ f.TYPE_MESSAGE, f.TYPE_ENUM ]:
+        if f.type in [ f.TYPE_MESSAGE, f.TYPE_ENUM, f.TYPE_GROUP ]:
             self.type = f.type_name
+            self.default_value = f.default_value
         else:
             # Work out what primitive type we have
-            self.type = {
-                f.TYPE_DOUBLE   : 'double',
-                f.TYPE_FLOAT    : 'float',
-                f.TYPE_INT64    : 'int64',
-                f.TYPE_UINT64   : 'uint64',
-                f.TYPE_INT32    : 'int32',
-                f.TYPE_FIXED64  : 'fixed64',
-                f.TYPE_FIXED32  : 'fixed32',
-                f.TYPE_BOOL     : 'bool',
-                f.TYPE_STRING   : 'string',
-                f.TYPE_GROUP    : 'group', # TODO SOMETHING
-                f.TYPE_BYTES    : 'bytes',
-                f.TYPE_UINT32   : 'uint32',
-                f.TYPE_SFIXED32 : 'sfixed32',
-                f.TYPE_SFIXED64 : 'sfixed64',
-                f.TYPE_SINT32   : 'sint32',
-                f.TYPE_SINT64   : 'sint64'
+            # and the default default for that field
+            type_info = {
+                f.TYPE_DOUBLE   : ('double',   '0.0'),
+                f.TYPE_FLOAT    : ('float',    '0.0'),
+                f.TYPE_INT64    : ('int64',    '0'),
+                f.TYPE_UINT64   : ('uint64',   '0'),
+                f.TYPE_INT32    : ('int32',    '0'),
+                f.TYPE_FIXED64  : ('fixed64',  '0'),
+                f.TYPE_FIXED32  : ('fixed32',  '0'),
+                f.TYPE_BOOL     : ('bool',     'false'),
+                f.TYPE_STRING   : ('string',   '""'),
+                f.TYPE_BYTES    : ('bytes',    ''),
+                f.TYPE_UINT32   : ('uint32',   '0'),
+                f.TYPE_SFIXED32 : ('sfixed32', '0'),
+                f.TYPE_SFIXED64 : ('sfixed64', '0'),
+                f.TYPE_SINT32   : ('sint32',   '0'),
+                f.TYPE_SINT64   : ('sint64'    '0')
             }[f.type]
 
-        # If we have one later we can use it
-        self.default_value = f.default_value
+            self.type = type_info[0]
+            self.default_value = f.default_value if f.default_value else type_info[1]
 
         # Now we add custom type information
         self.repeated = f.label == f.LABEL_REPEATED
         self.pointer = f.options.Extensions[pointer]
 
-    def get_cpp_type(self):
+        # If we are repeated or a pointer our default is changed
+        if self.repeated:
+            self.default_value = ''
+        elif self.pointer:
+            self.default_value = 'nullptr'
+
+    def cpp_type(self):
 
         cpp_type = self.type
         is_map = False
@@ -120,7 +127,7 @@ class Field:
         # Check if it is a map field
         elif cpp_type in self.map_types:
             is_map = True
-            cpp_type = '::std::map<{}, {}>'.format(self.map_types[cpp_type][0].get_cpp_type(), self.map_types[cpp_type][1].get_cpp_type())
+            cpp_type = '::std::map<{}, {}>'.format(self.map_types[cpp_type][0].cpp_type(), self.map_types[cpp_type][1].cpp_type())
 
         # Otherwise we assume it's a normal type and let it work out its scoping
         else:
@@ -142,13 +149,7 @@ class Field:
 
 
     def generate_cpp_header(self):
-
-        cpp_type = self.get_cpp_type()
-
-        if self.default_value:
-            return '{} {} = {};'.format(cpp_type, to_camel_case(self.name), self.default_value)
-        else:
-            return '{} {};'.format(cpp_type, to_camel_case(self.name))
+        return '{} {};'.format(self.cpp_type(), to_camel_case(self.name))
 
     def __repr__(self):
         return "%r" % (self.__dict__)
@@ -189,15 +190,93 @@ class Message:
 
     def generate_cpp_header(self):
 
+        # Protobuf name
+        protobuf_name = '::'.join(('.protobuf' + self.fqn).split('.'))
+
         # Make our value pairs
         fields = indent('\n'.join(['{}'.format(v.generate_cpp_header()) for v in self.fields]))
+
+        # Get all our enums
         enums = indent('\n\n'.join([e.generate_cpp_header() for e in self.enums]))
+
+        # Get all our submessages
         submessages = indent('\n\n'.join([m.generate_cpp_header() for m in self.submessages]))
+
+        # Make our constructors
+        constructors = []
+        # If we don't have any fields, it is all very easy
+        if not self.fields:
+            # DEFAULT CONSTRUCTOR
+            constructors.append('{}() {{}}'.format(self.name))
+            # PROTOBUF CONSTRUCTOR
+            constructors.append('{}(const {}&) {{}}'.format(self.name, protobuf_name))
+        else:
+            # DEFAULT CONSTRUCTOR
+            field_defaults = ', '.join(['{}({})'.format(to_camel_case(v.name), v.default_value) for v in self.fields])
+            constructors.append('{}() : {} {{}}'.format(self.name, field_defaults))
+
+            # ELEMENT WISE CONSTRUCTOR
+            field_list = ', '.join(['{} const& _{}'.format(v.cpp_type(), to_camel_case(v.name)) for v in self.fields])
+            field_set = ', '.join(['{0}(_{0})'.format(to_camel_case(v.name)) for v in self.fields])
+            constructors.append('{}({}) : {} {{}}'.format(self.name, field_list, field_set))
+
+            # PROTOBUF CONSTRUCTOR
+            protobuf_constructor = []
+            protobuf_constructor.append('{}(const {}& proto) {{'.format(self.name, protobuf_name));
+            for v in self.fields:
+                if v.repeated:
+                    protobuf_constructor.append(indent('{0}.insert(std::end({0}), std::begin({1}), std::end({1}));'.format(to_camel_case(v.name), v.name)))
+                else:
+                    protobuf_constructor.append(indent('{} = proto.{}();'.format(to_camel_case(v.name), v.name)))
+            protobuf_constructor.append('}')
+            constructors.append('\n'.join(protobuf_constructor))
+
+        constructors = indent('\n\n'.join(constructors))
+
+        # Make our converters
+        converters = []
+        # If we don't have any fields, it is all very easy
+        if not self.fields:
+            # PROTOBUF CONVERTER
+            converters.append('inline operator {}() const {{}}'.format(protobuf_name))
+        else:
+            # PROTOBUF CONVERTER
+            protobuf_converter = []
+            protobuf_converter.append('inline operator {}() const {{'.format(protobuf_name))
+            protobuf_converter.append(indent('{} proto;'.format(protobuf_name)))
+            for v in self.fields:
+                if v.repeated:
+                    protobuf_converter.append(indent('for (auto& v : {}) {{'.format(to_camel_case(v.name))))
+                    protobuf_converter.append(indent('*proto.add_{}() = v'.format(v.name), 8))
+                    protobuf_converter.append(indent('}'))
+                    pass
+                else:
+                    protobuf_converter.append(indent('*proto.mutable_{}() = {};'.format(v.name, to_camel_case(v.name))))
+            protobuf_converter.append('}')
+            converters.append('\n'.join(protobuf_converter))
+            # loop through fields
+            # if repeated, do a foreach and set add() = thing
+            # Otherwise set mutable->bla = thing
+            #
+
+        converters = indent('\n\n'.join(converters))
+
+
+        # TODO make our converters
+        # Converter to protobuf
+
 
         template = textwrap.dedent("""\
             struct {name} {{
+                // Enum Definitions
             {enums}
+                // Submessage Definitions
             {submessages}
+                // Constructors
+            {constructors}
+                // Converters
+            {converters}
+                // Fields
             {fields}
             }};
             """);
@@ -216,6 +295,8 @@ class Message:
             name=self.name,
             enums=enums,
             submessages=submessages,
+            constructors=constructors,
+            converters=converters,
             fields=fields
         )
 
@@ -238,6 +319,7 @@ class Enum:
 
         # Make our value pairs
         values = indent('\n'.join(['{} = {}'.format(v[0], v[1]) for v in self.values]), 8)
+        values = ',\n'.join([v for v in values.splitlines()])
 
         # Make our switch statement pairs
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 12)
@@ -245,8 +327,8 @@ class Enum:
         # Make our if chain
         if_chain = indent('\n'.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values]), 8)
 
-        # Add our commas
-        values = ',\n'.join([v for v in values.splitlines()])
+        # Get our default value
+        default_value = dict([reversed(v) for v in self.values])[0]
 
         # Make our fancy enums
         template = textwrap.dedent("""\
@@ -256,12 +338,18 @@ class Enum:
                 }};
                 Value value;
 
+                {name}() : value(Value::{default_value}) {{}}
+
                 {name}(const Value& value)
                 : value(value) {{}}
 
                 {name}(const std::string& str) {{
             {if_chain}
                     throw std::runtime_error("String did not match any enum for {name}");
+                }}
+
+                {name}(const {protobuf_name}& p) {{
+                    value = static_cast<Value>(p);
                 }}
 
                 inline operator Value() const {{
@@ -275,12 +363,18 @@ class Enum:
                             throw std::runtime_error("enum {name}'s value is corrupt, unknown value stored");
                     }}
                 }}
+
+                inline operator {protobuf_name}() const {{
+                    return static_cast<{protobuf_name}>(value);
+                }}
             }};
             """)
 
         return template.format(
             name=self.name,
+            protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
             values=values,
+            default_value=default_value,
             if_chain=if_chain,
             switches=switches
         )
@@ -316,7 +410,8 @@ class File:
             '2<string>',
             '2<map>',
             '2<vector>',
-            '2<memory>'
+            '2<memory>',
+            '4"{}"'.format(self.name[:-6] + '.pb.h')
         ])
 
         # We use a dirty hack here of putting a priority on each header
@@ -349,7 +444,6 @@ class File:
 
                 // Enum Definitions
             {enums}
-
                 // Message Definitions
             {messages}
 
@@ -366,9 +460,6 @@ class File:
             messages=messages,
             closeNamespace=ns_close
         )
-
-        return template
-
 
     def generate_cpp_impl(self):
         return '#include "{}"'.format(self.name[:-6] + '.h')
@@ -396,12 +487,6 @@ with open('{}.pb'.format(base_file), 'r') as f:
         f.write(b.generate_cpp_header())
 
     print highlight(b.generate_cpp_header(), CppLexer(), Terminal256Formatter())
-    # TODO generate smart enums
-    # TODO Generate cpp -> yaml
-    # TODO Generate yaml -> cpp
-    # TODO Generate cpp -> proto
-    # TODO Generate proto -> cpp
-    # TODO Generate Python interface
 
 
 # Basically you need to make a struct for each of the messages here
