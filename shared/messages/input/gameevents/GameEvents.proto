@@ -1,0 +1,91 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package messages.input.gameevents;
+
+import "google/protobuf/timestamp.proto";
+
+message GameState {
+    enum Mode {
+        NORMAL = 0;
+        PENALTY_SHOOTOUT = 1;
+        OVERTIME = 2;
+    }
+
+    enum Phase {
+        INITIAL = 0;
+        READY = 1;
+        SET = 2;
+        PLAYING = 3;
+        TIMEOUT = 4;
+        FINISHED = 5;
+
+    }
+
+    enum Context {
+        SELF = 0;
+        TEAM = 1;
+        OPPONENT = 2;
+    }
+
+    enum TeamColour {
+        CYAN = 0;
+        MAGENTA = 1;
+    }
+
+    enum PenaltyReason {
+        UNPENALISED = 0;
+        BALL_MANIPULATION = 1;
+        PHYSICAL_CONTACT = 2;
+        ILLEGAL_ATTACK = 3;
+        ILLEGAL_DEFENSE = 4;
+        REQUEST_FOR_PICKUP = 5;
+        REQUEST_FOR_SERVICE = 6;
+        REQUEST_FOR_PICKUP_TO_SERVICE = 7;
+        SUBSTITUTE = 8;
+        MANUAL = 9;
+    }
+
+    message Robot {
+        uint32 id = 1;
+        PenaltyReason penalty_state = 2;
+        google.protobuf.Timestamp unpenalised = 3;
+    }
+
+    message Team {
+        uint32 id = 1;
+        uint32 score = 2;
+        string coach_message = 3;
+        repeated Robot player = 4;
+    }
+
+    Phase phase = 1;
+    Mode mode = 2;
+    bool first_half = 3;
+    bool kicked_out_by_us = 4;
+    google.protobuf.Timestamp kicked_out_time = 5;
+    bool our_kick_off = 6;
+    google.protobuf.Timestamp primary_timer = 7;
+    google.protobuf.Timestamp secondary_timer = 8;
+    Team team = 9;
+    Team opponent = 10;
+    Robot self = 11;
+}

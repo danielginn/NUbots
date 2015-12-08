@@ -1,0 +1,96 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package messages.input;
+
+import "google/protobuf/timestamp.proto";
+import "messages/Vector.proto";
+import "messages/Matrix.proto";
+import "messages/Rotation.proto";
+import "messages/Transform.proto";
+import "messages/input/ServoID.proto";
+
+message Sensors {
+
+    message Servo {
+        uint32 error_flags = 1;
+
+        ServoID id = 2;
+
+        bool enabled = 3;
+
+        float p_gain = 4;
+        float i_gain = 5;
+        float d_gain = 6;
+
+        float goal_position = 7;
+        float goal_velocity = 8;
+
+        float present_position = 9;
+        float present_velocity = 10;
+
+        float load = 11;
+        float voltage = 12;
+        float temperature = 13;
+    }
+
+    message Button {
+        uint32 id = 1;
+        bool value = 2;
+    }
+
+    message LED {
+        uint32 id = 1;
+        uint32 colour = 2;
+    }
+
+    message ForceSensitiveResistor {
+        repeated vec2 position = 2;
+        repeated float value = 3;
+        vec3 centre = 4;
+    }
+
+    google.protobuf.Timestamp timestamp = 1;
+
+    vec3 accelerometer = 2;
+    vec3 gyroscope = 3;
+    Rotation3D orientation = 4;
+    float voltage = 5;
+    float battery = 6;
+
+    repeated Servo servo = 7;
+    repeated Button button = 8;
+    repeated LED led = 9;
+    repeated ForceSensitiveResistor fsr = 10;
+    map<uint32, Transform3D> forward_kinematics = 11;
+    vec3 centre_of_pressure = 12;
+    vec4 centre_of_mass = 13;
+    vec2 odometry = 14;
+
+    // Random transforms that got stuck on the end of sensors
+    mat22 robot_to_imu = 200;
+    mat22 odometry_covariance = 201;
+    float body_centre_height = 202;
+    Transform3D orientationBodyToGround = 203;
+    Transform3D orientationCamToGround = 204;
+    Transform3D kinematicsBodyToGround = 205;
+    Transform3D kinematicsCamToGround = 206;
+}

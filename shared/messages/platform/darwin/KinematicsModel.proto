@@ -1,0 +1,132 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013-2015 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package messages.platform.darwin;
+
+import "messages/Vector.proto";
+
+message DarwinKinematicsModel {
+
+    message Leg {
+        message Foot {
+            float width = 1;
+            float height = 2;
+            float length = 3;
+            float toe_length = 4;
+        }
+
+        vec3 hip_offset = 1;
+        float upper_leg_length = 2;
+        float lower_leg_length = 3;
+        float heel_length = 4;
+        float length_between_legs = 5;
+        float foot_centre_to_ankle_centre = 6;
+        Foot foot = 7;
+    }
+
+    message Head {
+        message Neck {
+            float length = 1;
+            vec3 base_position_from_origin = 2;
+        }
+
+        message HeadMovementLimits {
+            vec2 yaw = 1;
+            vec2 pitch = 2;
+        }
+
+        float camera_declination_angle_offset = 1;
+        vec3 neck_to_camera = 2;
+        Neck neck = 3;
+        HeadMovementLimits head_movement_limits = 4;
+    }
+
+    message Arm {
+        message Shoulder {
+            float length = 1;
+            float width = 2;
+            float height = 3;
+            vec2 offset = 4;
+        }
+
+        message UpperArm {
+            float length = 1;
+            vec2 offset = 2;
+        }
+
+        message LowerArm {
+            float length = 1;
+            vec2 offset = 2;
+        }
+
+        float distance_between_shoulders = 1;
+        Shoulder shoulder = 2;
+        UpperArm upper_arm = 3;
+        LowerArm lower_arm = 4;
+    }
+
+    message MassModel {
+        message Masses {
+            vec4 left_shoulder_roll = 1;
+            vec4 right_shoulder_roll = 2;
+
+            vec4 left_shoulder_pitch = 3;
+            vec4 right_shoulder_pitch = 4;
+
+            vec4 left_elbow = 5;
+            vec4 right_elbow = 6;
+
+            vec4 left_hip_roll = 7;
+            vec4 right_hip_roll = 8;
+
+            vec4 left_hip_pitch = 9;
+            vec4 right_hip_pitch = 10;
+
+            vec4 left_hip_yaw = 11;
+            vec4 right_hip_yaw = 12;
+
+            vec4 left_knee = 13;
+            vec4 right_knee = 14;
+
+            vec4 left_ankle_roll = 15;
+            vec4 right_ankle_roll = 16;
+
+            vec4 left_ankle_pitch = 17;
+            vec4 right_ankle_pitch = 18;
+
+            vec4 head_pitch = 19;
+            vec4 head_yaw = 20;
+
+            vec4 torso = 21;
+        }
+
+        uint32 number_of_masses = 1;
+        uint32 mass_representation_dimension = 2;
+        Masses masses = 3;
+    }
+
+    Leg leg = 1;
+    Head head = 2;
+    Arm arm = 3;
+    MassModel mass_model = 4;
+    float team_darwin_chest_to_origin = 5;
+
+}

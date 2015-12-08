@@ -1,0 +1,54 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package messages.vision;
+
+message LookUpTable {
+
+    enum Colour {
+        ERROR        =   0;
+        UNCLASSIFIED = 117; // 'u'
+        WHITE        = 119; // 'w'
+        GREEN        = 103; // 'g'
+        ORANGE       = 111; // 'o'
+        YELLOW       = 121; // 'y'
+        CYAN         =  99; // 'c'
+        MAGENTA      = 109; // 'm'
+
+        // Ambiguous Classifications
+        WHITE_GREEN  = 102; // 'f'
+    }
+
+    bytes table = 1;
+    uint32 bits_y = 2;
+    uint32 bits_cb = 3;
+    uint32 bits_cr = 4;
+}
+
+message LookUpTableDiff {
+
+    message Diff {
+        uint32 lut_index = 1;
+        LookUpTable.Colour classification = 2;
+    }
+
+    repeated Diff diff = 1;
+}

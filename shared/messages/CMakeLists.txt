@@ -1,61 +1,112 @@
 # This directory contains our message types and other shared types
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/)
 
-# This gets all of our source messages
-FILE(GLOB_RECURSE src "**.cpp" "**.h")
+# We need protobuf and python
+FIND_PACKAGE(Protobuf REQUIRED)
+FIND_PACKAGE(PythonInterp REQUIRED)
 
-# Get all protocol buffers
+# Get all of our messages
 FILE(GLOB_RECURSE protobufs "**.proto")
 
-# If we have any protocol buffers
-IF(protobufs)
+FOREACH(proto ${protobufs})
 
-    # We need Protobuf
-    FIND_PACKAGE(Protobuf REQUIRED)
+    # Get the file without the extension
+    GET_FILENAME_COMPONENT(file_we ${proto} NAME_WE)
 
-    # We need our protocol buffer headers if we are using protocol buffers
-    INCLUDE_DIRECTORIES(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
+    # Calculate the Output Directory
+    FILE(RELATIVE_PATH outputpath ${CMAKE_CURRENT_SOURCE_DIR} ${proto})
+    GET_FILENAME_COMPONENT(outputpath ${outputpath} PATH)
+    SET(outputpath "${CMAKE_CURRENT_BINARY_DIR}/${outputpath}")
 
-    # This directory contains our generated protocol buffers
-    INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/shared/)
+    # Get the dependencies on this protobuf so we can recompile on changes
+    # If they change you will need to re cmake
+    EXECUTE_PROCESS(COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+                            --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/temp1
+                            --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/temp2
+                            -I${CMAKE_SOURCE_DIR}/shared
+                            ${proto})
+    FILE(READ "${CMAKE_CURRENT_BINARY_DIR}/temp1" dependencies)
+    STRING(REGEX REPLACE "\\\\\n" ";" dependencies ${dependencies})
+    FILE(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/temp1" "${CMAKE_CURRENT_BINARY_DIR}/temp2")
 
-    # Loop through our protocol buffers
-    FOREACH(proto ${protobufs})
+    # Clean our dependency list
+    FOREACH(depend ${dependencies})
+        STRING(STRIP ${depend} depend)
+        FILE(RELATIVE_PATH depend_rel ${CMAKE_CURRENT_SOURCE_DIR} ${depend})
 
-        # Get the absolute file, and the file without the extension
-        GET_FILENAME_COMPONENT(abs_file ${proto} ABSOLUTE)
-        GET_FILENAME_COMPONENT(file_we ${proto} NAME_WE)
-
-        # Calculate the Output Directory
-        FILE(RELATIVE_PATH outputpath ${CMAKE_CURRENT_SOURCE_DIR} ${proto})
-        GET_FILENAME_COMPONENT(outputpath ${outputpath} PATH)
-        SET(outputpath "${CMAKE_CURRENT_BINARY_DIR}/${outputpath}")
-
-        # Add the two files we will generate to our output
-        LIST(APPEND proto_src "${outputpath}/${file_we}.pb.cc")
-        LIST(APPEND proto_h   "${outputpath}/${file_we}.pb.h")
-
-        # Make the protocol buffers
-        ADD_CUSTOM_COMMAND(
-            OUTPUT "${outputpath}/${file_we}.pb.cc"
-                   "${outputpath}/${file_we}.pb.h"
-            COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-            ARGS --cpp_out ${CMAKE_BINARY_DIR}/shared -I ${CMAKE_SOURCE_DIR}/shared ${abs_file}
-            DEPENDS ${abs_file}
-            COMMENT "Running C++ protocol buffer compiler on ${proto}"
-            VERBATIM)
+        # Absolute dependencies
+        IF(depend_rel MATCHES "^\\.\\.")
+            SET(source_depends ${source_depends} ${depend})
+            SET(binary_depends ${binary_depends} ${depend})
+        # Relative dependencies
+        ELSE()
+            SET(source_depends ${source_depends} "${CMAKE_CURRENT_SOURCE_DIR}/${depend_rel}")
+            SET(binary_depends ${binary_depends} "${CMAKE_CURRENT_BINARY_DIR}/${depend_rel}")
+        ENDIF()
     ENDFOREACH()
 
-    # The protobuf files are generated
-    SET_SOURCE_FILES_PROPERTIES(${proto_src} ${proto_h} PROPERTIES GENERATED TRUE)
+    # Extract the protocol buffer information so we can generate code off it
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${outputpath}/${file_we}.pb"
+        COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+        ARGS --descriptor_set_out "${outputpath}/${file_we}.pb"
+             -I ${CMAKE_SOURCE_DIR}/shared
+             ${proto}
+        DEPENDS ${source_depends}
+        COMMENT "Extracting protocol buffer information from ${proto}")
 
-    # Add the protocol buffers in with our source
-    SET(src ${src} ${proto_src} ${proto_h})
+    # Repackage our protocol buffers so they don't collide with the actual classes
+    # when we make our c++ protobuf classes by adding protobuf to the package
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${outputpath}/${file_we}.proto"
+        COMMAND ${PYTHON_EXECUTABLE}
+        ARGS "${CMAKE_SOURCE_DIR}/tools/scripts/repackage_message.py" ${proto} ${outputpath}
+        DEPENDS "${CMAKE_SOURCE_DIR}/tools/scripts/repackage_message.py"
+                ${source_depends}
+        COMMENT "Repackaging protobuf ${proto}")
 
-ENDIF()
+    # Run the protocol buffer compiler on these new protobufs
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${outputpath}/${file_we}.pb.cc"
+               "${outputpath}/${file_we}.pb.h"
+               "${outputpath}/${file_we}_pb2.py"
+        COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+        ARGS --cpp_out ${CMAKE_BINARY_DIR}/shared
+             --python_out ${CMAKE_BINARY_DIR}/shared
+             -I ${CMAKE_BINARY_DIR}/shared
+             "${outputpath}/${file_we}.proto"
+        DEPENDS ${binary_depends}
+        COMMENT "Compiling protocol buffer ${proto}")
 
-SOURCE_GROUP("Protocol Buffers" FILES ${protobufs})
-SOURCE_GROUP("Protocol Buffer Generated Files" FILES ${proto_src} ${proto_h})
+    # Build our c++ class from the extracted information
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${outputpath}/${file_we}.cpp"
+               "${outputpath}/${file_we}.h"
+        COMMAND ${PYTHON_EXECUTABLE}
+        ARGS "${CMAKE_SOURCE_DIR}/tools/scripts/build_message_class.py" "${outputpath}/${file_we}" ${outputpath}
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        DEPENDS "${CMAKE_SOURCE_DIR}/tools/scripts/build_message_class.py"
+                "${CMAKE_CURRENT_BINARY_DIR}/MessageOptions_pb2.py"
+                "${outputpath}/${file_we}.pb"
+        COMMENT "Building classes for ${proto}")
+
+    # The protobuf descriptions are generated
+    SET_SOURCE_FILES_PROPERTIES("${outputpath}/${file_we}.pb"
+                                "${outputpath}/${file_we}.proto"
+                                "${outputpath}/${file_we}.pb.cc"
+                                "${outputpath}/${file_we}.pb.h"
+                                "${outputpath}/${file_we}.cpp"
+                                "${outputpath}/${file_we}.h"
+                                 PROPERTIES GENERATED TRUE)
+
+    # Add the generated files to our list
+    SET(src ${src}
+            "${outputpath}/${file_we}.pb.cc"
+            "${outputpath}/${file_we}.pb.h"
+            "${outputpath}/${file_we}.cpp"
+            "${outputpath}/${file_we}.h")
+
+ENDFOREACH(proto)
 
 # Build a library from these files
 ADD_LIBRARY(messages ${protobufs} ${src})

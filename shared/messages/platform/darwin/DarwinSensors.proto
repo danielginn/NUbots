@@ -1,0 +1,103 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013-2015 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package messages.platform.darwin;
+
+import "google/protobuf/timestamp.proto";
+import "messages/Vector.proto";
+
+message DarwinSensors {
+
+    enum Error {
+        OK              = 0;
+        INPUT_VOLTAGE   = 1;
+        ANGLE_LIMIT     = 2;
+        OVERHEATING     = 3;
+        RANGE           = 4;
+        CHECKSUM        = 5;
+        OVERLOAD        = 6;
+        INSTRUCTION     = 7;
+        CORRUPT_DATA    = 8;
+        TIMEOUT         = 9;
+        TIMEOUT_VICTIM  = 10;
+    }
+
+    message LEDPanel {
+        bool led2 = 1;
+        bool led3 = 2;
+        bool led4 = 3;
+    }
+
+    message RGBLED {
+        uint32 colour = 1;
+    }
+
+    message Buttons {
+        bool left = 1;
+        bool middle = 2;
+    }
+
+    message FSR {
+        float fsr1 = 1;
+        float fsr2 = 2;
+        float fsr3 = 3;
+        float fsr4 = 4;
+
+        fvec2 centre = 5;
+
+        repeated Error error = 6;
+    }
+
+    message FSRs {
+        FSR left = 1;
+        FSR right = 2;
+    }
+
+    message Servo {
+        repeated Error error = 1;
+        bool torque_enabled = 2;
+        float p_gain = 3;
+        float i_gain = 4;
+        float d_gain = 5;
+
+        float goal_position = 6;
+        float moving_speed = 7;
+        float torque = 8;
+        float present_position = 9;
+        float present_speed = 10;
+        float load = 11;
+        float voltage = 12;
+        float temperature = 13;
+    }
+
+    google.protobuf.Timestamp timestamp = 1;
+    repeated Error cm730_error = 2;
+    LEDPanel led_panel = 3;
+    RGBLED head_led = 4;
+    RGBLED eye_led = 5;
+    Buttons buttons = 6;
+    float voltage = 7;
+
+    fvec3 accelerometer = 8;
+    fvec3 gyroscope = 9;
+    FSRs fsrs = 10;
+    repeated Servo servo = 11;
+}

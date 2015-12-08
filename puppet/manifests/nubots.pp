@@ -36,7 +36,7 @@ node nubotsvmbuild {
                                 creates => '/nubots/toolchain/lib/libz.a' }
   installer { 'bzip2':          url => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz', }
   installer { 'xml2':           url => 'http://xmlsoft.org/sources/libxml2-2.9.2.tar.gz', }
-  installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-1/protobuf-cpp-3.0.0-beta-1.tar.gz',
+  installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-1/protobuf-python-3.0.0-alpha-4.tar.gz',
                                 args => '--with-zlib',
                                 require => Installer['zlib'], }
   installer { 'catch':          url => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp', }

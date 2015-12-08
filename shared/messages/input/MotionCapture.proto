@@ -1,0 +1,89 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package messages.input;
+
+import "messages/MessageOptions.proto";
+import "messages/Vector.proto";
+
+message MotionCapture {
+
+    message Marker {
+        uint32 id = 1;
+        fvec3 position = 2;
+        float size = 3;
+    }
+
+    message MarkerSet {
+        string name = 1;
+        repeated Marker marker = 2;
+    }
+
+    message RigidBody {
+        uint32 id = 1;
+        fvec3 position = 2;
+        fvec4 rotation = 3;
+        repeated Marker marker = 4;
+        float error = 5;
+        bool tracking_valid = 6;
+
+        string name = 7;
+        fvec3 offset = 8;
+
+        // Since these refer to other objects in the list
+        // We use raw pointers for it
+        RigidBody parent = 9          [(pointer)=RAW];
+        repeated RigidBody child = 10 [(pointer)=RAW];
+    }
+
+    message Skeleton {
+        uint32 id = 1;
+        repeated RigidBody bones = 2;
+        string name = 3;
+    }
+
+    message LabeledMarker {
+        Marker marker = 1;
+        bool occluded = 2;
+        bool point_cloud_solved = 3;
+        bool modle_solved = 4;
+    }
+
+    message ForcePlate {
+        uint32 id = 1;
+        repeated fvec channels = 2;
+    }
+
+    uint32 frame_number = 1;
+    repeated MarkerSet marker_set = 2;
+    repeated Marker marker = 3;
+    repeated RigidBody rigid_body = 4;
+    repeated Skeleton skeleton = 5;
+    repeated LabeledMarker labeled_marker = 7;
+    repeated ForcePlate force_plate = 8;
+
+    float latency = 9;
+    uint32 timecode = 10;
+    uint32 timecode_sub = 11;
+    double timestamp = 12;
+    bool recording = 13;
+    bool tracked_models_changed = 14;
+}
