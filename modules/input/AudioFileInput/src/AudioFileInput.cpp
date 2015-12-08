@@ -21,7 +21,7 @@
 #include "utility/idiom/pimpl_impl.h"
 
 #include "messages/input/SoundChunk.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include <chrono>
 #include <string>
 #include <sndfile.hh>
@@ -31,7 +31,7 @@ namespace modules {
 
         const int CHUNKS_PER_SECOND = 100;
 
-        using messages::support::Configuration;
+        using extension::Configuration;
 
         class AudioFileInput::impl {
             public:

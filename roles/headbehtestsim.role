@@ -2,7 +2,6 @@ ADD_ROLE(
     #Support
     #support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
     support::NUbugger

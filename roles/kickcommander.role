@@ -3,7 +3,6 @@ ADD_ROLE(
     platform::darwin::KinematicsModel
     #Support
     support::logging::ConsoleLogHandler
-    support::extension::FileWatcher
     support::configuration::SoccerConfig
     support::NUbugger
     support::KickCommander

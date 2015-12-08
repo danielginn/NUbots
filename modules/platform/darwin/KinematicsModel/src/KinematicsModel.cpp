@@ -28,7 +28,7 @@ namespace modules {
 namespace platform {
 namespace darwin {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::platform::darwin::DarwinKinematicsModel;
 
     using utility::support::Expression;

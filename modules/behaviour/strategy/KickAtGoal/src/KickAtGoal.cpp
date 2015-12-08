@@ -22,7 +22,7 @@
 
 #include "messages/behaviour/KickPlan.h"
 #include "messages/behaviour/MotionCommand.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "utility/time/time.h"
 
@@ -34,7 +34,7 @@ namespace strategy {
     using messages::behaviour::WalkTarget;
     using messages::behaviour::MotionCommand;
     using messages::behaviour::KickPlan;
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::behaviour::proto::Behaviour;
     using VisionBall = messages::vision::Ball;
     using VisionGoal = messages::vision::Goal;

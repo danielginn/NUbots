@@ -20,14 +20,14 @@
 #include "DanceDarwin.h"
 
 #include "messages/motion/ServoWaypoint.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/audio/Beat.h"
 
 namespace modules {
     namespace behaviour {
         namespace tools {
 
-            using messages::support::Configuration;
+            using extension::Configuration;
 
             DanceDarwin::DanceDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

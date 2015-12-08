@@ -30,7 +30,7 @@
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Circle.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/WalkPath.h"

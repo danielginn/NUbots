@@ -19,7 +19,7 @@
 
 #include "NBZPlayer.h"
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/Image.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/platform/darwin/DarwinSensors.h"
@@ -29,7 +29,7 @@
 namespace modules {
 namespace support {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::input::Image;
     using messages::platform::darwin::DarwinSensors;
     using messages::input::CameraParameters;

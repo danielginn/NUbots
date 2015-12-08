@@ -23,7 +23,7 @@
 #include <nuclear>
 #include <chrono>
 #include "utility/localisation/LocalisationFieldObject.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/Sensors.h"

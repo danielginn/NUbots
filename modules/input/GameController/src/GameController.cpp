@@ -19,7 +19,7 @@
 
 #include <atomic>
 #include "GameController.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/support/GlobalConfig.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/output/Say.h"
@@ -27,7 +27,7 @@
 namespace modules {
 namespace input {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::support::GlobalConfig;
     using gamecontroller::GameControllerPacket;
     using gamecontroller::GameControllerReplyPacket;

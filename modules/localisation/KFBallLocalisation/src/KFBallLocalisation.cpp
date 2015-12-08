@@ -26,7 +26,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "messages/input/Sensors.h"
 #include "messages/vision/VisionObjects.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "BallModel.h"
 #include "utility/localisation/transform.h"
@@ -35,7 +35,7 @@
 using messages::localisation::Self;
 using utility::nubugger::graph;
 using messages::input::Sensors;
-using messages::support::Configuration;
+using extension::Configuration;
 // using messages::localisation::FakeOdometry;
 using messages::localisation::Ball;
 using utility::nubugger::drawArrow;

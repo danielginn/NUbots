@@ -19,13 +19,13 @@
 
 #include "VirtualCamera.h"
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/CameraParameters.h"
 
 namespace modules {
 namespace support {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::input::CameraParameters;
 
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)

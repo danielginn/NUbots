@@ -21,7 +21,7 @@
 
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/CameraParameters.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -32,7 +32,7 @@ namespace modules {
     namespace platform {
         namespace darwin {
 
-            using messages::support::Configuration;
+            using extension::Configuration;
             using utility::nubugger::drawArrow;
             using utility::nubugger::drawSphere;
             using messages::platform::darwin::DarwinSensors;

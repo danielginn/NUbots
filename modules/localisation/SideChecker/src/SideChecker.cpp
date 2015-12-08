@@ -19,9 +19,7 @@
 
 #include "SideChecker.h"
 
-#include "messages/support/Configuration.h"
-
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/MotionCommand.h"
 #include "messages/behaviour/SoccerObjectPriority.h"
@@ -45,9 +43,7 @@
 namespace modules {
 namespace localisation {
 
-    using messages::support::Configuration;
-
-    using messages::support::Configuration;
+    using extension::Configuration;
     using Self = messages::localisation::Self;
     using messages::localisation::SideCheckingComplete;
 

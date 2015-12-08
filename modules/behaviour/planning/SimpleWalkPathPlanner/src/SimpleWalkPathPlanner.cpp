@@ -21,7 +21,7 @@
 
 #include <cmath>
 #include "messages/behaviour/KickPlan.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
@@ -36,7 +36,7 @@ namespace modules {
     namespace behaviour {
         namespace planning {
 
-            using messages::support::Configuration;
+            using extension::Configuration;
             using messages::input::Sensors;
             using messages::motion::WalkCommand;
             using messages::behaviour::WalkTarget;

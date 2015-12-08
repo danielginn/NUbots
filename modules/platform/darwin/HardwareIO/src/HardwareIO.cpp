@@ -23,7 +23,7 @@
 #include "utility/math/angle.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/motion/ServoTarget.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 
 
 namespace modules {
@@ -32,7 +32,7 @@ namespace darwin {
 
     using messages::platform::darwin::DarwinSensors;
     using messages::motion::ServoTarget;
-    using messages::support::Configuration;
+    using extension::Configuration;
 
     DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
         DarwinSensors sensors;

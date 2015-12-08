@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <linux/serial.h>
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include <mutex>
 #include <cstring>

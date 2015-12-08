@@ -23,7 +23,7 @@
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "utility/math/angle.h"
 #include <armadillo>
@@ -34,7 +34,7 @@ namespace localisation {
     using messages::input::proto::MotionCapture;
     using messages::input::Sensors;
     using messages::localisation::Self;
-    using messages::support::Configuration;
+    using extension::Configuration;
     using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
     using utility::nubugger::graph;

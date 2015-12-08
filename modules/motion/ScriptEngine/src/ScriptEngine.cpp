@@ -20,13 +20,13 @@
 #include "ScriptEngine.h"
 
 #include "utility/file/fileutil.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/behaviour/ServoCommand.h"
 
 namespace modules {
     namespace motion {
 
-        using messages::support::Configuration;
+        using extension::Configuration;
         using messages::behaviour::ServoCommand;
         using messages::motion::Script;
         using messages::motion::ExecuteScriptByName;

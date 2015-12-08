@@ -23,7 +23,7 @@ class NUClearGraphBuilder:
             if module['name'] in [
                 # 'support::logging::ConsoleLogHandler',
                 # 'support::NUbugger',
-                # 'support::extension::FileWatcher',
+                # 'extension::FileWatcher',
             ]:
                 return
 

@@ -20,7 +20,7 @@
 #include "PressureAutoClassifier.h"
 
 #include "messages/research/AutoClassifierPixels.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/vision/LookUpTable.h"
 #include "messages/vision/proto/LookUpTableDiff.pb.h"
 
@@ -29,7 +29,7 @@ namespace research {
 
     using messages::input::Image;
     using messages::research::AutoClassifierPixels;
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::vision::LookUpTable;
     using messages::vision::proto::LookUpTableDiff;
     using messages::vision::Colour;

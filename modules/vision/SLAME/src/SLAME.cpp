@@ -30,7 +30,7 @@ namespace modules {
         using utility::vision::MockFeatureExtractor;
         using messages::input::Image;
         using messages::localisation::Self;
-        using messages::support::Configuration;
+        using extension::Configuration;
         using messages::input::Sensors;
         using utility::nubugger::graph;
 

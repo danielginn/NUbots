@@ -23,7 +23,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/vision/LookUpTable.h"
 #include "messages/input/CameraParameters.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/support/FieldDescription.h"
 
 #include "utility/support/yaml_expression.h"
@@ -62,7 +62,7 @@ namespace vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::support::FieldDescription;
 
     using utility::math::ransac::Ransac;

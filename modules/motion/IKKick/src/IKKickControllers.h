@@ -24,7 +24,7 @@
 #include "utility/support/yaml_armadillo.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/LimbID.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/ServoID.h"
 #include <armadillo>
 #include <nuclear>

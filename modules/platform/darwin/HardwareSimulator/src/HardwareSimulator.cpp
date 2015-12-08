@@ -30,7 +30,7 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 
 namespace modules {
 namespace platform {
@@ -42,7 +42,7 @@ namespace darwin {
     using messages::motion::ServoTarget;
     using messages::input::ServoID;
     using messages::input::Sensors;
-    using messages::support::Configuration;
+    using extension::Configuration;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

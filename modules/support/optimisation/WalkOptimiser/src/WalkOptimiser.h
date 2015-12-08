@@ -25,7 +25,7 @@
 
 #include "messages/input/Sensors.h"
 #include "messages/motion/GetupCommand.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/behaviour/FixedWalkCommand.h"
 
 namespace modules {

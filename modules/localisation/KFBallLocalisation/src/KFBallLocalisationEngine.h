@@ -26,7 +26,7 @@
 
 #include "utility/math/filter/UKF.h"
 #include "utility/math/filter/ParticleFilter.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/localisation/FieldObject.h"
 #include "BallModel.h"

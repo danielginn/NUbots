@@ -19,7 +19,7 @@
 
 #include "IKKick.h"
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
@@ -42,7 +42,7 @@
 namespace modules {
 namespace motion {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::motion::KickCommand;
     using messages::motion::IKKickParams;

@@ -22,7 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/support/GlobalConfig.h"
 #include "messages/support/FieldDescription.h"
 #include "utility/math/matrix/Transform2D.h"

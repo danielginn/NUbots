@@ -24,7 +24,7 @@
 #include "messages/motion/Script.h"
 #include "messages/behaviour/Action.h"
 #include "messages/behaviour/ServoCommand.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/motion/WalkCommand.h"
 
 namespace modules {
@@ -34,7 +34,7 @@ namespace skills {
     struct ExecuteKick{};
     struct FinishKick{};
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::input::ServoID;
     using messages::motion::ExecuteScriptByName;
     using messages::behaviour::RegisterAction;

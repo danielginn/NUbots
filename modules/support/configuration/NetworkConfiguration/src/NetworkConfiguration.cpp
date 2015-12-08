@@ -19,13 +19,13 @@
 
 #include "NetworkConfiguration.h"
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 
 namespace modules {
 namespace support {
 namespace configuration {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
 
     NetworkConfiguration::NetworkConfiguration(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

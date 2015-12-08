@@ -129,11 +129,11 @@ def generate_cpp(parts):
 
         #include "{className}.h"
 
-        #include "messages/support/Configuration.h"
+        #include "extension/Configuration.h"
 
         {openNamespace}
 
-            using messages::support::Configuration;
+            using extension::Configuration;
 
             {className}::{className}(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)) {{

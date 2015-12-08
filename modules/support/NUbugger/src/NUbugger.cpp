@@ -25,6 +25,7 @@
 #include "messages/support/nubugger/proto/ReactionHandles.pb.h"
 #include "messages/support/nubugger/proto/Command.pb.h"
 #include "messages/support/nubugger/proto/ConfigurationState.pb.h"
+#include "extension/Configuration.h"
 #include "messages/vision/proto/LookUpTable.pb.h"
 
 #include "utility/nubugger/NUhelpers.h"
@@ -42,6 +43,7 @@ namespace support {
     using messages::support::nubugger::proto::ReactionHandles;
     using messages::support::nubugger::proto::Command;
     using messages::support::nubugger::proto::ConfigurationState;
+    using extension::Configuration;
 
     using LookUpTableProto = messages::vision::proto::LookUpTable;
 

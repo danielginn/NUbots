@@ -21,7 +21,7 @@
 
 #include <limits>
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/MotionCommand.h"
 #include "messages/behaviour/WalkPath.h"
@@ -40,7 +40,7 @@ namespace modules {
 namespace behaviour {
 namespace skills {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using Self = messages::localisation::Self;
     using Ball = messages::localisation::Ball;
 

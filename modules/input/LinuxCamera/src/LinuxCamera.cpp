@@ -26,12 +26,12 @@ extern "C" {
 #include "V4L2Camera.h"
 #include "messages/input/Image.h"
 #include "messages/input/CameraParameters.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 
 namespace modules {
     namespace input {
 
-        using messages::support::Configuration;
+        using extension::Configuration;
         using messages::input::CameraParameters;
         using messages::input::Image;
 

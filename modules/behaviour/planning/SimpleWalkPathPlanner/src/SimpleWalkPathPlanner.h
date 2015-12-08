@@ -23,7 +23,7 @@
 #include <nuclear>
 #include <armadillo>
 #include <cmath>
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"

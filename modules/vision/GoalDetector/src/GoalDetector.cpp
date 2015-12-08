@@ -24,7 +24,7 @@
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/vision/LookUpTable.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/support/FieldDescription.h"
 
 #include "utility/math/geometry/Quad.h"
@@ -64,7 +64,7 @@ namespace vision {
     using messages::vision::VisionObject;
     using messages::vision::Goal;
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::support::FieldDescription;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it

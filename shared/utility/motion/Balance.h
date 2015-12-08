@@ -28,7 +28,6 @@
 
 #include "messages/input/Sensors.h"
 #include "messages/input/LimbID.h"
-#include "messages/support/Configuration.h"
 #include <yaml-cpp/yaml.h>
 
 #include <nuclear>

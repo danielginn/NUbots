@@ -24,7 +24,7 @@
 #include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "utility/math/filter/UKF.h"
 #include "utility/math/vision.h"
 #include "utility/math/angle.h"

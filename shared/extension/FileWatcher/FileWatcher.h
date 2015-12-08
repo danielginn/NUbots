@@ -22,8 +22,6 @@
 
 #include <nuclear>
 
-namespace modules {
-namespace support {
 namespace extension {
 
     class FileWatcher : public NUClear::Reactor {
@@ -37,8 +35,6 @@ namespace extension {
         explicit FileWatcher(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}
-}
 }
 
 #endif  // MODULES_SUPPORT_EXTENSION_FILEWATCHER_H

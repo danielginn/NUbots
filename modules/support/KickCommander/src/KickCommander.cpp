@@ -19,7 +19,7 @@
 
 #include "KickCommander.h"
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/motion/KickCommand.h"
 
 #include "utility/support/yaml_armadillo.h"
@@ -27,7 +27,7 @@
 namespace modules {
 namespace support {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::motion::KickCommand;
 
     KickCommander::KickCommander(std::unique_ptr<NUClear::Environment> environment)

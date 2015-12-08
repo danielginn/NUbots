@@ -25,7 +25,7 @@
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/filter/ParticleFilter.h"
 #include "utility/math/filter/UKF.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "RobotModel.h"
 #include "messages/input/Sensors.h"

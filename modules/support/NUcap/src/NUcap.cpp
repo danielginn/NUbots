@@ -27,13 +27,13 @@
 #include "NatNetLinux/CommandListener.h"
 #include "NatNetLinux/FrameListener.h"
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 
 namespace modules {
 namespace support {
 
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::input::proto::MotionCapture;
 
     NUcap::NUcap(std::unique_ptr<NUClear::Environment> environment)

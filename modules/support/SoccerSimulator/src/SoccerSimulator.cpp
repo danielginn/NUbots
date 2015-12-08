@@ -27,7 +27,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/support/yaml_armadillo.h"
 #include "messages/vision/VisionObjects.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/ServoID.h"
 #include "messages/motion/WalkCommand.h"
@@ -51,7 +51,7 @@ namespace support {
     using utility::localisation::transform::WorldToRobotTransform;
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::nubugger::graph;
-    using messages::support::Configuration;
+    using extension::Configuration;
     using messages::support::FieldDescription;
     using messages::motion::WalkCommand;
     using messages::motion::KickCommand;
@@ -59,7 +59,6 @@ namespace support {
     using messages::motion::KickPlannerConfig;
     using messages::platform::darwin::DarwinSensors;
     using utility::math::matrix::Transform2D;
-    using messages::support::Configuration;
     using messages::support::GlobalConfig;
     using namespace messages::input::gameevents;
     using utility::support::Expression;

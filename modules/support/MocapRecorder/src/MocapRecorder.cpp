@@ -19,7 +19,7 @@
 
 #include "MocapRecorder.h"
 
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -32,7 +32,7 @@ namespace support {
     using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
 	using messages::input::proto::MotionCapture;
-    using messages::support::Configuration;
+    using extension::Configuration;
 
     MocapRecorder::MocapRecorder(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -42,7 +42,7 @@ namespace support {
         });
 
         on<Trigger<MotionCapture>, Single>().then([this](const MotionCapture& mocap){
-        	
+
         	arma::mat rigidBodies(13,mocap.rigid_bodies().size());
         	int i = 0;
         	for (auto& rigidBody : mocap.rigid_bodies()) {

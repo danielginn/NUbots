@@ -27,7 +27,7 @@
 #include "CM730.h"
 #include "MX28.h"
 #include "FSR.h"
-#include "messages/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "DarwinRawSensors.h"
 
