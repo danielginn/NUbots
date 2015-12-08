@@ -1,24 +1,24 @@
-Units: m
-BallRadius: 0.065
-LineWidth: 0.05
+units: m
+ball_radius: 0.065
+line_width: 0.05
 
-MarkWidth: 0.1
+mark_width: 0.1
 
-FieldLength: 9
-FieldWidth: 6
-GoalDepth: 0.6
+field_length: 9
+field_width: 6
+goal_depth: 0.6
 # Distance between inner edges of goal posts.
-GoalWidth: 1.89
-GoalAreaLength: 0.61
-GoalAreaWidth: 3.50
+goal_width: 1.89
+goal_area_length: 0.61
+goal_area_width: 3.50
 # Height to the bottom of the crossbar.
-GoalCrossbarHeight: 1.20
+goal_crossbar_height: 1.20
 # The crossbar diameter and the goalpost diameter are (supposed to be) equal.
-GoalpostDiameter: 0.11
-GoalCrossbarDiameter: 0.11
-GoalNetHeight: 1.0
+goalpost_diameter: 0.11
+goal_crossbar_diameter: 0.11
+goal_net_height: 1.0
 # Measured from the goal line.
-PenaltyMarkDistance: 1.80
-CenterCircleDiameter: 1.54
-BorderStripMinWidth: 0.7
-PenaltyRobotStart: 1.0
+penalty_mark_distance: 1.80
+center_circle_diameter: 1.54
+border_strip_min_width: 0.7
+penalty_robot_start: 1.0
