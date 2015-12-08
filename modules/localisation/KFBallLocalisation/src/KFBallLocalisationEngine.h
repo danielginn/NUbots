@@ -54,7 +54,7 @@ namespace localisation {
 
         double MeasurementUpdate(const messages::vision::VisionObject& observed_object);
 
-        void UpdateConfiguration(const messages::support::Configuration& config);
+        void UpdateConfiguration(const extension::Configuration& config);
 
         bool CanEmitFieldObjects();
 

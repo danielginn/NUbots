@@ -62,9 +62,9 @@ namespace localisation {
 
         void set_field_description(std::shared_ptr<messages::support::FieldDescription> desc);
 
-        void UpdateMultiModalRobotModelConfiguration(const messages::support::Configuration& config);
+        void UpdateMultiModalRobotModelConfiguration(const extension::Configuration& config);
 
-        void UpdateRobotLocalisationEngineConfiguration(const messages::support::Configuration& config);
+        void UpdateRobotLocalisationEngineConfiguration(const extension::Configuration& config);
 
         bool CanEmitFieldObjects();
 

@@ -88,7 +88,7 @@ namespace Darwin {
         void buildBulkReadPacket();
 
     public:
-        inline void setConfig(const messages::support::Configuration& config){
+        inline void setConfig(const extension::Configuration& config){
             uart.setConfig(config);
         }
         /// The CM730

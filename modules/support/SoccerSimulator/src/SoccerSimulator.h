@@ -143,7 +143,7 @@ namespace support {
         NUClear::clock::time_point lastNow;
 
         //Methods
-        void updateConfiguration(const messages::support::Configuration& config, const messages::support::GlobalConfig& globalConfig);
+        void updateConfiguration(const extension::Configuration& config, const messages::support::GlobalConfig& globalConfig);
 
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
 

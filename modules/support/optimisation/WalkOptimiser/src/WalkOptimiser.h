@@ -63,12 +63,12 @@ namespace modules {
 
                 int configuration_wait_milliseconds = 2000;
 
-                messages::support::Configuration initialConfig;
+                extension::Configuration initialConfig;
 
                 static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
 
                 void printState(const arma::vec& state);
-                arma::vec getState(const messages::support::Configuration& walkConfig);
+                arma::vec getState(const extension::Configuration& walkConfig);
                 YAML::Node getWalkConfig(const arma::vec& state);
                 void saveConfig(const YAML::Node& config);
                 void setWalkParameters(const YAML::Node& config);

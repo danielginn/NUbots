@@ -181,7 +181,7 @@ namespace motion{
 		        	return result;
 				}
 
-				virtual void configure(const messages::support::Configuration& config) = 0;
+				virtual void configure(const extension::Configuration& config) = 0;
 		};
 
 		class KickBalancer : public SixDOFFootController{
@@ -193,7 +193,7 @@ namespace motion{
 			float adjustment = 0.011;
 
 		public:
-			virtual void configure(const messages::support::Configuration& config);
+			virtual void configure(const extension::Configuration& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
 			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 
@@ -214,7 +214,7 @@ namespace motion{
 			float return_before_place_duration;
 			float lift_before_windup_duration;
 		public:
-			virtual void configure(const messages::support::Configuration& config);
+			virtual void configure(const extension::Configuration& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
 			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 		};
