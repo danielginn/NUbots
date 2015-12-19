@@ -22,7 +22,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/proto/Sensors.pb.h"
 
-#include "utility/support/proto_armadillo.h"
+#include "utility/conversion/proto_armadillo.h"
 #include "utility/time/time.h"
 
 namespace modules {

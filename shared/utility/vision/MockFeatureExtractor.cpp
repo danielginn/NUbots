@@ -25,7 +25,7 @@
 #include "MockFeatureExtractor.h"
 #include "messages/input/ServoID.h"
 #include "utility/math/vision.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 
 namespace utility {
 	namespace vision {

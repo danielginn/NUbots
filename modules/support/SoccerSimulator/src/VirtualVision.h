@@ -97,7 +97,7 @@ namespace support {
 			for (auto & m : visibleMeasurements.measurements){
 				result.measurements.push_back(m);
 			}
-			
+
 			result.screenAngular = visibleMeasurements.screenAngular;
 			result.sensors = sensors;
 			result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
@@ -112,7 +112,7 @@ namespace support {
 	};
 
 	class VirtualBall {
-	public: 
+	public:
 		VirtualBall() {
 			position = arma::vec3({0,0,0});
 			diameter = 0.1;
@@ -126,7 +126,7 @@ namespace support {
 
 		// utility::math::matrix::Transform2D ballPose;
 		arma::vec3 position;
-        arma::vec3 velocity;  
+        arma::vec3 velocity;
 
 		// arma::vec2 position;
 		float diameter;

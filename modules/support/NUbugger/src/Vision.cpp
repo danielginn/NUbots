@@ -29,7 +29,7 @@
 #include "messages/vision/proto/VisionObjects.pb.h"
 
 #include "utility/time/time.h"
-#include "utility/support/proto_armadillo.h"
+#include "utility/conversion/proto_armadillo.h"
 
 namespace modules {
 namespace support {

@@ -28,7 +28,7 @@
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
-#include "utility/support/proto_armadillo.h"
+#include "utility/conversion/proto_armadillo.h"
 
 /**
  * @author Monica Olejniczak

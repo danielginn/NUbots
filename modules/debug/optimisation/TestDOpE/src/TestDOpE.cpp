@@ -22,7 +22,7 @@
 #include "extension/Configuration.h"
 #include "messages/support/optimisation/DOpE.h"
 #include "messages/support/optimisation/Episode.pb.h"
-#include "utility/support/proto_armadillo.h"
+#include "utility/conversion/proto_armadillo.h"
 
 namespace modules {
 namespace debug {

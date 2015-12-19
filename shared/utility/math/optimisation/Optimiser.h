@@ -114,7 +114,7 @@ namespace utility {
                     sampler.clear();
                     estimator.clear();
                 }
-                
+
                 virtual void reset(const OptimiserEstimate& est) {
                     currentValues = est;
                     sampler.clear();

@@ -1,4 +1,4 @@
-/* 
+/*
  * This file is part of Learning utilities.
  *
  * Learning utilities is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
  */
 #include "KMeans.h"
 
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_expression.h"
 
 namespace utility {
 namespace math {
@@ -36,9 +36,9 @@ namespace learning {
 	}
 
 	std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> KMeans::getDebugRectangles(){
-		
+
 		if(clusterModel.n_dims() != 2) return std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>>();
-		
+
 		std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
 		for (size_t i = 0; i < clusterModel.n_gaus(); i++){
             arma::vec2 mean = clusterModel.means.col(i);

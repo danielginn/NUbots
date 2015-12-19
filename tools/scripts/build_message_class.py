@@ -246,7 +246,9 @@ class Message:
 
                 elif v.map_type:
                     if v.type[1].bytes_type:
-                        print "AOIFJEOIFJSEOIFJOIESJFOISEJF"
+                        protobuf_constructor.append(indent('for (auto& _v : proto.{}()) {{'.format(v.name)))
+                        protobuf_constructor.append(indent('{0}[_v.first].insert(std::end({0}[_v.first]), std::begin(_v.second), std::end(_v.second));'.format(to_camel_case(v.name)), 8))
+                        protobuf_constructor.append(indent('}'))
 
                     elif v.type[1].special_cpp_type:
                         protobuf_constructor.append(indent('for (auto& _v : proto.{}()) {{'.format(v.name)))
@@ -366,12 +368,10 @@ class Message:
         # TODO
         # {name}() : defaultvalues {{}}
         # {name}(const YAML::Node& node) {{ CONVERT }}
-        # {name}(const proto::{FQN}& proto) {{ CONVERT }}
         # {name}(const PyObject* pyobj) {{ CONVERT }}
 
         # operator YAML::Node() {{ CONVERT TO YAML NODE }}
-        # operator proto::{FQN}() {{ CONVERT TO PROTOBUF }}
-        # operator PyObject* pyobj() {{ WRAP IN A PYOBJECT }}
+        # operator PyObject*() {{ WRAP IN A PYOBJECT }}
 
         return template.format(
             name=self.name,
@@ -434,6 +434,22 @@ class Enum:
 
                 {name}(const {protobuf_name}& p) {{
                     value = static_cast<Value>(p);
+                }}
+
+                bool operator <(const {name}& other) const {{
+                    return value < other.value;
+                }}
+
+                bool operator <(const {name}::Value& other) const {{
+                    return value < other;
+                }}
+
+                bool operator ==(const {name}& other) const {{
+                    return value == other.value;
+                }}
+
+                bool operator ==(const {name}::Value& other) const {{
+                    return value == other;
                 }}
 
                 inline operator Value() const {{
@@ -574,18 +590,3 @@ with open('{}.pb'.format(base_file), 'r') as f:
 
     with open('{}.h'.format(base_file), 'w') as f:
         f.write(b.generate_cpp_header())
-
-    # print highlight(b.generate_cpp_header(), CppLexer(), Terminal256Formatter())
-
-
-# Basically you need to make a struct for each of the messages here
-
-# You also need to make a conversion operator and cast operator to go to->from protobufs
-
-# if you encounter some special types (vec* mat*) you need to use armadillo to store them
-# Everything else should be made up of their basic types as normal
-
-# TODO need a way to grab custom accessor functions here
-
-
-# TODO we also want to write python wrappers for the classes here

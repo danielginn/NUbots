@@ -44,7 +44,7 @@ namespace motion {
 
         /// Subsumption ID key to access motors
         const size_t subsumptionId;
-        
+
         bool leftFootIsSupport;
 
         float foot_separation;

@@ -163,7 +163,7 @@ namespace planning {
 
     PathPlanner::PathPlanner(const FieldDescription& desc, const PathPlanner::Config& cfg) : cfg_(cfg) {
         staticObstacles.clear();
-        
+
         auto goalObsRad = cfg_.goalpost_safety_margin + desc.dimensions.goalpost_diameter*0.5;
         staticObstacles.push_back(Circle(goalObsRad, desc.goalpost_own_l));
         staticObstacles.push_back(Circle(goalObsRad, desc.goalpost_own_r));
@@ -174,7 +174,7 @@ namespace planning {
 
     std::unique_ptr<WalkPath> PathPlanner::obstacleFreePathBetween(Transform2D start, Transform2D goal, Transform2D ballSpace, double timeLimit) {
         auto omplPath = omplPlanPath(start, goal, ballSpace, timeLimit);
-        
+
         auto walkPath = omplPathToWalkPath(omplPath);
         if (walkPath != nullptr) {
             walkPath->ballSpace = ballSpace;
@@ -207,9 +207,9 @@ namespace planning {
 
     Circle PathPlanner::getBallObstacle(Transform2D ballSpace) {
         float obsRad = ballRadius + cfg_.ball_obstacle_margin;
-        
+
         Transform2D obsTrans = ballSpace.localToWorld({cfg_.ball_obstacle_margin, 0, 0});
-        
+
         // See the documentation for ball_obstacle_margin in OMPLPathPlanner.yaml
         Circle ballObstacle(obsRad, obsTrans.xy());
 

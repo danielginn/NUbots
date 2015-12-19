@@ -59,7 +59,7 @@ namespace modules {
 				}
 
 				~Searcher(){}
-        		
+
         		void sort(){
         			//Just set to closest:
         			auto relativePoints = points;

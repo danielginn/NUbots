@@ -28,7 +28,7 @@ bool test(const Circle& circle, const RotatedRectangle& rect) {
 	/*
 		Let E be the centre of the rectangle (i.e. the origin of its local coordinate frame).
 		Define the regions A-I as below, where the central region E has the dimensions of the rectangle.
-		
+
 		A │ B │ C
 		──┼───┼──
 		D │ E │ F

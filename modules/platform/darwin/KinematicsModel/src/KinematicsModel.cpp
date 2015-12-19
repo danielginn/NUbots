@@ -19,8 +19,8 @@
 
 #include "KinematicsModel.h"
 
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_armadillo.h"
+#include "utility/conversion/yaml_expression.h"
 
 #include "utility/motion/RobotModels.h"
 

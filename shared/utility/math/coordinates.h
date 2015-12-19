@@ -40,7 +40,7 @@ namespace utility {
                 double cos_phi = cos(sphericalCoordinates[2]);
                 double sin_phi = sin(sphericalCoordinates[2]);
                 arma::vec3 result;
-                
+
                 result[0] = distance * cos_theta * cos_phi;
                 result[1] = distance * sin_theta * cos_phi;
                 result[2] = distance * sin_phi;
@@ -87,7 +87,7 @@ namespace utility {
                 double dist = sphericalCoordinates(0);
                 double declination = sphericalCoordinates(2);
                 double flat_distance = dist * std::cos(declination);
-                
+
                 arma::vec2 result;
                 result[0] = flat_distance;
                 result[1] = sphericalCoordinates(1);

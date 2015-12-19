@@ -23,7 +23,7 @@
 #include <armadillo>
 #include <iostream>
 #include <yaml-cpp/yaml.h>
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_expression.h"
 
 namespace YAML {
 

@@ -23,7 +23,7 @@
 #include <format.h>
 #include <google/protobuf/util/message_differencer.h>
 
-#include "utility/support/proto_armadillo.h"
+#include "utility/conversion/proto_armadillo.h"
 #include "extension/Configuration.h"
 #include "messages/support/optimisation/DOpE.h"
 #include "messages/support/optimisation/Episode.pb.h"
