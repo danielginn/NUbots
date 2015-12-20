@@ -23,6 +23,9 @@ package messages.input.gameevents;
 
 import "google/protobuf/timestamp.proto";
 
+/**
+ * Game state message that holds the full game state
+ */
 message GameState {
     enum Mode {
         NORMAL = 0;
@@ -88,4 +91,105 @@ message GameState {
     Team team = 9;
     Team opponent = 10;
     Robot self = 11;
+}
+
+/**
+ * Event messages that are fired when an individual state change occurs
+ */
+message Score {
+    uint32 own_score = 1;
+    uint32 opponent_score = 2;
+};
+
+message TeamScored {
+    Score score = 1;
+}
+
+message OpponentScored {
+    Score score = 1;
+}
+
+message SelfPenalisation {
+    uint32 robot_id = 1;
+    google.protobuf.Timestamp ends = 2;
+    GameState.PenaltyReason reason = 3;
+}
+
+message TeamPenalisation {
+    uint32 robot_id = 1;
+    google.protobuf.Timestamp ends = 2;
+    GameState.PenaltyReason reason = 3;
+}
+
+message OpponentPenalisation {
+    uint32 robot_id = 1;
+    google.protobuf.Timestamp ends = 2;
+    GameState.PenaltyReason reason = 3;
+}
+
+message SelfUnpenalisation {
+    uint32 robot_id = 1;
+}
+
+message TeamUnpenalisation {
+    uint32 robot_id = 1;
+}
+
+message OpponentUnpenalisation {
+    uint32 robot_id = 1;
+}
+
+message TeamCoachMessage {
+    string message = 1;
+}
+
+message OpponentCoachMessage {
+    string message = 1;
+}
+
+message HalfTime {
+    bool first_half = 1;
+}
+
+message WeKickedBallOut {
+    google.protobuf.Timestamp time = 1;
+}
+
+message OpponentKickedBallOut {
+    google.protobuf.Timestamp time = 1;
+}
+
+message OurKickOff {
+}
+
+message OpponentKickOff {
+}
+
+message GamePhase {
+    message Initial {}
+
+    message Ready {
+        google.protobuf.Timestamp ready_time = 1;
+    }
+
+    message Set {}
+
+    message Playing {
+        google.protobuf.Timestamp end_half = 1;
+        google.protobuf.Timestamp ball_free = 2;
+    }
+
+    message Timeout {
+        google.protobuf.Timestamp ends = 1;
+    }
+
+    message Finished {
+        google.protobuf.Timestamp next_half = 1;
+    }
+}
+
+message GameMode {
+    message normal {}
+    message penalty_shootout {}
+    message overtime {}
 }
