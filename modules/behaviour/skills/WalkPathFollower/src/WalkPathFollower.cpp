@@ -31,7 +31,7 @@
 #include "messages/behaviour/KickPlan.h"
 #include "messages/input/LimbID.h"
 #include "messages/input/ServoID.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"

@@ -41,13 +41,13 @@ message Script {
 }
 
 message ExecuteScriptByName {
-    uint32 key = 1;
-    google.protobuf.Timestamp start = 2;
-    repeated string name = 3;
+    uint64 key = 1;
+    repeated string name = 2;
+    google.protobuf.Timestamp start = 3;
 }
 
 message ExecuteScript {
-    uint32 key = 1;
-    google.protobuf.Timestamp start = 2;
-    repeated Script script = 3;
+    uint64 key = 1;
+    repeated Script script = 2;
+    google.protobuf.Timestamp start = 3;
 }

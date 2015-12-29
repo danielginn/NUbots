@@ -102,7 +102,7 @@ namespace modules {
 
                 on<Trigger<Falling>>().then([this] {
 
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Relax.yaml"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"Relax.yaml"})));
                 });
 
                 on<Trigger<KillFalling>>().then([this] {

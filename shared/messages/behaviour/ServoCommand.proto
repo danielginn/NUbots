@@ -25,7 +25,7 @@ import "google/protobuf/timestamp.proto";
 import "messages/input/ServoID.proto";
 
 message ServoCommand {
-    int32 key = 1;
+    uint64 key = 1;
 
     google.protobuf.Timestamp time = 2;
     input.ServoID servo_id = 3;

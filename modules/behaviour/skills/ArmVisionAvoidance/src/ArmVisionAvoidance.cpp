@@ -27,7 +27,7 @@
 #include "extension/Configuration.h"
 
 #include "utility/math/coordinates.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_expression.h"
 
 namespace modules {
 namespace behaviour {
@@ -68,12 +68,12 @@ namespace skills {
 //            auto headPitch = headSpherical[2];
 
             // Get the current position of the arm servos.
-            float leftShoulderRoll   = sensors.servos.at(static_cast<int>(ServoID::L_SHOULDER_ROLL)).presentPosition;
-            float leftShoulderPitch  = sensors.servos.at(static_cast<int>(ServoID::L_SHOULDER_PITCH)).presentPosition;
-            float leftElbowPitch     = sensors.servos.at(static_cast<int>(ServoID::L_ELBOW)).presentPosition;
-            float rightShoulderRoll  = sensors.servos.at(static_cast<int>(ServoID::R_SHOULDER_ROLL)).presentPosition;
-            float rightShoulderPitch = sensors.servos.at(static_cast<int>(ServoID::R_SHOULDER_PITCH)).presentPosition;
-            float rightElbowPitch    = sensors.servos.at(static_cast<int>(ServoID::R_ELBOW)).presentPosition;
+            float leftShoulderRoll   = sensors.servo[ServoID::L_SHOULDER_ROLL].presentPosition;
+            float leftShoulderPitch  = sensors.servo[ServoID::L_SHOULDER_PITCH].presentPosition;
+            float leftElbowPitch     = sensors.servo[ServoID::L_ELBOW].presentPosition;
+            float rightShoulderRoll  = sensors.servo[ServoID::R_SHOULDER_ROLL].presentPosition;
+            float rightShoulderPitch = sensors.servo[ServoID::R_SHOULDER_PITCH].presentPosition;
+            float rightElbowPitch    = sensors.servo[ServoID::R_ELBOW].presentPosition;
 
             if (headYaw > headYawLimit[1]) {        // Looking behind left shoulder.
                 leftShoulderPitch   =  headYaw - (M_PI / 2); // (headYawLimit[1] + (M_PI / 2)) - headYaw;

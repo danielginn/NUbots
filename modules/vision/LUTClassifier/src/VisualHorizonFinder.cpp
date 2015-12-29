@@ -21,7 +21,7 @@
 #include "QuexClassifier.h"
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/geometry/Quad.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace modules {
     namespace vision {

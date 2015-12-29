@@ -22,27 +22,25 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "messages/support/nubugger/proto/DataPoint.pb.h"
-#include "messages/support/nubugger/proto/DrawObjects.pb.h"
-#include "messages/vision/proto/VisionObjects.pb.h"
+#include "messages/support/nusight/DataPoint.h"
+#include "messages/support/nusight/DrawObjects.h"
+#include "messages/vision/VisionObjects.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/support/proto_armadillo.h"
+#include "utility/conversion/proto_armadillo.h"
 
 namespace utility {
-namespace nubugger {
+namespace nusight {
     using utility::math::geometry::RotatedRectangle;
     using utility::math::geometry::Circle;
     using utility::math::matrix::Transform2D;
-    using messages::support::nubugger::proto::DrawObjects;
+    using messages::support::nusight::DrawObjects;
+    using messages::support::nusight::DataPoint;
+    using utility::math::matrix::Rotation3D;
 
     namespace {
-
-        using messages::support::nubugger::proto::DataPoint;
-        using utility::math::matrix::Rotation3D;
-
         constexpr float TIMEOUT = 2.5;
 
         template<typename T>
@@ -65,50 +63,51 @@ namespace nubugger {
         }
 
         template<typename First, typename... Remainder>
-        typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint, First first, Remainder... remainder) {
-            dataPoint.add_value(first);
+        std::enable_if_t<!is_iterable<First>::value> buildGraph(DataPoint& dataPoint, const First& first, const Remainder&... remainder) {
+            dataPoint.value.push_back(first);
             buildGraph(dataPoint, remainder...);
         }
 
         template<typename First, typename... Remainder>
-        typename std::enable_if<is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint, First first, Remainder... remainder) {
-            for (const auto& value : first) {
-                dataPoint.add_value(value);
-            }
+        std::enable_if_t<is_iterable<First>::value> buildGraph(DataPoint& dataPoint, const First& first, const Remainder&... remainder) {
+            dataPoint.value.insert(dataPoint.value.end(), first.begin(), first.end());
             buildGraph(dataPoint, remainder...);
         }
     }
 
     template<typename... Values>
-    inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Values... values) {
+    inline std::unique_ptr<messages::support::nusight::DataPoint> graph(const std::string& label, const Values&... values) {
         auto dataPoint = std::make_unique<DataPoint>();
-        dataPoint->set_label(label);
-        dataPoint->set_type(DataPoint::FLOAT_LIST);
+        dataPoint->label = label;
+        dataPoint->type = DataPoint::Type::FLOAT_LIST;
         buildGraph(*dataPoint, values...);
         return dataPoint;
     }
 
-    inline std::unique_ptr<messages::support::nubugger::proto::DataPoint> graph(std::string label, Rotation3D rotation) {
+    inline std::unique_ptr<messages::support::nusight::DataPoint> graph(const std::string& label, const Rotation3D& rotation) {
         auto dataPoint = std::make_unique<DataPoint>();
-        dataPoint->set_label(label);
-        dataPoint->set_type(DataPoint::ROTATION_3D);
-        for (const auto& value : rotation) {
-            dataPoint->add_value(value);
-        }
+        dataPoint->label = label;
+        dataPoint->type = DataPoint::Type::ROTATION_3D;
+
+        dataPoint->value.insert(dataPoint->value.end(), rotation.begin(), rotation.end());
+
         return dataPoint;
     }
 
     inline std::unique_ptr<DrawObjects> drawArrow(std::string name, arma::vec3 position, float length, arma::vec3 direction, float timeout = TIMEOUT) {
 
         auto drawObjects = std::make_unique<DrawObjects>();
-        auto* object = drawObjects->add_objects();
-        object->set_name(name);
-        object->set_shape(messages::support::nubugger::proto::DrawObject::ARROW);
-        object->set_timeout(timeout);
 
-        *object->mutable_position() << position;
-        *object->mutable_direction() << direction;
-        object->set_length(length);
+        DrawObject object;
+        object.name = name;
+        object.shape = messages::support::nubugger::proto::DrawObject::ARROW;
+        object.timeout = timeout;
+
+        object.position = position;
+        object.direction = direction;
+        object.length = length;
+
+        drawObjects.objects.push_back(object);
 
         return std::move(drawObjects);
     }

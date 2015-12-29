@@ -29,10 +29,10 @@
 #include "messages/support/FieldDescription.h"
 #include "messages/input/LimbID.h"
 
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 #include "utility/math/coordinates.h"
 #include "utility/localisation/transform.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/motion/InverseKinematics.h"

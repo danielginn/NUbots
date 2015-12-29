@@ -26,14 +26,14 @@
 #include "extension/Configuration.h"
 #include "messages/support/FieldDescription.h"
 
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_expression.h"
 
 #include "utility/math/geometry/Plane.h"
 
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/math/coordinates.h"
 
 namespace modules {

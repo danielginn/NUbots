@@ -24,7 +24,7 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/localisation/transform.h"
 #include "messages/vision/VisionObjects.h"

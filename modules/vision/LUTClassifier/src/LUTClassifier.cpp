@@ -25,7 +25,7 @@
 #include "messages/vision/LookUpTable.h"
 #include "extension/Configuration.h"
 
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_expression.h"
 
 #include "QuexClassifier.h"
 

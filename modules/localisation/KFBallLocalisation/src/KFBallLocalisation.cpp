@@ -23,14 +23,14 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "messages/input/Sensors.h"
 #include "messages/vision/VisionObjects.h"
 #include "extension/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "BallModel.h"
 #include "utility/localisation/transform.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 using messages::localisation::Self;
 using utility::nubugger::graph;

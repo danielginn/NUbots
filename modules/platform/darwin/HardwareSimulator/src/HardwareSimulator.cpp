@@ -24,8 +24,8 @@
 #include <mutex>
 
 #include "utility/math/angle.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/conversion/yaml_armadillo.h"
+#include "utility/nusight/NUhelpers.h"
 #include "messages/motion/ServoTarget.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"

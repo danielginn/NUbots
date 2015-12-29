@@ -27,7 +27,7 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/KickCommand.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 

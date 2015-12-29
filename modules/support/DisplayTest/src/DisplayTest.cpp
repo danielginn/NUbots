@@ -18,7 +18,7 @@
  */
 
 #include "DisplayTest.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "messages/input/Sensors.h"
 

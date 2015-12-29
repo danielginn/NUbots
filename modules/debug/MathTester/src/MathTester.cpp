@@ -19,7 +19,7 @@
 
 #include "MathTester.h"
 #include "extension/Configuration.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 #include "utility/math/geometry/Polygon.h"
 
 namespace modules {

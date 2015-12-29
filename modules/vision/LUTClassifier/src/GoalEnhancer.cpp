@@ -21,7 +21,7 @@
 #include "QuexClassifier.h"
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/geometry/Line.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace modules {
     namespace vision {

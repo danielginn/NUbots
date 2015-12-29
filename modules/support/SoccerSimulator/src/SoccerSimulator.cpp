@@ -22,10 +22,10 @@
 #include <sstream>
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 #include "messages/vision/VisionObjects.h"
 #include "extension/Configuration.h"
 #include "messages/localisation/FieldObject.h"

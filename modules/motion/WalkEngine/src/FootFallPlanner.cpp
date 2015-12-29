@@ -20,7 +20,7 @@
 #include "WalkEngine.h"
 
 #include "utility/motion/RobotModels.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace modules {
 namespace motion {

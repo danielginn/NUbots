@@ -23,7 +23,7 @@
 
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 namespace modules {
 namespace debug {

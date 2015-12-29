@@ -39,7 +39,7 @@ namespace modules {
             Stand::Stand(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
                 on<Trigger<ExecuteStand>>().then([this] {
-                    emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml"));
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"Stand.yaml"})));
                 });
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {

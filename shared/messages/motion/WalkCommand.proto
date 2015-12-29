@@ -24,24 +24,24 @@ package messages.motion;
 import "messages/Transform.proto";
 
 message WalkCommand {
-    uint32 key = 1;
+    uint64 key = 1;
     Transform2D command = 2;
 }
 
 message WalkStartCommand {
-    uint32 key = 1;
+    uint64 key = 1;
 }
 
 message WalkStopCommand {
-    uint32 key = 1;
+    uint64 key = 1;
 }
 
 message EnableWalkEngineCommand {
-    uint32 key = 1;
+    uint64 key = 1;
 }
 
 message DisableWalkEngineCommand {
-    uint32 key = 1;
+    uint64 key = 1;
 }
 
 message WalkStopped {

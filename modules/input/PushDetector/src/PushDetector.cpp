@@ -21,7 +21,7 @@
 
 #include "extension/Configuration.h"
 #include "utility/time/time.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/PushDetection.h"
 

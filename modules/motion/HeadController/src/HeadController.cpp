@@ -28,8 +28,8 @@
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/conversion/yaml_expression.h"
+#include "utility/nusight/NUhelpers.h"
 
 
 namespace modules {

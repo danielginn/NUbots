@@ -25,7 +25,7 @@
 
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
 
 namespace modules {

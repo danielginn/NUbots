@@ -29,10 +29,10 @@
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/vision.h"
 #include "messages/motion/GetupCommand.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/nusight/NUhelpers.h"
+#include "utility/conversion/yaml_armadillo.h"
 
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/nusight/NUhelpers.h"
 
 
 namespace modules {
