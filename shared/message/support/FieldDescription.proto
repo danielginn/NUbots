@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.support;
+package message.support;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message FieldDescription {
 

@@ -22,7 +22,7 @@ syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
-package messages.audio;
+package message.audio;
 
 message Beat {
     google.protobuf.Timestamp time = 1;

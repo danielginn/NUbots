@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.motion;
+package message.motion;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message DiveCommand {
     vec2 direction = 1;

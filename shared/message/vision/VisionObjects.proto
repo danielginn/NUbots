@@ -19,15 +19,15 @@
 
 syntax = "proto3";
 
-package messages.vision;
+package message.vision;
 
 import "google/protobuf/timestamp.proto";
-import "messages/MessageOptions.proto";
-import "messages/Geometry.proto";
-import "messages/Vector.proto";
-import "messages/Matrix.proto";
-import "messages/input/Sensors.proto";
-import "messages/vision/ClassifiedImage.proto";
+import "message/MessageOptions.proto";
+import "message/Geometry.proto";
+import "message/Vector.proto";
+import "message/Matrix.proto";
+import "message/input/Sensors.proto";
+import "message/vision/ClassifiedImage.proto";
 
 message VisionObject {
     message Measurement {

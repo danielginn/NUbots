@@ -19,13 +19,13 @@
 
 syntax = "proto3";
 
-package messages.vision;
+package message.vision;
 
-import "messages/MessageOptions.proto";
-import "messages/Geometry.proto";
-import "messages/Vector.proto";
-import "messages/input/Image.proto";
-import "messages/input/Sensors.proto";
+import "message/MessageOptions.proto";
+import "message/Geometry.proto";
+import "message/Vector.proto";
+import "message/input/Image.proto";
+import "message/input/Sensors.proto";
 
 message ClassifiedImage {
     enum ObjectClass {

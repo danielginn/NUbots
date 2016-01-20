@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.input;
+package message.input;
 
 enum LimbID {
     LEFT_LEG = 0;

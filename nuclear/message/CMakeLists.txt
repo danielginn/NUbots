@@ -40,13 +40,13 @@ FOREACH(proto ${protobufs})
     # Get the dependencies on this protobuf so we can recompile on changes
     # If they change you will need to re cmake
     EXECUTE_PROCESS(COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-                            --dependency_out=${message_binary_dir}/temp1
-                            --descriptor_set_out=${message_binary_dir}/temp2
-                            -I${CMAKE_SOURCE_DIR}/${message_include_dir}
+                            --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/temp1
+                            --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/temp2
+                            -I${message_source_include_dir}
                             ${proto})
-    FILE(READ "${message_binary_dir}/temp1" dependencies)
+    FILE(READ "${CMAKE_CURRENT_BINARY_DIR}/temp1" dependencies)
     STRING(REGEX REPLACE "\\\\\n" ";" dependencies ${dependencies})
-    FILE(REMOVE "${message_binary_dir}/temp1" "${message_binary_dir}/temp2")
+    FILE(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/temp1" "${CMAKE_CURRENT_BINARY_DIR}/temp2")
 
     # Clean our dependency list
     FOREACH(depend ${dependencies})
@@ -69,7 +69,7 @@ FOREACH(proto ${protobufs})
         OUTPUT "${outputpath}/${file_we}.pb"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
         ARGS --descriptor_set_out "${outputpath}/${file_we}.pb"
-             -I${CMAKE_SOURCE_DIR}/${message_include_dir}
+             -I${message_source_include_dir}
              ${proto}
         DEPENDS ${source_depends}
         COMMENT "Extracting protocol buffer information from ${proto}")
@@ -90,9 +90,9 @@ FOREACH(proto ${protobufs})
                "${outputpath}/${file_we}.pb.h"
                "${outputpath}/${file_we}_pb2.py"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --cpp_out ${message_binary_dir}/shared
-             --python_out ${message_binary_dir}/shared
-             -I ${message_binary_dir}/shared
+        ARGS --cpp_out ${message_binary_dir}
+             --python_out ${message_binary_dir}
+             -I${message_binary_include_dir}
              "${outputpath}/${file_we}.proto"
         DEPENDS ${binary_depends}
         COMMENT "Compiling protocol buffer ${proto}")
@@ -103,7 +103,7 @@ FOREACH(proto ${protobufs})
                "${outputpath}/${file_we}.h"
         COMMAND ${PYTHON_EXECUTABLE}
         ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${outputpath}/${file_we}" ${outputpath}
-        WORKING_DIRECTORY "${message_binary_dir}"
+        WORKING_DIRECTORY ${message_binary_dir}
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py"
                 "${message_binary_dir}/MessageOptions_pb2.py"
                 "${outputpath}/${file_we}.pb"

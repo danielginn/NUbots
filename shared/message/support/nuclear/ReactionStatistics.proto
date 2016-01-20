@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.support.nuclear;
+package message.support.nuclear;
 
 import "google/protobuf/timestamp.proto";
 

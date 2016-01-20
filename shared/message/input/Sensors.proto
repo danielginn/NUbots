@@ -19,14 +19,14 @@
 
 syntax = "proto3";
 
-package messages.input;
+package message.input;
 
 import "google/protobuf/timestamp.proto";
-import "messages/Vector.proto";
-import "messages/Matrix.proto";
-import "messages/Rotation.proto";
-import "messages/Transform.proto";
-import "messages/input/ServoID.proto";
+import "message/Vector.proto";
+import "message/Matrix.proto";
+import "message/Rotation.proto";
+import "message/Transform.proto";
+import "message/input/ServoID.proto";
 
 message Sensors {
 

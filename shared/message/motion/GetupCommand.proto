@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.motion;
+package message.motion;
 
 message ExecuteGetup {}
 message KillGetup {}

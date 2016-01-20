@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.research;
+package message.research;
 
-import "messages/vision/LookUpTable.proto";
+import "message/vision/LookUpTable.proto";
 
 message AutoClassifierPixels {
     repeated uint32 pixel = 1;

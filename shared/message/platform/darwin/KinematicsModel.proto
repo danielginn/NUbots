@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.platform.darwin;
+package message.platform.darwin;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message DarwinKinematicsModel {
 

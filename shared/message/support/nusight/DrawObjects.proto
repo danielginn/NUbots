@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.support.nusight;
+package message.support.nusight;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message DrawObject {
 

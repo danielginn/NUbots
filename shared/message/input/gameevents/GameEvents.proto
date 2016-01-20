@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.input.gameevents;
+package message.input.gameevents;
 
 import "google/protobuf/timestamp.proto";
 

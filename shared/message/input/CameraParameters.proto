@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.input;
+package message.input;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message CameraParameters {
     uvec2 image_size_pixels = 1;

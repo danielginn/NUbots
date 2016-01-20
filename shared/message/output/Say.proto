@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.output;
+package message.output;
 
 message Say {
     string message = 1;

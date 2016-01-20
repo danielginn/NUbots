@@ -19,11 +19,11 @@
 
 syntax = "proto3";
 
-package messages.motion;
+package message.motion;
 
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
-import "messages/input/ServoID.proto";
+import "message/input/ServoID.proto";
 
 message Script {
     message Frame {

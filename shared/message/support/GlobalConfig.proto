@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.support;
+package message.support;
 
 message GlobalConfig {
     uint32 player_id = 1;

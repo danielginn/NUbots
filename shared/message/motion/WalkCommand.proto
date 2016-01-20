@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.motion;
+package message.motion;
 
-import "messages/Transform.proto";
+import "message/Transform.proto";
 
 message WalkCommand {
     uint64 key = 1;

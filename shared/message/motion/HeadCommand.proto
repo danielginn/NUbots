@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.motion;
+package message.motion;
 
 /**
  * Tell the head where to look in world space.

@@ -19,10 +19,10 @@
 
 syntax = "proto3";
 
-package messages.behaviour;
+package message.behaviour;
 
-import "messages/Transform.proto";
-import "messages/behaviour/MotionCommand.proto";
+import "message/Transform.proto";
+import "message/behaviour/MotionCommand.proto";
 
 message WalkPath {
 

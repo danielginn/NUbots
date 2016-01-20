@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.support.nusight;
+package message.support.nusight;
 
 import "google/protobuf/struct.proto";
 

@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages;
+package message;
 
-import "messages/Matrix.proto";
+import "message/Matrix.proto";
 
 message Rotation3D {
     mat33 rotation = 1;

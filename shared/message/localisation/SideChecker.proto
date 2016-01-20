@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.localisation;
+package message.localisation;
 
 message SideCheckingComplete {
 }

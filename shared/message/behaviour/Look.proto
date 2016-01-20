@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.behaviour;
+package message.behaviour;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 import "google/protobuf/duration.proto";
 
 message Look {

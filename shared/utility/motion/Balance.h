@@ -26,8 +26,8 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/motion/RobotModels.h"
 
-#include "messages/input/Sensors.h"
-#include "messages/input/LimbID.h"
+#include "message/input/Sensors.h"
+#include "message/input/LimbID.h"
 #include <yaml-cpp/yaml.h>
 
 #include <nuclear>

@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.input;
+package message.input;
 
 enum ServoID {
     R_SHOULDER_PITCH    = 0;

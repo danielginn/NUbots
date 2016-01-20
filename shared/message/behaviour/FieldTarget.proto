@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.behaviour;
+package message.behaviour;
 
 enum FieldTarget {
     SELF = 0;
