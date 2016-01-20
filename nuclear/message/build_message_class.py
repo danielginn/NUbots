@@ -227,12 +227,12 @@ class Message:
             # PROTOBUF CONSTRUCTOR
             constructors.append('{}(const {}&) {{}}'.format(self.name, protobuf_name))
         else:
-            # DEFAULT CONSTRUCTOR
-            field_defaults = ', '.join(['{}({})'.format(to_camel_case(v.name), v.default_value) for v in self.fields])
-            constructors.append('{}() : {} {{}}'.format(self.name, field_defaults))
+            # CONSTRUCTOR WITH DEFAULT ARGUMENTS
 
-            # ELEMENT WISE CONSTRUCTOR
-            field_list = ', '.join(['{} const& _{}'.format(v.cpp_type, to_camel_case(v.name)) for v in self.fields])
+            # TODO if no default, just make it a construction
+            # TODO default timestamp is now
+
+            field_list = ', '.join(['{} const& _{} = {}'.format(v.cpp_type, to_camel_case(v.name), v.default_value if v.default_value else '{}()'.format(v.cpp_type)) for v in self.fields])
             field_set = ', '.join(['{0}(_{0})'.format(to_camel_case(v.name)) for v in self.fields])
             constructors.append('{}({}) : {} {{}}'.format(self.name, field_list, field_set))
 
