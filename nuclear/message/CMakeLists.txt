@@ -1,10 +1,15 @@
-# Get the relative path to our utility directory
-FILE(RELATIVE_PATH message_include_dir ${CMAKE_SOURCE_DIR} "${NUCLEAR_MESSAGE_DIR}/../")
+# Get the relative path to our message directory
+GET_FILENAME_COMPONENT(message_include_dir "${NUCLEAR_MESSAGE_DIR}/.." ABSOLUTE)
+FILE(RELATIVE_PATH message_include_dir ${CMAKE_SOURCE_DIR} ${message_include_dir})
+
+# Get our two include directories for message
+SET(message_source_include_dir "${CMAKE_SOURCE_DIR}/${message_include_dir}")
+SET(message_binary_include_dir "${CMAKE_BINARY_DIR}/${message_include_dir}")
 
 # Make our message include directories variable
 SET(NUCLEAR_MESSAGE_INCLUDE_DIRS
-    "${CMAKE_SOURCE_DIR}/${message_include_dir}"
-    "${CMAKE_BINARY_DIR}/${message_include_dir}"
+    ${message_source_include_dir}
+    ${message_binary_include_dir}
     CACHE INTERNAL "Include directories for the message folder and generated sources")
 INCLUDE_DIRECTORIES(${NUCLEAR_MESSAGE_INCLUDE_DIRS})
 
@@ -123,7 +128,7 @@ FOREACH(proto ${protobufs})
 ENDFOREACH(proto)
 
 # Build a library from these files
-ADD_LIBRARY(message message.cpp ${protobufs} ${src})
+ADD_LIBRARY(nuclear_message message.cpp ${protobufs} ${src})
 
 # Put it in an IDE group for shared
-SET_PROPERTY(TARGET message PROPERTY FOLDER "shared/")
+SET_PROPERTY(TARGET nuclear_message PROPERTY FOLDER "shared/")
