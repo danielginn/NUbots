@@ -23,15 +23,11 @@
 #include <fcntl.h>
 #include <sys/inotify.h>
 
-#include "messages/support/FileWatch.h"
+#include "extension/FileWatch.h"
 #include "utility/file/fileutil.h"
 
-namespace modules {
-namespace support {
 namespace extension {
 
-    using messages::support::FileWatch;
-    using messages::support::FileWatchRequest;
     using Unbind = NUClear::dsl::operation::Unbind<FileWatch>;
 
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
@@ -293,6 +289,4 @@ namespace extension {
             }
         });
     }
-}
-}
 }

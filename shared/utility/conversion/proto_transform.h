@@ -25,24 +25,24 @@
 /**
  * @brief Functions to convert the transform classes
  */
-protobuf::messages::Transform2D& operator<< (protobuf::messages::Transform2D& proto, const utility::math::matrix::Transform2D& transform) {
+protobuf::message::Transform2D& operator<< (protobuf::message::Transform2D& proto, const utility::math::matrix::Transform2D& transform) {
     *proto.mutable_transform() << static_cast<arma::vec3>(transform);
     return proto;
 }
 
-utility::math::matrix::Transform2D& operator<< (utility::math::matrix::Transform2D& transform, const protobuf::messages::Transform2D& proto) {
+utility::math::matrix::Transform2D& operator<< (utility::math::matrix::Transform2D& transform, const protobuf::message::Transform2D& proto) {
     arma::vec3 t;
     t << proto.transform();
     transform = t;
     return transform;
 }
 
-protobuf::messages::Transform3D& operator<< (protobuf::messages::Transform3D& proto, const utility::math::matrix::Transform3D& transform) {
+protobuf::message::Transform3D& operator<< (protobuf::message::Transform3D& proto, const utility::math::matrix::Transform3D& transform) {
     *proto.mutable_transform() << static_cast<arma::mat44>(transform);
     return proto;
 }
 
-utility::math::matrix::Transform3D& operator<< (utility::math::matrix::Transform3D& transform, const protobuf::messages::Transform3D& proto) {
+utility::math::matrix::Transform3D& operator<< (utility::math::matrix::Transform3D& transform, const protobuf::message::Transform3D& proto) {
     arma::mat44 t;
     t << proto.transform();
     transform = t;

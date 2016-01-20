@@ -93,8 +93,8 @@ class Field:
         # We are special unless we are not
         special = True
 
-        vector_regex = re.compile(r'^\.messages\.([fiu]?)vec([2-4]?)$');
-        matrix_regex = re.compile(r'^\.messages\.([fiu]?)mat([2-4]{0,2})$');
+        vector_regex = re.compile(r'^\.message\.([fiu]?)vec([2-4]?)$');
+        matrix_regex = re.compile(r'^\.message\.([fiu]?)mat([2-4]{0,2})$');
 
         # Check if it is a map field
         if self.map_type:
@@ -109,13 +109,13 @@ class Field:
             t = '::arma::{}mat{}'.format(r.group(1), r.group(2));
 
         # Transform and rotation types map to the Transform classes
-        elif t == '.messages.Transform2D':
+        elif t == '.message.Transform2D':
             t = '::utility::math::matrix::Transform2D'
-        elif t == '.messages.Transform3D':
+        elif t == '.message.Transform3D':
             t = '::utility::math::matrix::Transform3D'
-        elif t == '.messages.Rotation2D':
+        elif t == '.message.Rotation2D':
             t = '::utility::math::matrix::Rotation2D'
-        elif t == '.messages.Rotation3D':
+        elif t == '.message.Rotation3D':
             t = '::utility::math::matrix::Rotation3D'
 
         # Timestamps and durations map to real time/duration classes
@@ -517,14 +517,14 @@ class File:
         # We use a dirty hack here of putting a priority on each header
         # to make the includes be in a better order
         for d in self.dependencies:
-            if d in ['messages/Vector.proto', 'messages/Matrix.proto']:
+            if d in ['message/Vector.proto', 'message/Matrix.proto']:
                 includes.add('3<armadillo>')
                 includes.add('4"utility/conversion/proto_armadillo.h"')
-            if d in ['messages/Transform.proto']:
+            if d in ['message/Transform.proto']:
                 includes.add('4"utility/math/matrix/Transform2D.h"')
                 includes.add('4"utility/math/matrix/Transform3D.h"')
                 includes.add('4"utility/conversion/proto_transform.h"')
-            if d in ['messages/Rotation.proto']:
+            if d in ['message/Rotation.proto']:
                 includes.add('4"utility/math/matrix/Rotation2D.h"')
                 includes.add('4"utility/math/matrix/Rotation3D.h"')
                 includes.add('4"utility/conversion/proto_rotation.h"')

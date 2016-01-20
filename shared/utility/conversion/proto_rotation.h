@@ -25,24 +25,24 @@
 /**
  * @brief Functions to convert the rotation classes
  */
-protobuf::messages::Rotation2D& operator<< (protobuf::messages::Rotation2D& proto, const utility::math::matrix::Rotation2D& transform) {
+protobuf::message::Rotation2D& operator<< (protobuf::message::Rotation2D& proto, const utility::math::matrix::Rotation2D& transform) {
     *proto.mutable_rotation() << static_cast<arma::mat22>(transform);
     return proto;
 }
 
-utility::math::matrix::Rotation2D& operator<< (utility::math::matrix::Rotation2D& transform, const protobuf::messages::Rotation2D& proto) {
+utility::math::matrix::Rotation2D& operator<< (utility::math::matrix::Rotation2D& transform, const protobuf::message::Rotation2D& proto) {
     arma::mat22 t;
     t << proto.rotation();
     transform = t;
     return transform;
 }
 
-protobuf::messages::Rotation3D& operator<< (protobuf::messages::Rotation3D& proto, const utility::math::matrix::Rotation3D& transform) {
+protobuf::message::Rotation3D& operator<< (protobuf::message::Rotation3D& proto, const utility::math::matrix::Rotation3D& transform) {
     *proto.mutable_rotation() << static_cast<arma::mat33>(transform);
     return proto;
 }
 
-utility::math::matrix::Rotation3D& operator<< (utility::math::matrix::Rotation3D& transform, const protobuf::messages::Rotation3D& proto) {
+utility::math::matrix::Rotation3D& operator<< (utility::math::matrix::Rotation3D& transform, const protobuf::message::Rotation3D& proto) {
     arma::mat33 t;
     t << proto.rotation();
     transform = t;

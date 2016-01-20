@@ -64,7 +64,7 @@ namespace motion {
         NUClear::clock::time_point lastBalanceTime;
     public:
         void configure(const YAML::Node& config);
-        void balance(utility::math::matrix::Transform3D& footToTorso, const messages::input::LimbID& leg, const messages::input::Sensors& sensors);
+        void balance(utility::math::matrix::Transform3D& footToTorso, const message::input::LimbID& leg, const message::input::Sensors& sensors);
     };
 
 

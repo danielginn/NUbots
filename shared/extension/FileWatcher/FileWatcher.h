@@ -17,8 +17,8 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_EXTENSION_FILEWATCHER_H
-#define MODULES_SUPPORT_EXTENSION_FILEWATCHER_H
+#ifndef EXTENSION_FILEWATCHER_H
+#define EXTENSION_FILEWATCHER_H
 
 #include <nuclear>
 

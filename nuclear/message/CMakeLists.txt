@@ -90,8 +90,8 @@ FOREACH(proto ${protobufs})
                "${outputpath}/${file_we}.pb.h"
                "${outputpath}/${file_we}_pb2.py"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --cpp_out ${message_binary_dir}
-             --python_out ${message_binary_dir}
+        ARGS --cpp_out ${message_binary_include_dir}
+             --python_out ${message_binary_include_dir}
              -I${message_binary_include_dir}
              "${outputpath}/${file_we}.proto"
         DEPENDS ${binary_depends}

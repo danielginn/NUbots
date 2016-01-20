@@ -62,7 +62,6 @@ Vagrant.configure("2") do |config|
     ]
   end
 
-
   # Define the NUbots development VM, and make it the primary VM
   # (meaning that a plain `vagrant up` will only create this machine)
   # This VM will install all dependencies using the NUbots deb file (faster, generally recommended)
@@ -72,9 +71,6 @@ Vagrant.configure("2") do |config|
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'
     nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
-
-    # Private network for NUsight's benifit
-    nubots.vm.network "public_network", type: "dhcp"
 
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
@@ -93,9 +89,6 @@ Vagrant.configure("2") do |config|
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'
     nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
-
-    # Private network for NUsight's benifit
-    nubots.vm.network "public_network", type: "dhcp"
 
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
