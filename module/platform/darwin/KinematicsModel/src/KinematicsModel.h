@@ -24,7 +24,7 @@
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/platform/darwin/KinematicsModel.h"
 
 namespace module {
@@ -38,7 +38,7 @@ namespace darwin {
         explicit KinematicsModel(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-    	void configure (message::platform::darwin::DarwinKinematicsModel& darwinModel, const message::support::Configuration& objDarwinModel);
+    	void configure (message::platform::darwin::DarwinKinematicsModel& darwinModel, const extension::Configuration& objDarwinModel);
         void configureLeg (message::platform::darwin::DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg);
         void configureHead (message::platform::darwin::DarwinKinematicsModel::Head& head, const YAML::Node& objHead);
         void configureArm (message::platform::darwin::DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm);

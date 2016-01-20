@@ -21,7 +21,7 @@
 
 #include "message/vision/VisionObjects.h"
 #include "message/vision/ClassifiedImage.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/research/AutoClassifierPixels.h"
 
 namespace module {
@@ -33,7 +33,7 @@ namespace research {
     using message::vision::ObjectClass;
     using message::vision::ClassifiedImage;
     using message::vision::Colour;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::research::AutoClassifierPixels;
 
     AutoClassifierProvider::AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment)

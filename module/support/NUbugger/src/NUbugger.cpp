@@ -20,7 +20,7 @@
 #include "NUbugger.h"
 
 #include "message/vision/LookUpTable.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/nubugger/proto/Ping.pb.h"
 #include "message/support/nubugger/proto/ReactionHandles.pb.h"
 #include "message/support/nubugger/proto/Command.pb.h"
@@ -37,7 +37,7 @@ namespace support {
 
     using utility::nubugger::graph;
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::nubugger::proto::Ping;
     using message::support::nubugger::proto::ReactionHandles;
     using message::support::nubugger::proto::Command;

@@ -19,13 +19,13 @@
 
 #include "GlobalConfig.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/GlobalConfig.h"
 
 namespace module {
     namespace support {
         namespace configuration {
-            using message::support::Configuration;
+            using extension::Configuration;
 
             GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)) {

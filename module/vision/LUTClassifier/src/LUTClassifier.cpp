@@ -23,7 +23,7 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
 #include "message/vision/LookUpTable.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "utility/support/yaml_expression.h"
 
@@ -43,7 +43,7 @@ namespace module {
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
         using message::vision::Colour;
-        using message::support::Configuration;
+        using extension::Configuration;
         using utility::support::Expression;
 
         void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {

@@ -25,7 +25,7 @@
 #include <cmath>
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/motion/WalkCommand.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/Script.h"
@@ -65,7 +65,7 @@ namespace motion {
     using message::motion::ServoTarget;
     using message::motion::Script;
     using message::support::SaveConfiguration;
-    using message::support::Configuration;
+    using extension::Configuration;
 
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;

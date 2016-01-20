@@ -23,7 +23,7 @@
 using message::input::Sensors;
 using message::input::LimbID;
 using message::input::ServoID;
-using message::support::Configuration;
+using extension::Configuration;
 using utility::math::matrix::Transform3D;
 using utility::motion::kinematics::DarwinModel;
 

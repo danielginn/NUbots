@@ -19,7 +19,7 @@
 
 #include "WalkEngineStand.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/motion/WalkCommand.h"
 #include "message/input/LimbID.h"
@@ -29,7 +29,7 @@ namespace module {
 namespace behaviour {
 namespace skills {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::behaviour::RegisterAction;
     using message::behaviour::ActionPriorites;
     using message::motion::WalkStopped;

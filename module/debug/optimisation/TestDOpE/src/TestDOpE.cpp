@@ -19,7 +19,7 @@
 
 #include "TestDOpE.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
 #include "message/support/optimisation/Episode.pb.h"
 #include "utility/support/proto_armadillo.h"
@@ -28,7 +28,7 @@ namespace module {
 namespace debug {
 namespace optimisation {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::optimisation::Episode;
     using message::support::optimisation::Parameters;
     using message::support::optimisation::RequestParameters;

@@ -19,13 +19,13 @@
 
 #include "NUcapSimulator.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/proto/MotionCapture.pb.h"
 
 namespace module {
 namespace support {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::proto::MotionCapture;
 
     NUcapSimulator::NUcapSimulator(std::unique_ptr<NUClear::Environment> environment)

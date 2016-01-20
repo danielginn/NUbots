@@ -23,7 +23,7 @@
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
@@ -40,7 +40,7 @@ namespace module {
         using message::input::Sensors;
         using message::behaviour::RegisterAction;
         using message::input::LimbID;
-        using message::support::Configuration;
+        using extension::Configuration;
         using message::behaviour::ServoCommand;
         using message::motion::HeadCommand;
         using utility::math::coordinates::sphericalToCartesian;
