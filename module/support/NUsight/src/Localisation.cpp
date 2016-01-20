@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/localisation/FieldObject.h"
 #include "message/localisation/proto/Localisation.pb.h"
@@ -36,12 +36,12 @@ namespace support {
     using message::localisation::Self;
     using message::localisation::proto::Localisation;
 
-    void NUbugger::provideLocalisation() {
+    void NUsight::provideLocalisation() {
         handles["localisation"].push_back(on<Every<100, std::chrono::milliseconds>,
            Optional<With<std::vector<Ball>>>,
            Optional<With<std::vector<Self>>>,
            Single,
-           Priority::LOW>().then("Localisation Reaction (NUbugger.cpp)",
+           Priority::LOW>().then("Localisation Reaction (NUsight.cpp)",
             [this](std::shared_ptr<const std::vector<Ball>> opt_balls,
                    std::shared_ptr<const std::vector<Self>> opt_robots) {
             auto robot_msg = std::make_unique<FieldObject>();
@@ -105,7 +105,7 @@ namespace support {
                     ball_model.lost = false;
                     ball_msg_models.push_back(ball_model);
 
-                    emit(graph("NUbugger Localisation ball", ball_pos[0], ball_pos[1]));
+                    emit(graph("NUsight Localisation ball", ball_pos[0], ball_pos[1]));
 
                     // break; // Only output a single model
                 }
@@ -118,7 +118,7 @@ namespace support {
         }));
     }
 
-    void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
+    void NUsight::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
 
         Localisation localisation;
 

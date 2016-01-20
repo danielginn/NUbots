@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -108,7 +108,7 @@ namespace support {
         // iterate through every yaml node in the sequence
         for (auto&& yamlNode : yaml) {
             // check if the node should be processed
-            if (yamlNode.Tag() != NUbugger::IGNORE_TAG) {
+            if (yamlNode.Tag() != NUsight::IGNORE_TAG) {
                 // recursively calls the function with a new map value
                 processNode(*node.add_sequence_value(), yamlNode);
             }
@@ -128,7 +128,7 @@ namespace support {
         // iterate through every yaml node in the map
         for (auto&& yamlNode : yaml) {
             // check if the node should be processed
-            if (yamlNode.second.Tag() != NUbugger::IGNORE_TAG) {
+            if (yamlNode.second.Tag() != NUsight::IGNORE_TAG) {
                 // create a new map value from the protocol node
                 auto* map = node.add_map_value();
                 // set the name of this new node to the key of the yaml node and convert it to a string
@@ -265,7 +265,7 @@ namespace support {
      * @brief A command sent when the network requests the configuration state data. It retrieves all of the configuration
      * files and converts them into readable messages to send back over the network.
      */
-    void NUbugger::sendConfigurationState() {
+    void NUsight::sendConfigurationState() {
         // specify the base directory
         std::string directory = "config";
         // get the list of file paths in the shared config directory and ensure it is recursive
@@ -400,9 +400,9 @@ namespace support {
     /**
      * @brief Receives the ConfigurationState message over the network, processes it, and updates the relevant configuration files.
      *
-     * @param message The message sent over the network by NUbugger.
+     * @param message The message sent over the network by NUsight.
      */
-    void NUbugger::recvConfigurationState(const ConfigurationState& state) {
+    void NUsight::recvConfigurationState(const ConfigurationState& state) {
         // get the root node from the message
         auto root = state.root();
         // iterate through every file within the message

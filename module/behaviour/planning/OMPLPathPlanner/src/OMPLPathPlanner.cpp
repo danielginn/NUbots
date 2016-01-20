@@ -27,7 +27,7 @@
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/WalkPath.h"
 #include "message/behaviour/KickPlan.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"

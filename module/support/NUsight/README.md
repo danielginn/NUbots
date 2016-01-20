@@ -1,4 +1,4 @@
-NUbugger
+NUsight
 ========
 
 ## Description
@@ -8,8 +8,8 @@ sending the robot's status over the network.
 
 ## Usage
 
-The NUbugger module listens on TCP port 12000, which clients on remote machines
-running NUbugger can connect to in order to receive and monitor data from the
+The NUsight module listens on TCP port 12000, which clients on remote machines
+running NUsight can connect to in order to receive and monitor data from the
 robot in real time. Information is serialised using the NUAPI Message protocol
 buffer.
 

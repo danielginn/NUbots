@@ -14,32 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-syntax = "proto3";
+#ifndef MODULES_DEBUG_NUSIGHT_H
+#define MODULES_DEBUG_NUSIGHT_H
 
-package message.behaviour.proto;
+#include <nuclear>
 
-message Behaviour {
+namespace module {
+namespace debug {
 
-    enum State {
-        UNKNOWN = 0;
-        INIT = 1;
-        PICKED_UP = 5;
-        INITIAL = 6;
-        READY = 7;
-        SET = 8;
-        TIMEOUT = 9;
-        FINISHED = 10;
-        PENALISED = 11;
-        SEARCH_FOR_BALL = 2;
-        SEARCH_FOR_GOALS = 3;
-        WALK_TO_BALL = 4;
-        GOALIE_WALK = 12;
-        MOVE_TO_CENTRE = 13;
-        LOCALISING = 14;
-    }
+    class NUsight : public NUClear::Reactor {
+    public:
+        explicit NUsight(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-    State state = 1;
-}
+}  // debug
+}  // modules
+
+#endif  // MODULES_SUPPORT_NUSIGHT_H
+

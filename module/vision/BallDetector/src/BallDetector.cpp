@@ -26,7 +26,7 @@
 #include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
 
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_expression.h"
 
 #include "utility/math/geometry/Plane.h"
 

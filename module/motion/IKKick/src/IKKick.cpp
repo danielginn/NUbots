@@ -34,7 +34,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 
 

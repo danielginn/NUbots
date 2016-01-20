@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/behaviour/proto/Subsumption.pb.h"
 #include "message/behaviour/Action.h"
@@ -54,7 +54,7 @@ namespace support {
         }
     }
 
-    void NUbugger::provideSubsumption() {
+    void NUsight::provideSubsumption() {
 
         handles["subsumption"].push_back(on<Trigger<ActionStart>>().then([this](const ActionStart& actionStart) {
 
@@ -133,7 +133,7 @@ namespace support {
         }));
     }
 
-    void NUbugger::sendSubsumption() {
+    void NUsight::sendSubsumption() {
 
         Subsumption subsumption;
 

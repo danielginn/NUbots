@@ -4,7 +4,7 @@ NUCLEAR_ROLE(
     #Support
     support::logging::ConsoleLogHandler
     support::configuration::SoccerConfig
-    support::NUbugger
+    support::NUsight
     support::KickCommander
 
     #Sensors

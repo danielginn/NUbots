@@ -5,6 +5,6 @@ NUCLEAR_ROLE(
     support::logging::ConsoleLogHandler
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
-    support::NUbugger
+    support::NUsight
     debug::KinematicsDebug
 )

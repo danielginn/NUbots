@@ -6,6 +6,6 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
     behaviour::tools::ScriptTuner
     behaviour::Controller
-    support::NUbugger
+    support::NUsight
     motion::ScriptEngine
 )

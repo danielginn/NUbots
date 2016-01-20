@@ -27,7 +27,7 @@
 #include "extension/Configuration.h"
 
 #include "utility/math/coordinates.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_expression.h"
 
 namespace module {
 namespace behaviour {

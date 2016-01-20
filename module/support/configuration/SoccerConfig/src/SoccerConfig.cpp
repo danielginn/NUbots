@@ -31,52 +31,52 @@ namespace module {
     namespace support {
         namespace configuration {
 
-            void SetGoalpostPositions(FieldDescription& desc) {
+            void setGoalpostPositions(FieldDescription& desc) {
                 // Unused formulas remain as comments for completeness.
 
                 FieldDescription::FieldDimensions& d = desc.dimensions;
-                auto half_length = d.field_length * 0.5;
+                auto halfLength = d.fieldLength * 0.5;
                 // auto goal_line_width = d.line_width * 0.5;
-                auto goal_post_radius = d.goalpost_diameter * 0.5;
+                auto goalPostRadius = d.goalpostDiameter * 0.5;
                 // auto goal_x = (half_length - d.line_width * 0.5 + d.goal_depth + goal_line_width * 0.5);
-                auto goal_y = (d.goal_width + d.goalpost_diameter) * 0.5;
+                auto goalY = (d.goalWidth + d.goalpostDiameter) * 0.5;
                 // auto goal_w = (d.goal_depth - d.line_width + goal_line_width * 0.5);
                 // auto goal_h = (d.goal_width + d.goalpost_diameter);
-                auto goal_post_x = half_length + goal_post_radius * 0.5;
+                auto goalPostX = halfLength + goalPostRadius * 0.5;
 
-                desc.goalpost_own_l = { -goal_post_x, -goal_y };
-                desc.goalpost_own_r = { -goal_post_x,  goal_y };
-                desc.goalpost_opp_l = {  goal_post_x,  goal_y };
-                desc.goalpost_opp_r = {  goal_post_x, -goal_y };
+                desc.goalpostOwnL = { -goalPostX, -goalY };
+                desc.goalpostOwnR = { -goalPostX,  goalY };
+                desc.goalpostOppL = {  goalPostX,  goalY };
+                desc.goalpostOppR = {  goalPostX, -goalY };
             }
 
-            FieldDescription LoadFieldDescription(
+            FieldDescription loadFieldDescription(
                 const Configuration& config) {
                 FieldDescription desc;
 
-                desc.ball_radius = config["BallRadius"].as<double>();
+                desc.ballRadius = config["ball_radius"].as<double>();
 
                 FieldDescription::FieldDimensions& d = desc.dimensions;
-                d.line_width = config["LineWidth"].as<double>();
-                d.mark_width = config["MarkWidth"].as<double>();
-                d.field_length = config["FieldLength"].as<double>();
-                d.field_width = config["FieldWidth"].as<double>();
-                d.goal_depth = config["GoalDepth"].as<double>();
-                d.goal_width = config["GoalWidth"].as<double>();
-                d.goal_area_length = config["GoalAreaLength"].as<double>();
-                d.goal_area_width = config["GoalAreaWidth"].as<double>();
-                d.goal_crossbar_height = config["GoalCrossbarHeight"].as<double>();
-                d.goalpost_diameter = config["GoalpostDiameter"].as<double>();
-                d.goal_crossbar_diameter = config["GoalCrossbarDiameter"].as<double>();
-                d.goal_net_height = config["GoalNetHeight"].as<double>();
-                d.penalty_mark_distance = config["PenaltyMarkDistance"].as<double>();
-                d.center_circle_diameter = config["CenterCircleDiameter"].as<double>();
-                d.border_strip_min_width = config["BorderStripMinWidth"].as<double>();
+                d.lineWidth = config["line_width"].as<double>();
+                d.markWidth = config["mark_width"].as<double>();
+                d.fieldLength = config["field_length"].as<double>();
+                d.fieldWidth = config["field_width"].as<double>();
+                d.goalDepth = config["goal_depth"].as<double>();
+                d.goalWidth = config["goal_width"].as<double>();
+                d.goalAreaLength = config["goal_area_length"].as<double>();
+                d.goalAreaWidth = config["goal_area_width"].as<double>();
+                d.goalCrossbarHeight = config["goal_crossbar_height"].as<double>();
+                d.goalpostDiameter = config["goalpost_diameter"].as<double>();
+                d.goalCrossbarDiameter = config["goal_crossbar_diameter"].as<double>();
+                d.goalNetHeight = config["goal_net_height"].as<double>();
+                d.penaltyMarkDistance = config["penalty_mark_distance"].as<double>();
+                d.centerCircleDiameter = config["center_circle_diameter"].as<double>();
+                d.borderStripMinWidth = config["border_strip_min_width"].as<double>();
 
-                desc.penalty_robot_start = config["PenaltyRobotStart"].as<double>();
-                desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_diameter;
+                desc.penaltyRobotStart = config["penalty_robot_start"].as<double>();
+                desc.goalpostTopHeight = d.goalCrossbarHeight + d.goalCrossbarDiameter;
 
-                SetGoalpostPositions(desc);
+                setGoalpostPositions(desc);
 
                 return desc;
             }
@@ -85,7 +85,7 @@ namespace module {
                 : Reactor(std::move(environment)) {
 
                 on<Configuration>("FieldDescription.yaml").then("FieldDescriptionConfig Update", [this](const Configuration& config) {
-                    auto fd = std::make_unique<message::support::FieldDescription>(LoadFieldDescription(config));
+                    auto fd = std::make_unique<message::support::FieldDescription>(loadFieldDescription(config));
                     emit(std::move(fd));
                 });
 

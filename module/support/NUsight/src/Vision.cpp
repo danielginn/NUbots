@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/input/Image.h"
 #include "message/vision/ClassifiedImage.h"
@@ -47,7 +47,7 @@ namespace support {
     using message::vision::Ball;
     using message::input::Image;
 
-    void NUbugger::provideVision() {
+    void NUsight::provideVision() {
         handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
 
             if (NUClear::clock::now() - last_image < max_image_duration) {

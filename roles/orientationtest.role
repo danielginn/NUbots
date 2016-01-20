@@ -5,6 +5,6 @@ NUCLEAR_ROLE(
     platform::darwin::HardwareIO
     support::configuration::SoccerConfig
     platform::darwin::SensorFilter
-    support::NUbugger
-    debug::NUbugger
+    support::NUsight
+    debug::NUsight
 )

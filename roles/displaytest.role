@@ -9,8 +9,8 @@ NUCLEAR_ROLE(
     #platform::darwin::SensorFilter
     #input::LinuxCamera
     support::configuration::NetworkConfiguration
-    support::NUbugger
-    debug::NUbugger
+    support::NUsight
+    debug::NUsight
 
     vision::LUTClassifier
     #vision::FeatureDetector

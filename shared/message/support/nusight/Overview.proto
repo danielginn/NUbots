@@ -21,7 +21,7 @@ syntax = "proto3";
 
 package message.support.nusight;
 
-import "message/behaviour/proto/Behaviour.proto";
+import "message/behaviour/Behaviour.proto";
 import "message/input/gameevents/GameEvents.proto";
 import "message/Vector.proto";
 import "message/Matrix.proto";
@@ -35,7 +35,7 @@ message Overview {
 	float battery = 2;
 
 	// Behaviour
-    behaviour.proto.Behaviour.State behaviour_state = 3;
+    behaviour.Behaviour.State behaviour_state = 3;
     vec2 kick_target = 17;
 
     // Localisation

@@ -17,15 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_NUBUGGER_H
-#define MODULES_SUPPORT_NUBUGGER_H
+#ifndef MODULES_SUPPORT_NUSIGHT_H
+#define MODULES_SUPPORT_NUSIGHT_H
 
 #include <nuclear>
 #include "message/localisation/FieldObject.h"
 #include "message/input/gameevents/GameEvents.h"
-#include "message/support/nubugger/proto/Overview.pb.h"
-#include "message/behaviour/proto/Subsumption.pb.h"
-#include "message/support/nubugger/proto/ConfigurationState.pb.h"
+#include "message/support/nusight/Overview.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/support/nusight/ConfigurationState.h"
 
 namespace module {
     namespace support {
@@ -36,7 +36,7 @@ namespace module {
          * @author Brendan Annable
          * @author Trent Houliston
          */
-        class NUbugger : public NUClear::Reactor {
+        class NUsight : public NUClear::Reactor {
         private:
 
             template <typename T>
@@ -59,9 +59,9 @@ namespace module {
             uint pubPort = 0;
             uint subPort = 0;
 
-            NUClear::clock::duration max_image_duration;
+            NUClear::clock::duration   max_image_duration;
             NUClear::clock::time_point last_image = NUClear::clock::now();
-            NUClear::clock::duration max_classified_image_duration;
+            NUClear::clock::duration   max_classified_image_duration;
             NUClear::clock::time_point last_classified_image = NUClear::clock::now();
 
             bool listening = true;
@@ -84,7 +84,6 @@ namespace module {
             std::mutex networkMutex;
             std::mutex fileMutex;
 
-
             void provideOverview();
             void provideDataPoints();
             void provideDrawObjects();
@@ -98,9 +97,6 @@ namespace module {
             void sendReactionHandles();
 
             void sendGameState(std::string event, const message::input::gameevents::GameState& gameState);
-            message::input::proto::GameState::Data::Phase getPhase(const message::input::gameevents::Phase& phase);
-            message::input::proto::GameState::Data::Mode getMode(const message::input::gameevents::Mode& phase);
-            message::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const message::input::gameevents::PenaltyReason& penaltyReason);
 
             void sendConfigurationState();
             void sendSubsumption();
@@ -150,7 +146,7 @@ namespace module {
             // std::string getStringFromMessageType(message::support::nubugger::proto::Message::Type type);
         public:
             static constexpr const char* IGNORE_TAG = "IGNORE";
-            explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
+            explicit NUsight(std::unique_ptr<NUClear::Environment> environment);
         };
 
     }  // support
@@ -161,9 +157,9 @@ namespace NUClear {
     namespace util {
         namespace serialise {
             template <typename T>
-            struct Serialise<module::support::NUbugger::NUsightMessage<T>, module::support::NUbugger::NUsightMessage<T>> {
+            struct Serialise<module::support::NUsight::NUsightMessage<T>, module::support::NUsight::NUsightMessage<T>> {
 
-                using Type = module::support::NUbugger::NUsightMessage<T>;
+                using Type = module::support::NUsight::NUsightMessage<T>;
 
                 static inline std::vector<char> serialise(const Type& in) {
 
@@ -217,4 +213,4 @@ namespace NUClear {
     }
 }
 
-#endif  // MODULES_SUPPORT_NUBUGGER_H
+#endif  // MODULES_SUPPORT_NUSIGHT_H

@@ -38,7 +38,7 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 
 namespace module {
 namespace behaviour {

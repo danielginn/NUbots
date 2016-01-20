@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include <random>
 
@@ -28,7 +28,6 @@
 namespace module {
 namespace debug {
 
-    using NUClear::DEBUG;
     using utility::nubugger::graph;
     using utility::nubugger::drawArrow;
     using utility::nubugger::drawSphere;
@@ -38,7 +37,7 @@ namespace debug {
     using message::input::ServoID;
     using message::support::nubugger::proto::DrawObjects;
 
-    NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Every<50, milliseconds>>().then([this] {
 

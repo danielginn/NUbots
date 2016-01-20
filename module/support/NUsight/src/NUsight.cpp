@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/vision/LookUpTable.h"
 #include "extension/Configuration.h"
@@ -55,7 +55,7 @@ namespace support {
     // Flag struct to upload a lut
     struct UploadLUT {};
 
-    NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
+    NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         // These go first so the config can do things with them
@@ -69,7 +69,7 @@ namespace support {
         provideSensors();
         provideVision();
 
-        on<Configuration>("NUbugger.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("NUsight.yaml").then([this] (const Configuration& config) {
 
             max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
             max_classified_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>());
@@ -225,7 +225,7 @@ namespace support {
         });
     }
 
-    void NUbugger::sendReactionHandles() {
+    void NUsight::sendReactionHandles() {
 
         ReactionHandles reactionHandles;
 

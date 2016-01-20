@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/input/gameevents/GameEvents.h"
 
@@ -33,7 +33,7 @@ namespace support {
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
 
-    void NUbugger::provideGameController() {
+    void NUsight::provideGameController() {
 
         // HALP X_X
 
@@ -138,7 +138,7 @@ namespace support {
         }));
     }
 
-    void NUbugger::sendGameState(std::string event, const GameState& gameState) {
+    void NUsight::sendGameState(std::string event, const GameState& gameState) {
         log("GameEvent:", event);
 
         GameStateProto gameController;
@@ -183,7 +183,7 @@ namespace support {
         send(gameController, 0, true);
     }
 
-    GameStateData::Phase NUbugger::getPhase(const Phase& phase) {
+    GameStateData::Phase NUsight::getPhase(const Phase& phase) {
         switch (phase) {
             case Phase::INITIAL:
                 return GameStateData::INITIAL;
@@ -202,7 +202,7 @@ namespace support {
         }
     }
 
-    GameStateData::Mode NUbugger::getMode(const Mode& mode) {
+    GameStateData::Mode NUsight::getMode(const Mode& mode) {
         switch (mode) {
             case Mode::NORMAL:
                 return GameStateData::NORMAL;
@@ -215,7 +215,7 @@ namespace support {
         }
     }
 
-    GameStateData::PenaltyReason NUbugger::getPenaltyReason(const PenaltyReason& penaltyReason) {
+    GameStateData::PenaltyReason NUsight::getPenaltyReason(const PenaltyReason& penaltyReason) {
         switch (penaltyReason) {
             case PenaltyReason::UNPENALISED:
                 return GameStateData::UNPENALISED;

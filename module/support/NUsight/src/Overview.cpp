@@ -17,7 +17,7 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/behaviour/WalkPath.h"
 #include "message/behaviour/KickPlan.h"
@@ -56,7 +56,7 @@ namespace support {
      * @brief Provides triggers to send overview information over the network using the overview
      * instance variable.
      */
-    void NUbugger::provideOverview() {
+    void NUsight::provideOverview() {
 
         handles["overview"].push_back(on<Every<1, std::chrono::seconds>, Single, Priority::LOW>().then([this] {
             // Send the overview packet

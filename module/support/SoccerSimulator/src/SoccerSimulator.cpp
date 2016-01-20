@@ -25,7 +25,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 #include "message/vision/VisionObjects.h"
 #include "extension/Configuration.h"
 #include "message/localisation/FieldObject.h"

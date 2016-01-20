@@ -8,5 +8,5 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
     motion::ScriptEngine
     behaviour::tools::ScriptRunner
-    support::NUbugger
+    support::NUsight
 )

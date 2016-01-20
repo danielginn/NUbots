@@ -3,5 +3,5 @@ NUCLEAR_ROLE(
     #Support
     support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::NUbugger
+    support::NUsight
 )

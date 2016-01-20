@@ -22,7 +22,7 @@
 #include "extension/Configuration.h"
 #include "message/motion/KickCommand.h"
 
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 
 namespace module {
 namespace support {

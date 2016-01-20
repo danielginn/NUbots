@@ -17,21 +17,29 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_DEBUG_NUBUGGER_H
-#define MODULES_DEBUG_NUBUGGER_H
+#include "NUsight.h"
 
-#include <nuclear>
+#include "utility/time/time.h"
+#include "message/support/nubugger/proto/DrawObjects.pb.h"
 
 namespace module {
-namespace debug {
+namespace support {
+    using utility::time::getUtcTimestamp;
 
-    class NUbugger : public NUClear::Reactor {
-    public:
-        explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
-    };
+    using message::support::nubugger::proto::DrawObjects;
+    using message::support::nubugger::proto::DrawObject;
 
-}  // debug
-}  // modules
+    void NUsight::provideDrawObjects() {
 
-#endif  // MODULES_SUPPORT_NUBUGGER_H
+        handles["draw_objects"].push_back(on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) {
 
+            send(drawObjects);
+        }));
+
+        handles["draw_objects"].push_back(on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) {
+
+            send(drawObject);
+        }));
+    }
+}
+}

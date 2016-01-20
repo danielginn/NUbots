@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/support/nubugger/proto/DataPoint.pb.h"
 
@@ -29,7 +29,7 @@ namespace support {
 
     using message::support::nubugger::proto::DataPoint;
 
-    void NUbugger::provideDataPoints() {
+    void NUsight::provideDataPoints() {
 
         handles["data_point"].push_back(on<Trigger<DataPoint>>().then([this](const DataPoint& dataPoint) {
 

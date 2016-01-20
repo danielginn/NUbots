@@ -34,8 +34,8 @@
 
 #include "utility/motion/Balance.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/conversion/yaml_armadillo.h"
+#include "utility/conversion/yaml_expression.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"

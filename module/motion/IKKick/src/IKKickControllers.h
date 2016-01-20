@@ -21,7 +21,7 @@
 #define MODULES_MOTION_IKKICKCONTROLLERS_H
 
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/conversion/yaml_armadillo.h"
 #include "message/input/Sensors.h"
 #include "message/input/LimbID.h"
 #include "extension/Configuration.h"

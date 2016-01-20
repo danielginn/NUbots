@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "NUbugger.h"
+#include "NUsight.h"
 
 #include "message/input/Sensors.h"
 #include "message/input/proto/Sensors.pb.h"
@@ -32,7 +32,7 @@ namespace support {
     using message::input::Sensors;
     using ProtoSensors = message::input::proto::Sensors;
 
-    void NUbugger::provideSensors() {
+    void NUsight::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
         handles["sensor_data"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
