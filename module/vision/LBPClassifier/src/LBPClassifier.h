@@ -30,8 +30,16 @@ namespace vision {
     public:
         /// @brief Called by the powerplant to build and setup the LBPClassifier reactor.
         explicit LBPClassifier(std::unique_ptr<NUClear::Environment> environment);
-    };
-
+	private:
+		uint samplingPts = 8;
+		std::string typeLBP = "LBP";
+		int noiseLim = 0;
+		uint numChannels = 3;
+		float divisorLBP = 7168.0;
+		float divisorRLBP = 14336.0;
+		float divisorDRLBP = 100000.0;
+		std::string trainingStage = "TESTING";
+	};
 }
 }
 

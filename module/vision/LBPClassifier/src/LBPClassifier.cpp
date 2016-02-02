@@ -35,11 +35,23 @@ namespace vision {
 
     LBPClassifier::LBPClassifier(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
-
-        /*on<Configuration>("LBPClassifier.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("LBPClassifier.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file LBPClassifier.yaml
-        });*/
-        
+
+            //samplingPts = config["samplingPts"].as<const uint>();
+            typeLBP = config["typeLBP"].as<std::string>();
+            noiseLim = config["noiseLim"].as<int>();
+            numChannels = config["numChannels"].as<int>();
+            divisorLBP = config["divisorLBP"].as<float>();
+            divisorRLBP = config["divisorRLBP"].as<float>();
+            divisorDRLBP = config["divisorDRLBP"].as<float>();
+            trainingStage = config["trainingStage"].as<std::string>();
+        });
+
+        //log("Sampling Points:",samplingPts);
+        log("Vision Channels:",numChannels);
+        log("LBP Type       :",typeLBP);
+        log("Training Stage :",trainingStage);
 
         on<Trigger<Image>, Single>().then([this](const Image& image) {
             //NUClear::clock::time_point start;
@@ -53,7 +65,7 @@ namespace vision {
             int LBP[] = {0,0,0};
             double gradPix[] = {0,0};
 
-            int x0 = image.width/2-50, x1 = image.width/2+50, y0 = image.height/2-50, y1 = image.height/2+50;
+            int x0 = image.width/2-100, x1 = image.width/2+100, y0 = image.height/2-100, y1 = image.height/2+100;
 
             Image::Pixel currPix;
             for(auto x = x0; x < x1; x++){
@@ -103,7 +115,8 @@ namespace vision {
                 for(auto l=0;l<3;l++){
                     histDRLBP[k][l] = histLBP[k][l] + histLBP[255-k][l];
                     //tempHist = (double)(2*histLBP[k][l])/(double)((x1-x0)*(y1-y0));   //LBP
-                    tempHist = (double)histDRLBP[k][l]/((x1-x0)*(y1-y0)*2);             //DRLBP
+                    //tempHist = histDRLBP[k][l]/((x1-x0)*(y1-y0)*2);             //DRLBP
+                    tempHist = histDRLBP[k][l]/(double)((x1-x0)*(y1-y0)*2);
                     hist.push_back({arma::ivec2({3*k+l,0}),arma::ivec2({3*k+l+1,(double)(image.height)*tempHist})});
                 }
             }
@@ -112,7 +125,7 @@ namespace vision {
                 for(auto l=0;l<3;l++){
                     histDRLBP[k][l] = fabs(histLBP[k][l] - histLBP[255-k][l]);
                     //tempHist = (double)(2*histLBP[k][l])/(double)((x1-x0)*(y1-y0));   //LBP
-                    tempHist = (double)histDRLBP[k][l]/((x1-x0)*(y1-y0)*2);             //DRLBP
+                    tempHist = histDRLBP[k][l]/(double)((x1-x0)*(y1-y0)*2);             //DRLBP
                     hist.push_back({arma::ivec2({3*(k-128)+l,image.height}),arma::ivec2({3*(k-128)+l+1,image.height-(double)(image.height)*tempHist})});
                 }
             }
@@ -131,10 +144,8 @@ namespace vision {
             /*if(abs(max[0][1]-1.13)<=epsilon && abs(max[0][2]-1.02)<=epsilon && abs(max[0][3]-0.79)<=epsilon && abs(max[0][4]-0.78)<=epsilon){
 
             }
-            std::cout << std::fixed << std::setprecision(3);
-
-
-            emit(utility::nubugger::drawVisionLines(hist));  */  
+            std::cout << std::fixed << std::setprecision(3);*/
+            emit(utility::nubugger::drawVisionLines(hist));   
             //NUClear::clock::time_point end;  
             //auto time_diff = end - start;
             //log("Elapsed(ns):",std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count());    
