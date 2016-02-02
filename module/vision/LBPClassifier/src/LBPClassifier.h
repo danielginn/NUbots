@@ -32,12 +32,12 @@ namespace vision {
         explicit LBPClassifier(std::unique_ptr<NUClear::Environment> environment);
 	private:
 		uint samplingPts = 8;
-		std::string typeLBP = "LBP";
+		std::string typeLBP = "DRLBP";
 		int noiseLim = 0;
 		uint numChannels = 3;
-		float divisorLBP = 7168.0;
-		float divisorRLBP = 14336.0;
-		float divisorDRLBP = 100000.0;
+		float divisorLBP = 15000.0;
+		float divisorRLBP = 15000.0;
+		float divisorDRLBP = 25000.0;
 		std::string trainingStage = "TESTING";
 	};
 }

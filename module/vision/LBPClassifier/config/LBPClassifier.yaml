@@ -5,7 +5,7 @@
 # samplingPts: 8
 
 # LBP Type {LBP, RLBP, DRLBP} determines size required and method of calculating the histogram
-typeLBP: DRLBP
+typeLBP: RLBP
 
 # Noise Limit is the maximum difference in pixel value of which two pixels are considered 'equal'
 noiseLim: 0
