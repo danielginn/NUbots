@@ -20,16 +20,99 @@
 #include "LBPClassifier.h"
 #include <iostream>
 #include <iomanip>
+#include <fstream> 
 #include "message/support/Configuration.h"
 #include "message/input/Image.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "message/platform/darwin/DarwinSensors.h"
 #include "utility/time/time.h"
+
+#define CHANNELS 1
 
 namespace module {
 namespace vision {
 
     using message::support::Configuration;
     using message::input::Image;
+    using message::platform::darwin::ButtonLeftDown;
+    using message::platform::darwin::ButtonMiddleDown;    
+
+    void LBPClassifier::toFile(int histLBP[][CHANNELS], int polarity){
+        std::ofstream output;
+        output.open(LBPClassifier::typeLBP, std::ofstream::app);
+        output << std::fixed << std::setprecision(3);
+        output << polarity << " ";
+        if(typeLBP == "LBP"){
+            for(auto j=0; j<CHANNELS; j++){
+                for(auto i=0; i<256; i++){
+                    output << j*256+1+i << ":" << (float)histLBP[i][j]/divisorLBP << " ";
+                }
+            }
+        }
+        else{
+            for(auto j=0; j<CHANNELS; j++){
+                for(auto i=0; i<128; i++){
+                    output << j*256+1+i << ":" << (float)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP << " ";
+                }
+                for(auto i=128; i<256; i++){
+                    output << j*256+1+i << ":" << (float)(fabs(histLBP[i][j] - histLBP[255-i][j]))/divisorDRLBP << " ";
+                }
+            }
+        }    
+        output << "\n";
+        output.close();
+        if(polarity == 1){
+            log("Positive image histogram saved.");
+        }
+        else{
+            log("Negative image histogram saved.");
+        }
+    }
+
+    void LBPClassifier::drawHist(int histLBP[][CHANNELS], const uint imgW, const uint imgH){
+        int width = 50;
+        int x0 = imgW/2.0-width, x1 = imgW/2.0+width, y0 = imgH/2.0-width, y1 = imgH/2.0+width;
+        std::vector<std::pair<arma::ivec2, arma::ivec2>> hist;
+        hist.reserve(768);
+        double tempHist, max=0;
+        int x_init;
+        for(auto k=0;k<128;k++){
+            for(auto l=0;l<CHANNELS;l++){
+                if(typeLBP == "LBP"){
+                    tempHist = ((double)(histLBP[k][l]/divisorLBP));
+                }
+                else if(typeLBP == "DRLBP"){
+                    tempHist = ( (double)(histLBP[k][l] + histLBP[255-k][l])/divisorDRLBP );
+                }
+                (tempHist > max) ? (max = tempHist) : (max = max) ;
+                x_init = ((imgW-CHANNELS*128)/2.0+CHANNELS*k+l);
+                hist.push_back({arma::ivec2({x_init,0}),arma::ivec2({x_init+1,(int)((double)(imgH)*tempHist/2.0)})});
+            }
+        }
+        for(auto k=128;k<256;k++){
+            for(auto l=0;l<CHANNELS;l++){
+                if(typeLBP == "LBP"){
+                    tempHist = ((double)(histLBP[k][l]/divisorLBP));
+                }
+                else if(typeLBP == "DRLBP"){
+                    tempHist = ((double)( fabs(histLBP[k][l] - histLBP[255-k][l])/divisorDRLBP ));
+                }
+                (tempHist > max) ? (max = tempHist) : (max = max) ;
+                x_init = (imgW-CHANNELS*128)/2.0+CHANNELS*(k-128)+l;
+                hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
+            }
+        }
+        log("Max:",max);
+        arma::ivec2 tl = {x0,y0};
+        arma::ivec2 tr = {x1,y0};
+        arma::ivec2 bl = {x0,y1};
+        arma::ivec2 br = {x1,y1};
+        hist.push_back({tl, tr});
+        hist.push_back({tr, br});
+        hist.push_back({br, bl});
+        hist.push_back({bl, tl});
+        emit(utility::nubugger::drawVisionLines(hist));   
+    }
 
     LBPClassifier::LBPClassifier(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -38,41 +121,36 @@ namespace vision {
             //samplingPts = config["samplingPts"].as<const uint>();
             typeLBP = config["typeLBP"].as<std::string>();
             noiseLim = config["noiseLim"].as<int>();
-            numChannels = config["numChannels"].as<int>();
             divisorLBP = config["divisorLBP"].as<float>();
             divisorRLBP = config["divisorRLBP"].as<float>();
             divisorDRLBP = config["divisorDRLBP"].as<float>();
             trainingStage = config["trainingStage"].as<std::string>();
         });
 
-        log("Vision Channels:",numChannels);
+        log("Vision Channels:",CHANNELS);
         log("LBP Type       :",typeLBP);
         log("Training Stage :",trainingStage);
+        log("Output         :",output);
 
-        //log("Sampling Points:",samplingPts);S
+        if(output == true){
+            std::ofstream oFile;
+            oFile.open(LBPClassifier::typeLBP, std::ofstream::trunc); //Clears the file each time program is run
+        }
 
-        on<Trigger<Image>, Single>().then([this](const Image& image) {
+        on<Trigger<Image>, Single>().then([this](const Image& image){
             //NUClear::clock::time_point start;
-            int histLBP[256][numChannels];
-            //int histRLBP[128][numChannels];
-            int histDRLBP[256][numChannels];
-
             std::memset(&histLBP, 0, sizeof(histLBP));
-            //std::memset(&histRLBP, 0, sizeof(histRLBP));
-            std::memset(&histDRLBP, 0, sizeof(histDRLBP));
-
             constexpr const int shift[8][2] = {{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,1},{-1,-1},{-1,0}};
             int LBP[] = {0,0,0};
             double gradPix[] = {0,0};
             int width = 50;
-            int x0 = image.width/2-width, x1 = image.width/2+width, y0 = image.height/2-width, y1 = image.height/2+width;
-
+            int x0 = image.width/2.0-width, x1 = image.width/2.0+width, y0 = image.height/2.0-width, y1 = image.height/2.0+width;
             Image::Pixel currPix;
             for(auto x = x0; x < x1; x++){
                 for(auto y = y0; y < y1; y++){
                     currPix = image(x,y);
                     for(auto i=0;i<8;i++){
-                        switch(numChannels){
+                        switch(CHANNELS){
                             case 3:
                                 if(currPix.cr-image(x+shift[i][0],y+shift[i][1]).cr >= noiseLim){
                                     LBP[2] += (1 << i);
@@ -89,92 +167,48 @@ namespace vision {
                         }                        
                     }
                     if(typeLBP == "LBP"){
-                        for(auto j=0; j<numChannels; j++){
+                        for(auto j=0; j<CHANNELS; j++){
                             histLBP[LBP[j]][j]++;                                                       //LBP
                         }
                     }
-                    /*else if(typeLBP == "RLBP"){
-                        for(auto j=0; j<numChannels; j++){
-                            histRLBP[(int)(fmin(LBP[j],pow(2,samplingPts)-1-LBP[j]))][j];               //RLBP
-                        }
-                    }*/
                     else{
-                        gradPix[0] = (image(x+1,y).y-image(x-1,y).y)/2;
-                        gradPix[1] = (image(x,y+1).y-image(x,y-1).y)/2;
+                        gradPix[0] = (image(x+1,y).y-image(x-1,y).y)/2.0;
+                        gradPix[1] = (image(x,y+1).y-image(x,y-1).y)/2.0;
                         histLBP[LBP[0]][0] += sqrt(gradPix[0]*gradPix[0] + gradPix[1]*gradPix[1]);
-                        if(numChannels > 1){
-                            gradPix[0] = (image(x+1,y).cb-image(x-1,y).cb)/2;
-                            gradPix[1] = (image(x,y+1).cb-image(x,y-1).cb)/2;                           //DRLBP
+                        if(CHANNELS > 1){
+                            gradPix[0] = (image(x+1,y).cb-image(x-1,y).cb)/2.0;
+                            gradPix[1] = (image(x,y+1).cb-image(x,y-1).cb)/2.0;                           //DRLBP
                             histLBP[LBP[1]][1] += sqrt(gradPix[0]*gradPix[0] + gradPix[1]*gradPix[1]);
-                            if(numChannels == 3){
-                                gradPix[0] = (image(x+1,y).cr-image(x-1,y).cr)/2;
-                                gradPix[1] = (image(x,y+1).cr-image(x,y-1).cr)/2;
+                            if(CHANNELS == 3){
+                                gradPix[0] = (image(x+1,y).cr-image(x-1,y).cr)/2.0;
+                                gradPix[1] = (image(x,y+1).cr-image(x,y-1).cr)/2.0;
                                 histLBP[LBP[2]][2] += sqrt(gradPix[0]*gradPix[0] + gradPix[1]*gradPix[1]);
                             }
                         } 
                     }
-
                     LBP[0] = 0;
                     LBP[1] = 0;
                     LBP[2] = 0;
                 }
             }
-
-            std::vector<std::pair<arma::ivec2, arma::ivec2>> hist;
-            hist.reserve(768);
-            float max = 0;
-            double tempHist;
-            for(auto k=0;k<128;k++){
-                for(auto l=0;l<numChannels;l++){
-                    if(typeLBP == "LBP"){
-                        tempHist = (double)(histLBP[k][l])/divisorLBP;
-                    }
-                    else if(typeLBP == "DRLBP"){
-                        histDRLBP[k][l] = histLBP[k][l] + histLBP[255-k][l];
-                        tempHist = (double)(histDRLBP[k][l])/divisorDRLBP;
-                    }
-                    /*else{
-                        tempHist = (double)(histRLBP[k][l])/(double)((x1-x0)*(y1-y0));
-                    }*/
-                    //tempHist = (double)(2*histLBP[k][l])/(double)((x1-x0)*(y1-y0));   //LBP
-                    //tempHist = histDRLBP[k][l]/((x1-x0)*(y1-y0)*2);             //DRLBP
-                    (max < tempHist) ? (max = tempHist) : (max = max);
-                    hist.push_back({arma::ivec2({(image.width-numChannels*128)/2.0+numChannels*k+l,0}),arma::ivec2({(image.width-numChannels*128)/2.0+numChannels*k+l+1,(double)(image.height)*tempHist/2.0})});
-                }
+            if(draw == true){
+                drawHist(histLBP, image.width, image.height);
             }
-            //if(typeLBP != "RLBP"){
-            for(auto k=128;k<256;k++){
-                for(auto l=0;l<numChannels;l++){
-                    if(typeLBP == "LBP"){
-                        tempHist = (double)(histLBP[k][l])/divisorLBP;
-                    }
-                    else if(typeLBP == "DRLBP"){
-                        histDRLBP[k][l] = fabs(histLBP[k][l] - histLBP[255-k][l]);
-                        tempHist = (double)(histDRLBP[k][l])/divisorDRLBP;
-                    }
-                    //tempHist = (double)(2*histLBP[k][l])/(double)((x1-x0)*(y1-y0));   //LBP
-                    //tempHist = histDRLBP[k][l]/((x1-x0)*(y1-y0)*2);             //DRLBP
-                    (max < tempHist) ? (max = tempHist) : (max = max);
-                    hist.push_back({arma::ivec2({(image.width-numChannels*128)/2.0+numChannels*(k-128)+l,image.height}),arma::ivec2({(image.width-numChannels*128)/2.0+numChannels*(k-128)+l+1,image.height-(double)(image.height)*tempHist/2.0})});
-                }
-            }
-            //}
-            arma::ivec2 tl = {x0,y0};
-            arma::ivec2 tr = {x1,y0};
-            arma::ivec2 bl = {x0,y1};
-            arma::ivec2 br = {x1,y1};
-
-            hist.push_back({tl, tr});
-            hist.push_back({tr, br});
-            hist.push_back({br, bl});
-            hist.push_back({bl, tl});
-
-            emit(utility::nubugger::drawVisionLines(hist));   
-            //NUClear::clock::time_point end;  
-            //auto time_diff = end - start;
-            //log("Elapsed(ns):",std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count());    
+            
+            /*NUClear::clock::time_point end;  
+            auto time_diff = end - start;
+            log("Elapsed(ns):",std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count());*/
         });
-        
+        on<Trigger<ButtonLeftDown>, Single>().then([this]{
+            if(output == true){
+                toFile(histLBP,1);
+            }
+        });
+        on<Trigger<ButtonMiddleDown>, Single>().then([this]{
+            if(output == true){
+                toFile(histLBP,-1);
+            }
+        });
     }
 }
 }

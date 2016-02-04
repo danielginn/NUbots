@@ -136,11 +136,11 @@ namespace module {
                         leftDown = newLeftDown;
 
                         if(newLeftDown) {
-                            std::cout << "Left Button Down" << std::endl;
+                            log("Left Button Down");
                             emit(std::make_unique<ButtonLeftDown>());
                         }
                         else {
-                            std::cout << "Left Button Up" << std::endl;
+                            log("Left Button Up");
                             emit(std::make_unique<ButtonLeftUp>());
                         }
                     }
@@ -149,11 +149,11 @@ namespace module {
                         middleDown = newMiddleDown;
 
                         if(newMiddleDown) {
-                            std::cout << "Middle Button Down" << std::endl;
+                            log("Middle Button Down");
                             emit(std::make_unique<ButtonMiddleDown>());
                         }
                         else {
-                            std::cout << "Middle Button Up" << std::endl;
+                            log("Middle Button Up");
                             emit(std::make_unique<ButtonMiddleUp>());
                         }
                     }

@@ -21,6 +21,8 @@
 #define MODULES_VISION_LBPCLASSIFIER_H
 
 #include <nuclear>
+#include "utility/nubugger/NUhelpers.h"
+#define CHANNELS 1
 
 namespace module {
 namespace vision {
@@ -30,14 +32,20 @@ namespace vision {
     public:
         /// @brief Called by the powerplant to build and setup the LBPClassifier reactor.
         explicit LBPClassifier(std::unique_ptr<NUClear::Environment> environment);
+        void toFile(int histLBP[][CHANNELS], int polarity);
+        void drawHist(int histLBP[][CHANNELS], const uint imgW, const uint imgH);
 	private:
+		int histLBP[256][CHANNELS];
 		uint samplingPts = 8;
 		std::string typeLBP = "DRLBP";
-		int noiseLim = 0;
-		uint numChannels = 3;
-		float divisorLBP = 15000.0;
+		int noiseLim = 2;
+		
+		float divisorLBP = 7000.0;
 		float divisorRLBP = 15000.0;
 		float divisorDRLBP = 25000.0;
+		
+		bool draw = true;
+		bool output = true;
 		std::string trainingStage = "TESTING";
 	};
 }
