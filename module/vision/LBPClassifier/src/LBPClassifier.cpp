@@ -26,6 +26,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "utility/time/time.h"
+#include "svm.h"
 
 #define CHANNELS 1
 
@@ -146,6 +147,7 @@ namespace vision {
             int width = 50;
             int x0 = image.width/2.0-width, x1 = image.width/2.0+width, y0 = image.height/2.0-width, y1 = image.height/2.0+width;
             Image::Pixel currPix;
+            svm_node node[256*CHANNELS];
             for(auto x = x0; x < x1; x++){
                 for(auto y = y0; y < y1; y++){
                     currPix = image(x,y);
@@ -194,7 +196,15 @@ namespace vision {
             if(draw == true){
                 drawHist(histLBP, image.width, image.height);
             }
-            
+            if(trainingStage == "TESTING"){
+                for(int i=0;i<CHANNELS;i++){
+                    for(int j=0;j<256;j++){
+                        node[j+CHANNELS*256] = histLBP[j][i];
+                    }
+                }
+                svm_model* model = svm_load_model("ballModel"); 
+                log("Prediction:",svm_predict(model,node));
+            }
             /*NUClear::clock::time_point end;  
             auto time_diff = end - start;
             log("Elapsed(ns):",std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count());*/

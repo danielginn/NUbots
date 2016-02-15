@@ -46,7 +46,7 @@ namespace vision {
 		
 		bool draw = true;
 		bool output = true;
-		std::string trainingStage = "TESTING";
+		std::string trainingStage = "TRAINING";
 	};
 }
 }
