@@ -46,17 +46,17 @@ namespace vision {
         if(typeLBP == "LBP"){
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<256; i++){
-                    output << j*256+1+i << ":" << (float)histLBP[i][j]/divisorLBP << " ";
+                    output << j*256+1+i << ":" << (double)histLBP[i][j]/divisorLBP << " ";
                 }
             }
         }
         else{
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<128; i++){
-                    output << j*256+1+i << ":" << (float)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP << " ";
+                    output << j*256+1+i << ":" << (double)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP << " ";
                 }
                 for(auto i=128; i<256; i++){
-                    output << j*256+1+i << ":" << (float)(fabs(histLBP[i][j] - histLBP[255-i][j]))/divisorDRLBP << " ";
+                    output << j*256+1+i << ":" << (double)(fabs(histLBP[i][j] - histLBP[255-i][j]))/divisorDRLBP << " ";
                 }
             }
         }    
@@ -70,40 +70,37 @@ namespace vision {
         }
     }
 
-    void LBPClassifier::drawHist(int histLBP[][CHANNELS], const uint imgW, const uint imgH){
+    void LBPClassifier::drawHist(int histLBP[][CHANNELS], const uint imgW, const uint imgH, bool found){
         int width = 50;
         int x0 = imgW/2.0-width, x1 = imgW/2.0+width, y0 = imgH/2.0-width, y1 = imgH/2.0+width;
         std::vector<std::pair<arma::ivec2, arma::ivec2>> hist;
-        hist.reserve(768);
+        hist.reserve(256*CHANNELS);
         double tempHist, max=0;
         int x_init;
-        for(auto k=0;k<128;k++){
-            for(auto l=0;l<CHANNELS;l++){
-                if(typeLBP == "LBP"){
-                    tempHist = ((double)(histLBP[k][l]/divisorLBP));
+
+        if(typeLBP == "LBP"){
+            for(auto j=0; j<CHANNELS; j++){
+                for(auto i=0; i<256; i++){
+                    tempHist = (double)histLBP[i][j]/divisorLBP;
+                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
                 }
-                else if(typeLBP == "DRLBP"){
-                    tempHist = ( (double)(histLBP[k][l] + histLBP[255-k][l])/divisorDRLBP );
-                }
-                (tempHist > max) ? (max = tempHist) : (max = max) ;
-                x_init = ((imgW-CHANNELS*128)/2.0+CHANNELS*k+l);
-                hist.push_back({arma::ivec2({x_init,0}),arma::ivec2({x_init+1,(int)((double)(imgH)*tempHist/2.0)})});
             }
         }
-        for(auto k=128;k<256;k++){
-            for(auto l=0;l<CHANNELS;l++){
-                if(typeLBP == "LBP"){
-                    tempHist = ((double)(histLBP[k][l]/divisorLBP));
+        else{
+            for(auto j=0; j<CHANNELS; j++){
+                for(auto i=0; i<128; i++){
+                    tempHist = (double)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP;
+                    x_init = ((imgW-CHANNELS*128)/2.0+CHANNELS*i+j);
+                    hist.push_back({arma::ivec2({x_init,0}),arma::ivec2({x_init+1,(int)((double)(imgH)*tempHist/2.0)})});
                 }
-                else if(typeLBP == "DRLBP"){
-                    tempHist = ((double)( fabs(histLBP[k][l] - histLBP[255-k][l])/divisorDRLBP ));
+                for(auto i=128; i<256; i++){
+                    tempHist = (double)(fabs(histLBP[i][j] - histLBP[255-i][j]))/divisorDRLBP;
+                    x_init = (imgW-CHANNELS*128)/2.0+CHANNELS*(i-128)+j;
+                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
                 }
-                (tempHist > max) ? (max = tempHist) : (max = max) ;
-                x_init = (imgW-CHANNELS*128)/2.0+CHANNELS*(k-128)+l;
-                hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
-            }
+            }            
         }
-        log("Max:",max);
+        //log("Max:",max);
         arma::ivec2 tl = {x0,y0};
         arma::ivec2 tr = {x1,y0};
         arma::ivec2 bl = {x0,y1};
@@ -112,6 +109,10 @@ namespace vision {
         hist.push_back({tr, br});
         hist.push_back({br, bl});
         hist.push_back({bl, tl});
+        if(found == true){
+            hist.push_back({tl,br});
+            hist.push_back({tr,bl});
+        }
         emit(utility::nubugger::drawVisionLines(hist));   
     }
 
@@ -123,20 +124,23 @@ namespace vision {
             typeLBP = config["typeLBP"].as<std::string>();
             noiseLim = config["noiseLim"].as<int>();
             divisorLBP = config["divisorLBP"].as<float>();
-            divisorRLBP = config["divisorRLBP"].as<float>();
             divisorDRLBP = config["divisorDRLBP"].as<float>();
             trainingStage = config["trainingStage"].as<std::string>();
+            draw = config["draw"].as<bool>();
+            output = config["output"].as<bool>();
         });
 
         log("Vision Channels:",CHANNELS);
         log("LBP Type       :",typeLBP);
+        log("Noise Limit    :",noiseLim);
         log("Training Stage :",trainingStage);
+        log("Histogram Draw :",draw);
         log("Output         :",output);
 
-        if(output == true){
+        /*if(output == true){
             std::ofstream oFile;
             oFile.open(LBPClassifier::typeLBP, std::ofstream::trunc); //Clears the file each time program is run
-        }
+        }*/
 
         on<Trigger<Image>, Single>().then([this](const Image& image){
             //NUClear::clock::time_point start;
@@ -144,10 +148,11 @@ namespace vision {
             constexpr const int shift[8][2] = {{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,1},{-1,-1},{-1,0}};
             int LBP[] = {0,0,0};
             double gradPix[] = {0,0};
-            int width = 50;
+            int width = 75;
             int x0 = image.width/2.0-width, x1 = image.width/2.0+width, y0 = image.height/2.0-width, y1 = image.height/2.0+width;
             Image::Pixel currPix;
-            svm_node node[256*CHANNELS];
+            bool found = false;
+            
             for(auto x = x0; x < x1; x++){
                 for(auto y = y0; y < y1; y++){
                     currPix = image(x,y);
@@ -193,17 +198,46 @@ namespace vision {
                     LBP[2] = 0;
                 }
             }
-            if(draw == true){
-                drawHist(histLBP, image.width, image.height);
-            }
             if(trainingStage == "TESTING"){
-                for(int i=0;i<CHANNELS;i++){
-                    for(int j=0;j<256;j++){
-                        node[j+CHANNELS*256] = histLBP[j][i];
+                svm_node node[256*CHANNELS];
+                if(typeLBP == "LBP"){
+                    for(int j=0;j<CHANNELS;j++){
+                        for(int i=0;i<256;i++){
+                            svm_node tempNode;
+                            tempNode.index = j*256+1+i;
+                            tempNode.value = ((double)(histLBP[i][j]))/divisorLBP;
+                            node[j*256+i] = tempNode;
+                        }
                     }
                 }
-                svm_model* model = svm_load_model("ballModel"); 
-                log("Prediction:",svm_predict(model,node));
+                else{
+                    svm_node tempNode;
+                    for(int j=0;j<CHANNELS;j++){
+                        for(int i=0;i<128;i++){
+                            tempNode.index = j*256+1+i;
+                            tempNode.value = (double)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP;
+                            node[j*256+i] = tempNode;
+                        }
+                        for(int i=128;i<256;i++){
+                            tempNode.index = j*256+1+i;
+                            tempNode.value = ((double)( fabs(histLBP[i][j] - histLBP[255-i][j]) ))/divisorDRLBP;
+                            node[j*256+i] = tempNode;
+                        }
+                    }
+                }
+                node[256*CHANNELS].index = -1;
+                svm_model* model = svm_load_model((std::string(typeLBP)+std::string(".model")).c_str()); 
+                double result = svm_predict(model,node);
+                log("Prediction:",result);
+                if(result == 1){
+                    found = true;
+                }
+                else{
+                    found = false;
+                }
+            }
+            if(draw == true){
+                drawHist(histLBP, image.width, image.height, found);
             }
             /*NUClear::clock::time_point end;  
             auto time_diff = end - start;
