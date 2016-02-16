@@ -1,0 +1,30 @@
+# LBP Classifier Configuration
+#  Configures the Local Binary Pattern type to be used to histogram images.
+
+# Sampling Points determine number of pixel comparisons made for each pixel
+# samplingPts: 8
+
+# LBP Type {LBP, DRLBP} determines method of calculating the histogram
+typeLBP: DRLBP
+
+# Noise Limit is the maximum difference in pixel value of which two pixels are considered 'equal'
+noiseLim: 0
+
+# Number of channels used to compute the histogram of the image {Y, Cb, Cr}
+numChannels: 1
+
+# Divisor to normalise the LBP histogram output
+divisorLBP: 7000.0
+
+# Divisor to normalise the DRLBP histogram output
+divisorDRLBP: 25000.0
+
+# Training stage determines if the data is to be used to produce a training model (training) or to be
+#			compared to a already defined model (testing)
+trainingStage: TRAINING
+
+# Draw determines whether or not the histogram will be drawn to NUsight
+draw: true
+
+# Output determines if the histogram will be saved to file
+output: true
