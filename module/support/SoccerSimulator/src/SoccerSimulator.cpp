@@ -232,6 +232,21 @@ namespace support {
             lastNow = now;
             lastKicking = kicking;
 
+            auto simulatorState = std::unique_ptr<SimulatorState>();
+            simulatorState->head().set_position().set_x(world.robotPose.x());
+            simulatorState->head().set_position().set_y(world.robotPose.y());
+            simulatorState->head().set_position().set_z(sensors.orientationCamToGround.translation()[2]);
+
+            for (int i=0; i<3; i++)
+            {
+                auto rotation = simulatorState->head().add_column();
+                auto col = sensors.orientationCamToGround.col(i);
+                rotation->set_x(col[0]);
+                rotation->set_y(col[1]);
+                rotation->set_z(col[2]);
+            }
+
+            emit<Network>(simulatorState);
         });
 
         // Simulate Vision
