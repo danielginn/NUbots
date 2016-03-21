@@ -28,27 +28,37 @@ namespace module {
 namespace vision {
 
     class LBPClassifier : public NUClear::Reactor {
+        
+    private:
+        
+        //this enumerates the LBP subtypes so we can turn parts on and off at will
+        enum LBPAlgorithmTypes {
+            Discriminative = 1,
+            Robust = 2,
+            Uniform = 3
+        };
+        uint64_t LBPAlgorithm = 0;
+        
+        int histLBP[256][CHANNELS];
+        uint samplingPts = 8;
+        std::string typeLBP = "DRLBP";
+        int noiseLim = 0;
+        
+        float divisorLBP = 7000.0;
+        float divisorDRLBP = 25000.0;
+        
+        bool draw = true;
+        bool output = true;
+        
+        float tests = 0;
+        float correct = 0;
+        std::string trainingStage = "TESTING";
 
     public:
         /// @brief Called by the powerplant to build and setup the LBPClassifier reactor.
         explicit LBPClassifier(std::unique_ptr<NUClear::Environment> environment);
         void toFile(int histLBP[][CHANNELS], int polarity);
         void drawHist(int histLBP[][CHANNELS], const uint imgW, const uint imgH, bool found);
-	private:
-		int histLBP[256][CHANNELS];
-		uint samplingPts = 8;
-		std::string typeLBP = "DRLBP";
-		int noiseLim = 0;
-		
-		float divisorLBP = 7000.0;
-		float divisorDRLBP = 25000.0;
-		
-		bool draw = true;
-		bool output = true;
-
-		float tests = 0;
-		float correct = 0;
-		std::string trainingStage = "TESTING";
 	};
 }
 }

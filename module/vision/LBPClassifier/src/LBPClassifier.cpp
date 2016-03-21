@@ -86,7 +86,7 @@ namespace vision {
                 }
             }
         }
-        else{
+        else{ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<128; i++){
                     tempHist = (double)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP;
@@ -122,6 +122,17 @@ namespace vision {
             // Use configuration here from file LBPClassifier.yaml
             //samplingPts = config["samplingPts"].as<const uint>();
             typeLBP = config["typeLBP"].as<std::string>();
+            //XXX: typeLBP needs to be cleaned up later, this just makes things easier
+            if (typeLBP[0] == 'R' or typeLBP[1] == 'R' or typeLBP[2] == 'R') {
+                LBPAlgorithm |= LBPAlgorithmTypes::Robust;
+            }
+            if (typeLBP[0] == 'D' or typeLBP[1] == 'D' or typeLBP[2] == 'D') {
+                LBPAlgorithm |= LBPAlgorithmTypes::Discriminative;
+            }
+            if (typeLBP[0] == 'U' or typeLBP[1] == 'U' or typeLBP[2] == 'U') {
+                LBPAlgorithm |= LBPAlgorithmTypes::Uniform;
+            }
+            
             noiseLim = config["noiseLim"].as<int>();
             divisorLBP = config["divisorLBP"].as<float>();
             divisorDRLBP = config["divisorDRLBP"].as<float>();
@@ -146,8 +157,8 @@ namespace vision {
             //NUClear::clock::time_point start;
             std::memset(&histLBP, 0, sizeof(histLBP));
             constexpr const int shift[8][2] = {{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,1},{-1,-1},{-1,0}};
-            int LBP[] = {0,0,0};
-            double gradPix[] = {0,0};
+            uint64_t LBP[] = {0,0,0};
+            arma::vec2 gradPix;
             int width = 75;
             int x0 = image.width/2.0-width, x1 = image.width/2.0+width, y0 = image.height/2.0-width, y1 = image.height/2.0+width;
             Image::Pixel currPix;
@@ -155,47 +166,68 @@ namespace vision {
             
             for(auto x = x0; x < x1; x++){
                 for(auto y = y0; y < y1; y++){
+                    
+                    //clear this first so we don't need to think about implicit changes.
+                    LBP[0] = 0;
+                    LBP[1] = 0;
+                    LBP[2] = 0;
+                    
                     currPix = image(x,y);
                     for(auto i=0;i<8;i++){
                         switch(CHANNELS){
                             case 3:
-                                if(currPix.cr-image(x+shift[i][0],y+shift[i][1]).cr >= noiseLim){
-                                    LBP[2] += (1 << i);
+                                if(currPix.cr-image(x+shift[i][0],y+shift[i][1]).cr >= noiseLim){ //TODO: implement a polarity switch with <= instead of >=
+                                    LBP[2] += (1ull << i);
                                 }
                             case 2:
                                 if(currPix.cb-image(x+shift[i][0],y+shift[i][1]).cb >= noiseLim){
-                                    LBP[1] += (1 << i);
+                                    LBP[1] += (1ull << i); //any time you bitshift a constant, cast it to ULL so that it's 64-bit. Just in case you need it.
                                 }
                             case 1:
                                 if(currPix.y-image(x+shift[i][0],y+shift[i][1]).y >= noiseLim){
-                                    LBP[0] += (1 << i);
+                                    LBP[0] += (1ull << i);
                                 }
                             break;
                         }                        
                     }
-                    if(typeLBP == "LBP"){
-                        for(auto j=0; j<CHANNELS; j++){
-                            histLBP[LBP[j]][j]++;                                                       //LBP
+                    
+                    //this is the inverted lighting condition from the paper (the "R" part of "RLBP")
+                    if (LBPAlgorithm & LBPAlgorithmTypes::Robust) {
+                        for(auto j = 0; j < CHANNELS; j++) {
+                            //XXX: shift by 8 as it's the size of the shift array. THIS IS BAD, USE arma::Mat<int32_t>(8,2) for shift.
+                            //Better yet, give a distance and number of bits in the config and calculate shift at init time.
+                            LBP[j] = std::min(LBP[j], (2ull << 8) - 1 - LBP[j]);
                         }
                     }
-                    else{
-                        gradPix[0] = (image(x+1,y).y-image(x-1,y).y)/2.0;
-                        gradPix[1] = (image(x,y+1).y-image(x,y-1).y)/2.0;
-                        histLBP[LBP[0]][0] += sqrt(gradPix[0]*gradPix[0] + gradPix[1]*gradPix[1]);
-                        if(CHANNELS > 1){
-                            gradPix[0] = (image(x+1,y).cb-image(x-1,y).cb)/2.0;
-                            gradPix[1] = (image(x,y+1).cb-image(x,y-1).cb)/2.0;                           //DRLBP
-                            histLBP[LBP[1]][1] += sqrt(gradPix[0]*gradPix[0] + gradPix[1]*gradPix[1]);
-                            if(CHANNELS == 3){
-                                gradPix[0] = (image(x+1,y).cr-image(x-1,y).cr)/2.0;
-                                gradPix[1] = (image(x,y+1).cr-image(x,y-1).cr)/2.0;
-                                histLBP[LBP[2]][2] += sqrt(gradPix[0]*gradPix[0] + gradPix[1]*gradPix[1]);
-                            }
-                        } 
+                    
+                    //TODO: uniform pattern mapping - should be precalculated on init to let us map down to a MUCH smaller vector than we currently use
+                    
+                    
+                    //do the "D" - discriminative part of LBP
+                    if (LBPAlgorithm & LBPAlgorithmTypes::Discriminative) {
+                        switch(CHANNELS){
+                            case 3:
+                                gradPix[0] = (image(x+1,y).cr-image(x-1,y).cr);
+                                gradPix[1] = (image(x,y+1).cr-image(x,y-1).cr);
+                                histLBP[LBP[2]][2] += arma::norm(gradPix*0.5);
+                            case 2:
+                                gradPix[0] = (image(x+1,y).cb-image(x-1,y).cb);
+                                gradPix[1] = (image(x,y+1).cb-image(x,y-1).cb);
+                                histLBP[LBP[1]][1] += arma::norm(gradPix*0.5);
+                            case 1:
+                                gradPix[0] = (image(x+1,y).y-image(x-1,y).y);
+                                gradPix[1] = (image(x,y+1).y-image(x,y-1).y);
+                                histLBP[LBP[0]][0] += arma::norm(gradPix*0.5);
+                                break;
+                        }
+                    
+                    //if we're not being discriminative, just use plain LBP
+                    } else {
+                        for(auto j=0; j<CHANNELS; j++){
+                            histLBP[LBP[j]][j]++;
+                        }
                     }
-                    LBP[0] = 0;
-                    LBP[1] = 0;
-                    LBP[2] = 0;
+                
                 }
             }
             if(trainingStage == "TESTING"){
