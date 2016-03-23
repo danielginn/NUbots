@@ -42,7 +42,7 @@ namespace vision {
         
         int histLBP[256][CHANNELS];
         uint samplingPts = 8;
-        std::string typeLBP = "DRLBP";
+        std::string typeLBP = "LTP";
         int noiseLim = 0;
         
         float divisorLBP = 7000.0;
@@ -51,9 +51,10 @@ namespace vision {
         bool draw = true;
         bool output = true;
         
+        int numImages = 0;
         float tests = 0;
         float correct = 0;
-        std::string trainingStage = "TESTING";
+        std::string trainingStage = "TRAINING";
 
     public:
         /// @brief Called by the powerplant to build and setup the LBPClassifier reactor.

@@ -77,8 +77,9 @@ namespace vision {
         hist.reserve(256*CHANNELS);
         double tempHist, max=0;
         int x_init;
-
-        if(typeLBP == "LBP"){
+        //TODO: Properly adjust output for Ternary Types
+        //Not printing histogram for ternary type
+        if(LBPAlgorithm & LBPAlgorithmTypes::Uniform){
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<256; i++){
                     tempHist = (double)histLBP[i][j]/divisorLBP;
@@ -86,6 +87,7 @@ namespace vision {
                 }
             }
         }
+        else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){  //NOT IMPLEMENTED }
         else{ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<128; i++){
@@ -157,11 +159,26 @@ namespace vision {
         }*/
 
         on<Trigger<Image>, Single>().then([this](const Image& image){
-            //NUClear::clock::time_point start;
+            numImages++;
             std::memset(&histLBP, 0, sizeof(histLBP));
             constexpr const int shift[8][2] = {{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,1},{-1,-1},{-1,0}};
             uint64_t LBP[] = {0,0,0};
             uint64_t LLBP[] = {0,0,0};
+
+            //NEEDS TO BE REMOVED AND CONFIG TO BE WORKING
+            if (typeLBP[0] == 'R' or typeLBP[1] == 'R' or typeLBP[2] == 'R') {
+                LBPAlgorithm |= LBPAlgorithmTypes::Robust;
+            }
+            if (typeLBP[0] == 'D' or typeLBP[1] == 'D' or typeLBP[2] == 'D') {
+                LBPAlgorithm |= LBPAlgorithmTypes::Discriminative;
+            }
+            if (typeLBP[0] == 'U' or typeLBP[1] == 'U' or typeLBP[2] == 'U') {
+                LBPAlgorithm |= LBPAlgorithmTypes::Uniform;
+            }
+            if (typeLBP[typeLBP.size()-2] == 'T') {
+                LBPAlgorithm |= LBPAlgorithmTypes::Ternary;
+            }
+
             arma::vec2 gradPix;
             int width = 75;
             int x0 = image.width/2.0-width, x1 = image.width/2.0+width, y0 = image.height/2.0-width, y1 = image.height/2.0+width;
@@ -171,11 +188,13 @@ namespace vision {
             divisorLBP = 0.;
             for(auto x = x0; x < x1; x++){
                 for(auto y = y0; y < y1; y++){
-                    
                     //clear this first so we don't need to think about implicit changes.
                     LBP[0] = 0;
                     LBP[1] = 0;
                     LBP[2] = 0;
+                    LLBP[0] = 0;
+                    LLBP[1] = 0;
+                    LLBP[2] = 0;
                     
                     currPix = image(x,y);
                     for(auto i=0;i<8;i++){
@@ -211,13 +230,13 @@ namespace vision {
                         for(auto j = 0; j < CHANNELS; j++) {
                             //XXX: shift by 8 as it's the size of the shift array. THIS IS BAD, USE arma::Mat<int32_t>(8,2) for shift.
                             //Better yet, give a distance and number of bits in the config and calculate shift at init time.
-                            LBP[j] = std::min(LBP[j], (2ull << 8) - 1 - LBP[j]);
+                            LBP[j] = std::min(LBP[j], (1ull << 8) - 1 - LBP[j]);
                             
                             if (LBPAlgorithm & LBPAlgorithmTypes::Ternary) {
-                                LLBP[j] = std::max(LLBP[j], (2ull << 8) - 1 - LLBP[j]);
+                                LLBP[j] = std::max(LLBP[j], (1ull << 8) - 1 - LLBP[j]);
                             }
                         }
-                    }
+                    } 
                     
                     //TODO: uniform pattern mapping - should be precalculated on init to let us map down to a MUCH smaller vector than we currently use
                     
@@ -225,7 +244,6 @@ namespace vision {
                     //do the "D" - discriminative part of LBP
                     if (LBPAlgorithm & LBPAlgorithmTypes::Discriminative) {
                         double result;
-                        
                         if (LBPAlgorithm & LBPAlgorithmTypes::Ternary) {
                             switch(CHANNELS){
                                 case 3:
@@ -252,7 +270,6 @@ namespace vision {
                                     break;
                             }
                         } else {
-                            
                             switch(CHANNELS){
                                 case 3:
                                     gradPix[0] = (image(x+1,y).cr-image(x-1,y).cr);
@@ -289,7 +306,7 @@ namespace vision {
                 
                 }
             }
-            if(trainingStage == "TESTING"){
+            /*if(trainingStage == "TESTING"){
                 svm_node node[256*CHANNELS];
                 if(typeLBP == "LBP"){
                     for(int j=0;j<CHANNELS;j++){
@@ -326,13 +343,10 @@ namespace vision {
                 else{
                     found = false;
                 }
-            }
+            }*/
             if(draw == true){
                 drawHist(histLBP, image.width, image.height, found);
             }
-            /*NUClear::clock::time_point end;  
-            auto time_diff = end - start;
-            log("Elapsed(ns):",std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count());*/
         });
         on<Trigger<ButtonLeftDown>, Single>().then([this]{
             if(output == true){
