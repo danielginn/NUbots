@@ -35,7 +35,8 @@ namespace vision {
         enum LBPAlgorithmTypes {
             Discriminative = 1,
             Robust = 2,
-            Uniform = 3
+            Uniform = 4,
+            Ternary = 8
         };
         uint64_t LBPAlgorithm = 0;
         
