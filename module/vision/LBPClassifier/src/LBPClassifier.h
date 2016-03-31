@@ -42,7 +42,7 @@ namespace vision {
         
         int histLBP[256][CHANNELS];
         uint samplingPts = 8;
-        std::string typeLBP = "LTP";
+        std::string typeLBP = "UTP";
         int noiseLim = 0;
         
         float divisorLBP = 7000.0;

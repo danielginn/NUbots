@@ -51,8 +51,10 @@ namespace vision {
             }
         }
         else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){  /*NOT IMPLEMENTED*/ 
-            for(auto i=0; i<128; i++){
-                output << j*128+1+i << ":" << (double)histLBP[i][j]/divisorLBP << " ";
+            for(auto j=0; j<CHANNELS; j++){
+                for(auto i=0; i<128; i++){
+                    output << j*128+1+i << ":" << (double)histLBP[i][j]/divisorLBP << " ";
+                }
             }
         }
         else{ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
@@ -88,6 +90,7 @@ namespace vision {
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<256; i++){
                     tempHist = (double)histLBP[i][j]/divisorLBP;
+                    x_init = ((imgW-CHANNELS*256)/2.0+CHANNELS*i+j);
                     hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
                 }
             }
@@ -96,11 +99,12 @@ namespace vision {
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<128; i++){
                     tempHist = (double)histLBP[i][j]/divisorLBP;
+                    x_init = ((imgW-CHANNELS*128)/2.0+CHANNELS*i+j);
                     hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
                 }
             }
         }
-        else{ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
+        else if(LBPAlgorithm & LBPAlgorithmTypes::Discriminative){ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<128; i++){
                     tempHist = (double)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP;
@@ -196,9 +200,8 @@ namespace vision {
             int x0 = image.width/2.0-width, x1 = image.width/2.0+width, y0 = image.height/2.0-width, y1 = image.height/2.0+width;
             Image::Pixel currPix;
             bool found = false;
-            divisorDRLBP = 0.;
-            divisorRLBP = 0.;
-            divisorLBP = 0.;
+            /*divisorDRLBP = 0.;
+            divisorLBP = 0.;*/
             for(auto x = x0; x < x1; x++){
                 for(auto y = y0; y < y1; y++){
                     //clear this first so we don't need to think about implicit changes.
@@ -265,21 +268,21 @@ namespace vision {
                                     result = arma::norm(gradPix*0.5);
                                     histLBP[LBP[2]][2] += result;
                                     histLBP[LLBP[2]][2] += result;
-                                    divisorDRLBP += 2*result;
+                                    //divisorDRLBP += 2*result;
                                 case 2:
                                     gradPix[0] = (image(x+1,y).cb-image(x-1,y).cb);
                                     gradPix[1] = (image(x,y+1).cb-image(x,y-1).cb);
                                     result = arma::norm(gradPix*0.5);
                                     histLBP[LBP[1]][1] += result;
                                     histLBP[LLBP[1]][1] += result;
-                                    divisorDRLBP += 2*result;
+                                    //divisorDRLBP += 2*result;
                                 case 1:
                                     gradPix[0] = (image(x+1,y).y-image(x-1,y).y);
                                     gradPix[1] = (image(x,y+1).y-image(x,y-1).y);
                                     result = arma::norm(gradPix*0.5);
                                     histLBP[LBP[0]][0] += result;
                                     histLBP[LLBP[0]][0] += result;
-                                    divisorDRLBP += 2*result;
+                                    //divisorDRLBP += 2*result;
                                     break;
                             }
                         } else {
@@ -289,19 +292,19 @@ namespace vision {
                                     gradPix[1] = (image(x,y+1).cr-image(x,y-1).cr);
                                     result = arma::norm(gradPix*0.5);
                                     histLBP[LBP[2]][2] += result;
-                                    divisorDRLBP += result;
+                                    //divisorDRLBP += result;
                                 case 2:
                                     gradPix[0] = (image(x+1,y).cb-image(x-1,y).cb);
                                     gradPix[1] = (image(x,y+1).cb-image(x,y-1).cb);
                                     result = arma::norm(gradPix*0.5);
                                     histLBP[LBP[1]][1] += result;
-                                    divisorDRLBP += result;
+                                    //divisorDRLBP += result;
                                 case 1:
                                     gradPix[0] = (image(x+1,y).y-image(x-1,y).y);
                                     gradPix[1] = (image(x,y+1).y-image(x,y-1).y);
                                     result = arma::norm(gradPix*0.5);
                                     histLBP[LBP[0]][0] += result;
-                                    divisorDRLBP += result;
+                                    //divisorDRLBP += result;
                                     break;
                             }
                         }
@@ -312,14 +315,14 @@ namespace vision {
                             histLBP[LBP[j]][j]++;
                             if (LBPAlgorithm & LBPAlgorithmTypes::Ternary) {
                                 histLBP[LLBP[j]][j]++;
-                                divisorLBP++;
+                                //divisorLBP++;
                             }
                         }
                     }
                 }
             }
 
-            if(trainingStage == "TESTING"){
+            /*if(trainingStage == "TESTING"){
                 svm_node node[256*CHANNELS];
                 if(typeLBP == "LBP"){
                     for(int j=0;j<CHANNELS;j++){
@@ -356,7 +359,7 @@ namespace vision {
                 else{
                     found = false;
                 }
-            }
+            }*/
 
             if(draw == true){
                 drawHist(histLBP, image.width, image.height, found);
