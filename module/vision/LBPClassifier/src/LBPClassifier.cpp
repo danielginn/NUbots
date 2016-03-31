@@ -43,14 +43,19 @@ namespace vision {
         output.open(LBPClassifier::typeLBP, std::ofstream::app);
         output << std::fixed << std::setprecision(3);
         output << polarity << " ";
-        if(typeLBP == "LBP"){
+        if(LBPAlgorithm & LBPAlgorithmTypes::Uniform){
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<256; i++){
                     output << j*256+1+i << ":" << (double)histLBP[i][j]/divisorLBP << " ";
                 }
             }
         }
-        else{
+        else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){  /*NOT IMPLEMENTED*/ 
+            for(auto i=0; i<128; i++){
+                output << j*128+1+i << ":" << (double)histLBP[i][j]/divisorLBP << " ";
+            }
+        }
+        else{ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<128; i++){
                     output << j*256+1+i << ":" << (double)(histLBP[i][j] + histLBP[255-i][j])/divisorDRLBP << " ";
@@ -58,8 +63,8 @@ namespace vision {
                 for(auto i=128; i<256; i++){
                     output << j*256+1+i << ":" << (double)(fabs(histLBP[i][j] - histLBP[255-i][j]))/divisorDRLBP << " ";
                 }
-            }
-        }    
+            }            
+        } 
         output << "\n";
         output.close();
         if(polarity == 1){
@@ -87,7 +92,14 @@ namespace vision {
                 }
             }
         }
-        else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){  //NOT IMPLEMENTED }
+        else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){  /*NOT IMPLEMENTED*/ 
+            for(auto j=0; j<CHANNELS; j++){
+                for(auto i=0; i<128; i++){
+                    tempHist = (double)histLBP[i][j]/divisorLBP;
+                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
+                }
+            }
+        }
         else{ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
             for(auto j=0; j<CHANNELS; j++){
                 for(auto i=0; i<128; i++){
@@ -153,10 +165,10 @@ namespace vision {
         log("Histogram Draw :",draw);
         log("Output         :",output);
 
-        /*if(output == true){
+        if(output == true){
             std::ofstream oFile;
             oFile.open(LBPClassifier::typeLBP, std::ofstream::trunc); //Clears the file each time program is run
-        }*/
+        }
 
         on<Trigger<Image>, Single>().then([this](const Image& image){
             numImages++;
@@ -185,6 +197,7 @@ namespace vision {
             Image::Pixel currPix;
             bool found = false;
             divisorDRLBP = 0.;
+            divisorRLBP = 0.;
             divisorLBP = 0.;
             for(auto x = x0; x < x1; x++){
                 for(auto y = y0; y < y1; y++){
@@ -303,10 +316,10 @@ namespace vision {
                             }
                         }
                     }
-                
                 }
             }
-            /*if(trainingStage == "TESTING"){
+
+            if(trainingStage == "TESTING"){
                 svm_node node[256*CHANNELS];
                 if(typeLBP == "LBP"){
                     for(int j=0;j<CHANNELS;j++){
@@ -343,10 +356,12 @@ namespace vision {
                 else{
                     found = false;
                 }
-            }*/
+            }
+
             if(draw == true){
                 drawHist(histLBP, image.width, image.height, found);
             }
+            
         });
         on<Trigger<ButtonLeftDown>, Single>().then([this]{
             if(output == true){
