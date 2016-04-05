@@ -36,7 +36,7 @@ namespace vision {
     using message::platform::darwin::ButtonLeftDown;
     using message::platform::darwin::ButtonMiddleDown;    
 
-    void LBPClassifier::toFile(arma::umat histLBP, int polarity){
+    void LBPClassifier::toFile(arma::mat histLBP, int polarity){
         std::ofstream output;
         output.open(LBPClassifier::typeLBP, std::ofstream::app);
         output << std::fixed << std::setprecision(3);
@@ -75,8 +75,7 @@ namespace vision {
         }
     }
 
-    void LBPClassifier::drawHist(arma::umat histLBP, const uint imgW, const uint imgH, bool found){
-        int width = 50;
+    void LBPClassifier::drawHist(arma::mat histLBP, const uint imgW, const uint imgH, bool found){
         int x0 = imgW/2.0-width, x1 = imgW/2.0+width, y0 = imgH/2.0-width, y1 = imgH/2.0+width;
         std::vector<std::pair<arma::ivec2, arma::ivec2>> hist;
         hist.reserve(256*numChannels);
@@ -89,30 +88,30 @@ namespace vision {
                 for(auto i=0; i<256; i++){
                     tempHist = (double)histLBP(i,j)/divisorLBP;
                     x_init = ((imgW-numChannels*256)/2.0+numChannels*i+j);
-                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
+                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH -(double)(imgH)*tempHist/2.0)})});
                 }
             }
         }
-        else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){  /*NOT IMPLEMENTED*/ 
+        else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){
             for(auto j=0; j<numChannels; j++){
                 for(auto i=0; i<128; i++){
                     tempHist = (double)histLBP(i,j)/divisorLBP;
                     x_init = ((imgW-numChannels*128)/2.0+numChannels*i+j);
-                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH-(double)(imgH)*tempHist/2.0)})});
+                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH - (double)(imgH)*tempHist/2.0)})});
                 }
             }
         }
-        else if(LBPAlgorithm & LBPAlgorithmTypes::Discriminative){ //XXX: this isn't how polarity works.... polarity refers to the direction of the >=/<= when creating hte LBP codes.
+        else if(LBPAlgorithm & LBPAlgorithmTypes::Discriminative){
             for(auto j=0; j<numChannels; j++){
                 for(auto i=0; i<128; i++){
                     tempHist = (double)(histLBP(i,j) + histLBP(255-i,j))/divisorDRLBP;
                     x_init = ((imgW-numChannels*128)/2.0+numChannels*i+j);
-                    hist.push_back({arma::ivec2({x_init,0}),arma::ivec2({x_init+1,((double)(imgH)*tempHist/2.0)})});
+                    hist.push_back({arma::ivec2({x_init,0}),arma::ivec2({x_init+1,(int)((double)(imgH)*tempHist/2.0)})});
                 }
                 for(auto i=128; i<256; i++){
                     tempHist = ((double)(fabs(histLBP(i,j) - histLBP(255-i,j))))/divisorDRLBP;
                     x_init = (imgW-numChannels*128)/2.0+numChannels*(i-128)+j;
-                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(imgH - (double)(imgH)*tempHist/2.0)})});
+                    hist.push_back({arma::ivec2({x_init,imgH}),arma::ivec2({x_init+1,(int)(imgH - (double)(imgH)*tempHist/2.0)})});
                 }
             }            
         }
@@ -134,7 +133,7 @@ namespace vision {
 
     LBPClassifier::LBPClassifier(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
-    , histLBP(256, numChannels, arma::fill::zeros) {
+    , histLBP(256, 3, arma::fill::zeros) { //Need to make the matrix size dependent on the numChannels on init, i.e. remove the 3
         on<Configuration>("LBPClassifier.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file LBPClassifier.yaml
             //samplingPts = config["samplingPts"].as<const uint>();
@@ -153,20 +152,23 @@ namespace vision {
                 LBPAlgorithm |= LBPAlgorithmTypes::Ternary;
             }
             
+            numChannels = config["numChannels"].as<int>();
             noiseLim = config["noiseLim"].as<int>();
-            divisorLBP = config["divisorLBP"].as<float>();
-            divisorDRLBP = config["divisorDRLBP"].as<float>();
             trainingStage = config["trainingStage"].as<std::string>();
             draw = config["draw"].as<bool>();
+            width = config["width"].as<int>();
             output = config["output"].as<bool>();
+
+            log("Vision Channels:",numChannels);
+            log("LBP Type       :",typeLBP);
+            log("Noise Limit    :",noiseLim);
+            log("Training Stage :",trainingStage);
+            log("Histogram Draw :",draw);
+            log("Output         :",output);
+            log("----------------");
         });
 
-        log("Vision Channels:",numChannels);
-        log("LBP Type       :",typeLBP);
-        log("Noise Limit    :",noiseLim);
-        log("Training Stage :",trainingStage);
-        log("Histogram Draw :",draw);
-        log("Output         :",output);
+        
 
         if(output == true){
             std::ofstream oFile;
@@ -179,9 +181,8 @@ namespace vision {
             constexpr const int shift[8][2] = {{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,1},{-1,-1},{-1,0}};
             uint64_t LBP[] = {0,0,0};
             uint64_t LLBP[] = {0,0,0};
-
             //NEEDS TO BE REMOVED AND CONFIG TO BE WORKING
-            if (typeLBP[0] == 'R' or typeLBP[1] == 'R' or typeLBP[2] == 'R') {
+            /*if (typeLBP[0] == 'R' or typeLBP[1] == 'R' or typeLBP[2] == 'R') {
                 LBPAlgorithm |= LBPAlgorithmTypes::Robust;
             }
             if (typeLBP[0] == 'D' or typeLBP[1] == 'D' or typeLBP[2] == 'D') {
@@ -192,10 +193,9 @@ namespace vision {
             }
             if (typeLBP[typeLBP.size()-2] == 'T') {
                 LBPAlgorithm |= LBPAlgorithmTypes::Ternary;
-            }
+            }*/
 
             arma::vec2 gradPix;
-            int width = 75;
             int x0 = image.width/2.0-width, x1 = image.width/2.0+width, y0 = image.height/2.0-width, y1 = image.height/2.0+width;
             Image::Pixel currPix;
             bool found = false;
@@ -210,7 +210,6 @@ namespace vision {
                     LLBP[0] = 0;
                     LLBP[1] = 0;
                     LLBP[2] = 0;
-                    
                     currPix = image(x,y);
                     for(auto i=0;i<8;i++){
                         int32_t tmpval;
@@ -218,44 +217,40 @@ namespace vision {
                             case 3:
                                 tmpval = currPix.cr-image(x+shift[i][0],y+shift[i][1]).cr;
                                 if(tmpval >= noiseLim){ //TODO: implement a polarity switch with <= instead of >=
-                                    LBP[2] += (1ull << i);
+                                    LBP[2] += (1 << i);
                                 } else if (tmpval <= -noiseLim) {
-                                    LLBP[2] += (1ull << i);
+                                    LLBP[2] += (1 << i);
                                 }
                             case 2:
                                 tmpval = currPix.cb-image(x+shift[i][0],y+shift[i][1]).cb;
                                 if(tmpval >= noiseLim){
-                                    LBP[1] += (1ull << i); //any time you bitshift a constant, cast it to ULL so that it's 64-bit. Just in case you need it.
+                                    LBP[1] += (1 << i); //any time you bitshift a constant, cast it to ULL so that it's 64-bit. Just in case you need it.
                                 } else if (tmpval <= -noiseLim) {
-                                    LLBP[1] += (1ull << i);
+                                    LLBP[1] += (1 << i);
                                 }
                             case 1:
                                 tmpval = currPix.y-image(x+shift[i][0],y+shift[i][1]).y;
                                 if(tmpval >= noiseLim){
-                                    LBP[0] += (1ull << i);
+                                    LBP[0] += (1 << i);
                                 } else if (tmpval <= -noiseLim) {
-                                    LLBP[0] += (1ull << i);
+                                    LLBP[0] += (1 << i);
                                 }
                             break;
                         }                        
                     }
-                    
                     //this is the inverted lighting condition from the paper (the "R" part of "RLBP")
                     if (LBPAlgorithm & LBPAlgorithmTypes::Robust) {
                         for(auto j = 0; j < numChannels; j++) {
                             //XXX: shift by 8 as it's the size of the shift array. THIS IS BAD, USE arma::Mat<int32_t>(8,2) for shift.
                             //Better yet, give a distance and number of bits in the config and calculate shift at init time.
-                            LBP[j] = std::min(LBP[j], (1ull << 8) - 1 - LBP[j]);
+                            LBP[j] = std::min(LBP[j], (1 << 8) - 1 - LBP[j]);
                             
                             if (LBPAlgorithm & LBPAlgorithmTypes::Ternary) {
-                                LLBP[j] = std::max(LLBP[j], (1ull << 8) - 1 - LLBP[j]);
+                                LLBP[j] = std::max(LLBP[j], (1 << 8) - 1 - LLBP[j]);
                             }
                         }
                     } 
-                    
                     //TODO: uniform pattern mapping - should be precalculated on init to let us map down to a MUCH smaller vector than we currently use
-                    
-                    
                     //do the "D" - discriminative part of LBP
                     if (LBPAlgorithm & LBPAlgorithmTypes::Discriminative) {
                         double result;
@@ -307,7 +302,6 @@ namespace vision {
                                     break;
                             }
                         }
-                        
                     //if we're not being discriminative, just use plain LBP
                     } else {
                         for(auto j=0; j<numChannels; j++){
@@ -321,9 +315,11 @@ namespace vision {
                 }
             }
 
-            if(trainingStage == "TESTING"){
-                svm_node node[256*numChannels];
-                if(typeLBP == "LBP"){
+            /*if(trainingStage == "TESTING"){
+                double result;
+                svm_model* model = svm_load_model((std::string(typeLBP)+std::string(".model")).c_str()); 
+                if(LBPAlgorithm & LBPAlgorithmTypes::Uniform){
+                    svm_node node[256*numChannels];
                     for(int j=0;j<numChannels;j++){
                         for(int i=0;i<256;i++){
                             svm_node tempNode;
@@ -332,9 +328,25 @@ namespace vision {
                             node[j*256+i] = tempNode;
                         }
                     }
+                    node[256*numChannels].index = -1;
+                    result = svm_predict(model,node);
                 }
-                else{
+                else if(LBPAlgorithm & LBPAlgorithmTypes::Robust){
                     svm_node tempNode;
+                    svm_node node[128*numChannels];
+                    for(int j=0;j<numChannels;j++){
+                        for(int i=0;i<128;i++){
+                            tempNode.index = j*128+1+i;
+                            tempNode.value = (double)(histLBP(i,j) + histLBP(255-i,j))/divisorDRLBP;
+                            node[j*256+i] = tempNode;
+                        }
+                    }
+                    node[256*numChannels].index = -1;
+                    result = svm_predict(model,node);
+                }
+                else if(LBPAlgorithm & LBPAlgorithmTypes::Discriminative){
+                    svm_node tempNode;
+                    svm_node node[256*numChannels];
                     for(int j=0;j<numChannels;j++){
                         for(int i=0;i<128;i++){
                             tempNode.index = j*256+1+i;
@@ -343,14 +355,13 @@ namespace vision {
                         }
                         for(int i=128;i<256;i++){
                             tempNode.index = j*256+1+i;
-                            tempNode.value = ((double)( fabs(histLBP(i,j) - histLBP(255-i,j)) ))/divisorDRLBP;
+                            tempNode.value = ((double)(fabs(histLBP(i,j) - histLBP(255-i,j))))/divisorDRLBP;
                             node[j*256+i] = tempNode;
                         }
                     }
+                    node[256*numChannels].index = -1;
+                    result = svm_predict(model,node);
                 }
-                node[256*numChannels].index = -1;
-                svm_model* model = svm_load_model((std::string(typeLBP)+std::string(".model")).c_str()); 
-                double result = svm_predict(model,node);
                 log("Prediction:",result);
                 if(result == 1){
                     found = true;
@@ -358,7 +369,7 @@ namespace vision {
                 else{
                     found = false;
                 }
-            }
+            }*/
 
             if(draw == true){
                 drawHist(histLBP, image.width, image.height, found);

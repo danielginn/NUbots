@@ -39,29 +39,30 @@ namespace vision {
         uint64_t LBPAlgorithm = 0;
         
         uint samplingPts = 8;
-        std::string typeLBP = "DBP";
-        int noiseLim = 0;
-        int numChannels = 1;
+        std::string typeLBP;
+        int noiseLim;
+        int numChannels;
 
         float divisorLBP; //7000.0
         float divisorDRLBP; //25000.0
         
-        bool draw = true;
-        bool output = true;
+        bool draw;
+        int width;
+        bool output;
         
         int numImages = 0;
         float tests = 0;
         float correct = 0;
-        std::string trainingStage = "TRAINING";
+        std::string trainingStage;
 
         //int histLBP[256][CHANNELS];
-        arma::umat histLBP; 
+        arma::mat histLBP; 
 
     public:
         /// @brief Called by the powerplant to build and setup the LBPClassifier reactor.
         explicit LBPClassifier(std::unique_ptr<NUClear::Environment> environment);
-        void toFile(arma::umat histLBP, int polarity);
-        void drawHist(arma::umat histLBP, const uint imgW, const uint imgH, bool found);
+        void toFile(arma::mat histLBP, int polarity);
+        void drawHist(arma::mat histLBP, const uint imgW, const uint imgH, bool found);
 	};
 }
 }

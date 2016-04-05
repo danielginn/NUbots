@@ -26,5 +26,8 @@ trainingStage: TRAINING
 # Draw determines whether or not the histogram will be drawn to NUsight
 draw: true
 
+# Image Sampling Region Width
+width: 50
+
 # Output determines if the histogram will be saved to file
 output: true
