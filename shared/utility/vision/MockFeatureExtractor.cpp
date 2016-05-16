@@ -16,24 +16,26 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#include "MockFeatureExtractor.h"
-#include "messages/input/ServoID.h"
-#include "utility/math/vision.h"
-#include "utility/support/yaml_armadillo.h"
+
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <armadillo>
 
+#include "MockFeatureExtractor.h"
+#include "message/input/ServoID.h"
+#include "utility/math/vision.h"
+#include "utility/support/yaml_armadillo.h"
+
 namespace utility {
 	namespace vision {
 		bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 
-		using messages::input::ServoID;
+		using message::input::ServoID;
 
 		MockFeatureExtractor::MockFeatureExtractor(){}
 
-		std::vector<MockFeatureExtractor::MockFeature> MockFeatureExtractor::setParameters(const messages::support::Configuration<MockFeatureExtractor>& config){
+		std::vector<MockFeatureExtractor::MockFeature> MockFeatureExtractor::setParameters(const YAML::Node& config){
 			int NUMBER_OF_MOCK_POINTS = config["NUMBER_OF_MOCK_POINTS"].as<int>();
 
 			arma::vec RADIUS = config["RADIUS"].as<arma::vec>();
@@ -73,7 +75,7 @@ namespace utility {
 			return mockFeatures;
 		}
 
-		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::localisation::Self& self, const messages::input::Sensors& sensors){
+		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const message::localisation::Self& self, const message::input::Sensors& sensors){
 			std::vector<MockFeatureExtractor::ExtractedFeature> features;
 			arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 

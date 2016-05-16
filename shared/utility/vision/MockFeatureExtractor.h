@@ -21,13 +21,13 @@
 #ifndef UTILITY_VISION_MOCK_FEATURE_EXTRACTOR_H
 #define UTILITY_VISION_MOCK_FEATURE_EXTRACTOR_H
 
-#include "messages/input/Image.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/Image.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/support/Configuration.h"
-
 #include <armadillo>
+#include <yaml-cpp/yaml.h>
+
+#include "message/input/Image.h"
+#include "message/input/Sensors.h"
+#include "message/input/Image.h"
+#include "message/localisation/FieldObject.h"
 
 namespace utility {
 	namespace vision {
@@ -47,8 +47,7 @@ namespace utility {
 			double uniformSample(arma::vec/*2*/ range);
 			bool sampleRandomBool(double probability_true);
 		public:
-            static constexpr const char* CONFIGURATION_PATH = "MockFeatureExtractor.json";
-			std::vector<MockFeature> setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
+			std::vector<MockFeature> setParameters(const YAML::Node& config);
 			class ExtractedFeature {
 			public:
 				arma::vec screenAngular;	//Compulsory
@@ -58,7 +57,7 @@ namespace utility {
 				int numberOfTimesUpdated;
 			};
 			MockFeatureExtractor();
-			std::vector<ExtractedFeature> extractFeatures(const messages::localisation::Self& self, const messages::input::Sensors& sensors);
+			std::vector<ExtractedFeature> extractFeatures(const message::localisation::Self& self, const message::input::Sensors& sensors);
 
 			float FOV_X;
 			float FOV_Y;

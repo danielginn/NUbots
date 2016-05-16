@@ -1,4 +1,4 @@
-ADD_ROLE(
+NUCLEAR_ROLE(
     # This must come first as it populates global variables that other modules depend on.
     platform::darwin::KinematicsModel
     # Hardware for button testing
@@ -8,9 +8,10 @@ ADD_ROLE(
     # Support and Configuration
     support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::configuration::ConfigSystem
+    support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
     support::NUbugger
 
     input::GameController

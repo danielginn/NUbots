@@ -1,237 +1,617 @@
 #!/usr/bin/python
 
+from info.type_to_string import type_to_string
+
+import math
+import random
 import sys
 import json
 import re
+from collections import Counter
 from pydotplus.graphviz import Dot, Node, Edge, Cluster
 
 class NUClearGraphBuilder:
     def __init__(self):
-        self.modules = {}
+        self.modules = []
 
     def add_module(self, filename):
 
         with open(filename, 'r') as file:
-            data = json.load(file)
+            module = json.load(file)
 
-            # Our relevant fields
-            module_name = data['module_name']
-            module_outputs = data['outputs']
-            module_reactions = data['reactions']
-
-            # TODO NUbugger is crazy!
-            if module_name == 'support::NUbugger':
+            # Don't load some super connected modules
+            if module['name'] in [
+                # 'support::logging::ConsoleLogHandler',
+                # 'support::NUbugger',
+                # 'support::extension::FileWatcher',
+            ]:
                 return
 
-            # Add our outputs
-            for output in module_outputs:
+            self.modules.append(module)
 
-                # Our output may actually belong to someone else!
-                if output['type'] and output['type'][0] == 'NUClear':
-                    target_module = 'NUClear'
-                elif len(output['type']) > 3 and output['type'][:3] == ['messages', 'support', 'Configuration']:
-                    target_module = 'support::configuration::ConfigSystem'
-                else:
-                    target_module = module_name
+    def make_edge(self, output_id, output, input_id, input):
+        # If we are after a two module edge
+        if output:
+            if input['scope'] == output['scope']:
 
-                # Get our module (or create it)
-                module = self.modules.setdefault(target_module, {
-                    'name': target_module,
-                    'outputs': set(),
-                    'reactions': []
-                })
+                # If the two types are type scopes of the same type
+                if input['scope'] == 'type' and input['type'] == output['type']:
 
-                # Add this parsed output to the module
-                module['outputs'].add(self.type_to_str(output['type']))
+                    # Get our type name
+                    type_name = type_to_string(input['type'])
 
-            # Add our reactions
-            for reaction in module_reactions:
-                # Work out a name for our reaction
+                    # give our global arguments
+                    edge = {
+                        'src':   '"{}"'.format(output_id),
+                        'dst':   '"{}"'.format(input_id),
+                        'label': '"{}"'.format(type_name),
+                        # Red for triggering edges, blue for data only edges
+                        'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
+                    }
 
-                dsl = ['on'] + [[ x['scope'] + [[ x['type']]] for x in reaction['inputs']]]
-                reaction_name = self.type_to_str(dsl);
+                    if input['modifiers'].get('optional', False):
+                        edge['style'] = 'dashed'
 
-                module = self.modules.setdefault(module_name, {
-                    'name': module_name,
-                    'outputs': set(),
-                    'reactions': []
-                })
+                    if input['modifiers'].get('last', False):
+                        # TODO do something here
+                        # Try to make the line a different style
+                        pass
 
-                module['reactions'].append({
-                    'name': reaction_name,
-                    'inputs': set(),
-                    'outputs': set()
-                })
+                    if output['modifiers'].get('binding', False):
+                        edge['style'] = 'dotted'
 
-                r = module['reactions'][-1]
+                    if output['modifiers'].get('direct', False):
+                        edge['dir'] = 'both'
+                        edge['arrowtail'] = 'dot'
 
-                # Add our reaction outputs
-                for output in reaction['outputs']:
-                    # Parse our output type into a sensible name
-                    r['outputs'].add(self.type_to_str(output['type']))
+                    if output['modifiers'].get('initialize', False):
+                        edge['dir'] = 'both'
+                        edge['arrowtail'] = 'odot'
 
-                # Add our reaction inputs
-                for input in reaction['inputs']:
-                    # Parse our input type into a sensible name
-                    r['inputs'].add(self.type_to_str(input['type']))
+                    return Edge(**edge)
 
-    def type_to_str(self, type_list):
+                if input['scope'] == 'network' and input['type'] == output['type']:
+                    pass
+                    # This is a network type
+        else:
+            if input['scope'] == 'system_event':
+                # give our arguments
+                edge = {
+                    'src':   '"{}"'.format('System'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format(input['type']),
+                    'color': '#00FF00'
+                }
+                return Edge(**edge)
 
-        # Extract datatypes out of DataFor types
-        if len(type_list) > 2 and type_list[:2] == ['NUClear', 'DataFor']:
-            type_list = type_list[2][0]
+            if input['scope'] == 'every':
+                edge = {
+                    'src':   '"{}"'.format('Every'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"Every<{}, seconds>"'.format(input['type']),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        # Remove the allocator from vectors
-        if len(type_list) > 2 and type_list[:2] == ['std', 'vector']:
-            type_list = type_list[:2] + [[type_list[2][0]]]
+            if input['scope'] == 'always':
+                edge = {
+                    'src':   '"{}"'.format('Every'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('Always'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        # Parse Every into sanity
-        if len(type_list) > 3 and type_list[:3] == ['NUClear', 'dsl', 'Every']:
-            # Get the number of ticks we are doing
-            ticks = int(type_list[3][0][0])
+            if input['scope'] == 'io':
+                edge = {
+                    'src':   '"{}"'.format('IO'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('IO'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-            # Extract our period information
-            period = type_list[3][1]
-            is_per = len(type_list[3][1]) > 3 and period[:3] == ['NUClear', 'dsl', 'Per']
-            if is_per:
-                period = period[3][0]
-            period = period[3][-1][-1]
-            period = ['std', 'chrono'] + {
-                1e-9 : ['nanoseconds'],
-                1e-6 : ['microseconds'],
-                1e-3 : ['milliseconds'],
-                1    : ['seconds'],
-                60   : ['minutes'],
-                3600 : ['hours']
-            }[float(period[0][0][:-2]) / float(period[1][0][:-2])]
+            if input['scope'] == 'tcp':
+                edge = {
+                    'src':   '"{}"'.format('TCP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('TCP'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-            if is_per:
-                type_list = type_list[:3] + [[[str(ticks)], ['NUClear', 'dsl', 'Per', [period]]]]
-            else:
-                type_list = type_list[:3] + [[[str(ticks)], period]]
-                pass
+            if input['scope'] == 'udp':
+                edge = {
+                    'src':   '"{}"'.format('UDP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('UDP'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        # Optional and Raw won't link as they are, pull out the real types
-        if len(type_list) > 3 and type_list[:3] == ['NUClear', 'dsl', 'Optional'] or type_list[:3] == ['NUClear', 'dsl', 'Raw']:
-            type_list = type_list[3][0]
+            if input['scope'] == 'udp_broadcast':
+                edge = {
+                    'src':   '"{}"'.format('UDP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('UDP Broadcast'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        flat_list = []
-        short_type = False
-        previous = type_list[0]
+            if input['scope'] == 'udp_multicast':
+                edge = {
+                    'src':   '"{}"'.format('UDP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('UDP Multicast'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        for item in type_list:
-            if isinstance(item, basestring) and (short_type or (item[0].isupper() and item != 'NUClear')):
-                short_type = True
-                flat_list.append(item)
-            elif not isinstance(item, basestring):
-                # If we didn't have a type yet we must use the last one
-                if not short_type:
-                    flat_list.append(previous)
-                    short_type = True
-                flat_list.append('<{}>'.format(', '.join([self.type_to_str(subitem) for subitem in item])))
-            else:
-                previous = item
+            if input['scope'] == 'configuration':
+                edge = {
+                    'src':   '"{}"'.format('Configuration'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format(input['type']),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if not short_type:
-            flat_list.append(previous)
+            if input['scope'] == 'file_watch':
+                edge = {
+                    'src':   '"{}"'.format('File Watch'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format(input['type']),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
+        # We are not going to make an edge for this
+        return None
 
-        return '::'.join(flat_list)
+    def build_reaction_graph(self, group_clusters=True):
 
-    def build_reaction_graph(self):
+        # A unique identifier for use in the clusters
+        id = 0
 
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False)
+        graph = {
+            'label': 'Reactions',
+            'graph_type': 'digraph',
+            'suppress_disconnected': False,
+            'splines': 'polyline',
+            'overlap': 'prism10000',
+            'layout': 'fdp',
+            'epsilon': 0.01,
+            'start': int(random.random() * 2**32)
+        }
 
-        # Add our nodes
-        id = 0
-        for index in self.modules:
-            module = self.modules[index]
-            # Make a unique group for our cluster
-            cluster = Cluster(graph_name=str(id), label='"{}"'.format(module['name']))
-            id += 1
-            graph.add_subgraph(cluster);
+        graph = Dot(**graph)
 
-            for reaction in module['reactions']:
-                fqn = module['name'] + '::' + reaction['name']
-                node = Node(name='"{}"'.format(fqn), label='"{}"'.format(reaction['name']), shape='rect')
-
-                cluster.add_node(node)
-
-        # Loop through all our reactions
+        # Loop through each of our modules
         for m1 in self.modules:
+            if group_clusters:
+                # Add a cluster for the module
+                cluster = Cluster(graph_name=str(id), label='"{}"'.format(m1['name']))
+                graph.add_subgraph(cluster);
+                id += 1
+            else:
+                cluster = graph
 
-            src_module = self.modules[m1]
-            for us in src_module['reactions']:
+            # Add a node for our module itself
+            if m1['output_data']:
+                node = {
+                    'name': '"{}"'.format(m1['name']),
+                    'label': '"{}"'.format(m1['name']),
+                    'shape': 'rect'
+                }
+                cluster.add_node(Node(**node))
 
-                # Our fully qualified unique name
-                src_fqn = src_module['name'] + '::' + us['name']
+                for outputs in m1['output_data']:
+                    for output in outputs:
+                        # Loop through our reactions in all the other modules
+                        for m2 in self.modules:
+                            for r2 in m2['reactions']:
 
-                # Look for nodes that have our outputs in their inputs
-                for m2 in self.modules:
-                    dst_module = self.modules[m2]
-                    for them in dst_module['reactions']:
+                                # Get our destination fqn
+                                dst_text_dsl = type_to_string(['DSL', r2['dsl']])[4:-1]
+                                dst_reaction_identifier = '0x{0:x}<{1}>'.format(r2['address'], dst_text_dsl)
+                                dst_fqn = m2['name'] + '::' + dst_reaction_identifier
 
-                        # Our fully qualified unique name
-                        dst_fqn = dst_module['name'] + '::' + them['name']
+                                for input in r2['input_data']:
 
-                        # Go through every type that overlaps our outputs to their inputs
-                        for type in (us['outputs'] & them['inputs']):
-                            graph.add_edge(Edge(src='"{}"'.format(src_fqn), dst='"{}"'.format(dst_fqn), label='"{}"'.format(type)))
+                                    edge = self.make_edge(m1['name'], output, dst_fqn, input)
+                                    if edge:
+                                        graph.add_edge(edge)
+
+
+            # Loop through the reactions of each module
+            for r1 in m1['reactions']:
+
+                # Get identifiers for this reaction
+                src_text_dsl = type_to_string(['DSL', r1['dsl']])[4:-1]
+                src_reaction_identifier = '0x{0:x}<{1}>'.format(r1['address'], src_text_dsl)
+                src_fqn = m1['name'] + '::' + src_reaction_identifier
+                label = r1['name'] if r1['name'] else src_text_dsl
+
+                # TODO if the label is Configuration, we need to get the .yaml file to help the label
+
+                node = {
+                    'name': '"{}"'.format(src_fqn),
+                    'label': '"{}"'.format(label),
+                    'shape': 'rect'
+                }
+
+                # If we are not grouping clusters, put the owner module here
+                if not group_clusters:
+                    node['label'] = '{0}\\n{1}'.format(m1['name'], label)
+
+                if r1['modifiers'].get('single', False):
+                    # TODO make the outline style be dashed?
+                    pass # TODO modify the reaction
+                if r1['modifiers'].get('sync', False):
+                    # TODO make the outline style be something??
+                    pass # TODO modify the reaction
+                if r1['modifiers'].get('priority', False):
+                    if r1['modifiers']['priority'] == 'LOW':
+                        node['style'] = 'filled'
+                        node['fillcolor'] = '#44FF4444'
+
+                    elif r1['modifiers']['priority'] == 'HIGH':
+                        node['style'] = 'filled'
+                        node['fillcolor'] = '#FF444444'
+
+                # Add the node
+                cluster.add_node(Node(**node))
+
+                # Go through our own inputs looking for single edged inputs
+                for input in r1['input_data']:
+                    edge = self.make_edge(None, None, src_fqn, input)
+                    if edge:
+                        graph.add_edge(edge)
+
+                # Go through our outputs
+                for outputs in r1['output_data']:
+                    for output in outputs:
+
+                        # Loop through our reactions in all the other modules
+                        for m2 in self.modules:
+                            for r2 in m2['reactions']:
+
+                                # Get our destination fqn
+                                dst_text_dsl = type_to_string(['DSL', r2['dsl']])[4:-1]
+                                dst_reaction_identifier = '0x{0:x}<{1}>'.format(r2['address'], dst_text_dsl)
+                                dst_fqn = m2['name'] + '::' + dst_reaction_identifier
+
+                                for input in r2['input_data']:
+                                    edge = self.make_edge(src_fqn, output, dst_fqn, input)
+                                    if edge:
+                                        graph.add_edge(edge)
 
         return graph
 
     def build_module_graph(self):
 
-        # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato')
+        # Build up a list of compressed modules
+        compressed_modules = []
 
-        # Build up a compressed modules list
-        graph_modules = {}
+        for module in self.modules:
 
-        # Make a version of our data where all the modules are compressed into one
-        for m1 in self.modules:
-
-            # Skip several modules because they are so connected
-            if m1 == 'support::configuration::ConfigSystem' or m1 == 'support::logging::ConsoleLogHandler':
-                continue
-
-            module = self.modules[m1]
-
-            # Get our module
-            gm = graph_modules.setdefault(module['name'], {
+            compressed = {
                 'name': module['name'],
-                'inputs': set(),
-                'outputs': set()
-            })
+                'input_data': [],
+                'output_data': []
+            }
 
-            # Add in our global outputs
-            gm['outputs'] |= module['outputs']
+            # TODO we are getting doubleups
 
-            # Add in our reaction outputs
+            # Add all of our reaction's inputs and outputs
             for reaction in module['reactions']:
-                gm['outputs'] |= reaction['outputs']
-                gm['inputs'] |= reaction['inputs']
+                for input in reaction['input_data']:
+                    if input not in compressed['input_data']:
+                        compressed['input_data'].append(input)
 
-        # Loop through to make nodes
-        for m1 in graph_modules:
-            module = graph_modules[m1]
+                for outputs in reaction['output_data']:
+                    for output in outputs:
+                        if output not in compressed['output_data']:
+                            compressed['output_data'].append(output)
 
-            node = Node(name='"{}"'.format(module['name']), shape='rect')
-            graph.add_node(node)
+            # Add our modules floating inputs and outputs
+            for outputs in module['output_data']:
+                for output in outputs:
+                    if output not in compressed['output_data']:
+                        compressed['output_data'].append(output)
 
-        # Loop through to link edges
-        for m1 in graph_modules:
-            us = graph_modules[m1]
-            for m2 in graph_modules:
-                them = graph_modules[m2]
 
-                # Go through every type that overlaps our outputs to their inputs
-                for type in (us['outputs'] & them['inputs']):
-                    graph.add_edge(Edge(src='"{}"'.format(us['name']), dst='"{}"'.format(them['name']), label='"{}"'.format(type), weight=0.2))
+            compressed_modules.append(compressed)
+
+
+        # Our graph
+        graph = Dot(graph_type='digraph', suppress_disconnected=True, splines=True, overlap='prism10000', layout='fdp', epsilon=0.01, start=int(random.random() * 2**32))
+
+        for m1 in compressed_modules:
+
+            # Add a node for our module itself
+            node = {
+                'name': '"{}"'.format(m1['name']),
+                'label': '"{}"'.format(m1['name']),
+                'shape': 'rect'
+            }
+            graph.add_node(Node(**node))
+
+            # Loop through our outputs
+            for output in m1['output_data']:
+
+                # Loop through the other modules inputs
+                for m2 in compressed_modules:
+
+                    for input in m2['input_data']:
+                        edge = self.make_edge(m1['name'], output, m2['name'], input)
+                        if edge:
+                            graph.add_edge(edge)
 
         return graph
 
+    def histogram_information(self, data):
+
+        # Unpack our data into this list
+        l = []
+        for k in data:
+            v = data[k]
+            l.extend([k] * v)
+        l = sorted(l)
+
+        # If it's an empty list
+        if(not len(l)):
+            return (float('nan'), float('nan'), float('nan'), float('nan'))
+
+        # Calculate the average
+        mean = float(sum(l))/float(len(l))
+
+        # Use a counter to get the mode
+        mode = Counter(data).most_common(1)[0][0]
+
+        # The median is the middle element of the list
+        median = l[len(l) / 2]
+
+        # Calculate the standard deviation
+        stddev = math.sqrt(sum([pow(i-mean, 2) for i in l]) / len(l))
+
+        return (mean, mode, median, stddev)
+
+    def extract_graph_information(self):
+        info = {
+            'number_of_modules': 0,
+            'lmb': {
+                'reactions': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+                'inputs': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+                'unused_messages': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+            },
+            'message_lmb_complexity': [],
+            'message': {
+                'reactions': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+                'induced_cache_variables': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+            },
+            'blackboard': {
+                'types': 0
+            }
+        }
+
+        info['number_of_modules'] = len(self.modules)
+
+        # Process information for LMB
+        for module in self.modules:
+
+            # Add to our reaction histogram
+            h = info['lmb']['reactions']['histogram']
+            l = len(module['reactions'])
+            h[l] = h.get(l, 0) + 1
+
+            for reaction in module['reactions']:
+                # Build a histogram of the input complexity
+                h = info['lmb']['inputs']['histogram']
+                l = len(reaction['input_data'])
+                h[l] = h.get(l, 0) + 1
+
+        # Look for unused data inputs
+        for m1 in self.modules:
+
+            # Count the number of unused outputs
+            unused = 0
+
+            for outputs in m1['output_data']:
+                for o in outputs:
+
+                    # Skip some types that go to NUClear or are networked
+                    if o['type'][0] == 'NUClear' or o['scope'] == 'network':
+                        continue
+
+                    used = False
+
+                    # Try to see if this output is used as an input anywhere
+                    for m2 in self.modules:
+                        for r2 in m2['reactions']:
+                            for i in r2['input_data']:
+                                used |= self.make_edge('', o, '', i) != None
+
+                    if not used:
+                        unused += 1
+
+            for r1 in m1['reactions']:
+                for outputs in r1['output_data']:
+                    for o in outputs:
+
+                        # Skip some types that go to NUClear or are networked
+                        if o['type'][0] == 'NUClear' or o['scope'] == 'network':
+                            continue
+
+                        used = False
+
+                        # Try to see if this output is used as an input anywhere
+                        for m2 in self.modules:
+                            for r2 in m2['reactions']:
+                                for i in r2['input_data']:
+                                    used |= self.make_edge('', o, '', i) != None
+
+                        if not used:
+                            unused += 1
+
+            h = info['lmb']['unused_messages']['histogram']
+            h[unused] = h.get(unused, 0) + 1
+
+        # TODO traverse the graph and find data rate mismatches
+        # TODO do this by solving a data rate for every place you can (Every)
+
+        # TODO loop through every reaction and try to find it's rate
+        # TODO an every gives a direct rate
+        # Configuration is considered "very slow"
+
+        # Go flatten all the outputs and add them to a list?
+
+        output_rates = []
+
+        for module in self.modules:
+            for r in module['reactions']:
+                for i in r['input_data']:
+                    # TODO get a rate here if we can directly from an input
+                    pass
+        # TODO we now need to "push" our rates down from our types to reactions
+        # TODO compare the rates of "with" and "trigger" types
+
+        # Calculate our histogram information
+        h = info['lmb']['reactions']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        # Calculate our histogram information
+        h = info['lmb']['inputs']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        # Calculate our histogram information
+        h = info['lmb']['unused_messages']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        # Process the transformation for Message Passing
+        for module in self.modules:
+
+            data_types = []
+            exec_types = []
+
+            for reaction in module['reactions']:
+                for input in reaction['input_data']:
+
+                    ex = input['modifiers'].get('execution', False)
+                    t = { 'scope': input['scope'], 'type': input['type'] }
+
+                    if input['modifiers'].get('execution', False):
+                        exec_types.append(input)
+                    elif t not in data_types:
+                        data_types.append(t)
+
+            info['message_lmb_complexity'].append((module['name'], len(module['reactions']), len(data_types) + len(exec_types), len(data_types)))
+
+            h = info['message']['reactions']['histogram']
+            l = len(data_types) + len(exec_types)
+            h[l] = h.get(l, 0) + 1
+
+            h = info['message']['induced_cache_variables']['histogram']
+            l = len(data_types)
+            h[l] = h.get(l, 0) + 1
+
+        # Calculate our histogram information
+        h = info['message']['reactions']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        h = info['message']['induced_cache_variables']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+
+        # Calculate blackboard information (get number of unique "types")
+        types = []
+
+        for module in self.modules:
+            for outputs in module['output_data']:
+                for o in outputs:
+                    if o['scope'] == 'type' and o['type'] not in types:
+                        types.append(o['type'])
+
+
+            for r in module['reactions']:
+                for i in r['input_data']:
+                    if i['scope'] == 'type' and i['type'] not in types:
+                        types.append(i['type'])
+
+                for outputs in r['output_data']:
+                    for o in outputs:
+                        if o['scope'] == 'type' and o['type'] not in types:
+                            types.append(o['type'])
+
+        info['blackboard']['types'] = len(types)
+
+        return info
+
+    def get_unique_input_output(self):
+
+        # Process some information for blackboards
+        unique_inputs = []
+        unique_outputs = []
+
+        # Go and find all of our unique inputs/outputs
+        for module in self.modules:
+            for outputs in module['output_data']:
+                for o in outputs:
+                    unique_outputs.append(o)
+
+            for r in module['reactions']:
+                for i in r['input_data']:
+                    unique_inputs.append(i)
+                    pass
+
+                for outputs in r['output_data']:
+                    for o in outputs:
+                        unique_outputs.append(o)
+
+        l = []
+        for i in unique_inputs:
+            if i not in l:
+                l.append(i)
+        unique_inputs = l
+
+        l = []
+        for i in unique_outputs:
+            if i not in l:
+                l.append(i)
+        unique_outputs = l
+
+        return {'inputs': unique_inputs, 'outputs': unique_outputs }
 
 if __name__ == "__main__":
 
@@ -240,10 +620,17 @@ if __name__ == "__main__":
     out = sys.argv[1]
     filenames = sys.argv[2:]
 
+    converter.build_module_graph().write("{}_module.dot".format(out))
+    converter.build_reaction_graph(group_clusters=False).write("{}_reaction.dot".format(out))
+
     # Add all of our modules
     for filename in filenames:
         converter.add_module(filename)
 
     # Build our graph and save
-    converter.build_module_graph().write("{}_module.dot".format(out))
-    converter.build_reaction_graph().write("{}_reaction.dot".format(out))
+    with open("{}_info.json".format(out), 'w') as file:
+        json.dump(converter.extract_graph_information(), file, sort_keys=True, indent=4, separators=(',', ': '))
+
+    with open("{}_types.json".format(out), 'w') as file:
+        json.dump(converter.get_unique_input_output(), file, sort_keys=True, indent=4, separators=(',', ': '))
+
