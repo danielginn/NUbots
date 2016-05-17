@@ -64,6 +64,10 @@ namespace robot {
             const arma::vec::fixed<RobotModel::size>& state, double deltaT,
             const message::input::Sensors& sensors);
 
+        arma::vec::fixed<RobotModel::size> timeUpdate(
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
+            const message::localisation::DiscreteOdometry& odometry);
+
         // arma::vec predictedObservation(
         //     const arma::vec::fixed<RobotModel::size>& state,
         //     const arma::vec& actual_position);

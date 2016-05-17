@@ -92,7 +92,6 @@ namespace message {
 
             std::map<message::input::ServoID, utility::math::matrix::Transform3D> forwardKinematics;
 
-            // utility::math::Transform3D odometry;
             arma::vec2 odometry;
             arma::mat22 odometryCovariance;
 

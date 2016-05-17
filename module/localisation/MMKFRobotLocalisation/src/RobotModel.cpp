@@ -35,6 +35,7 @@ namespace localisation {
 namespace robot {
 
     using message::input::Sensors;
+    using message::input::Sensors::DiscreteOdometry;
     using message::input::ServoID;
     using utility::localisation::transform::SphericalRobotObservation;
     using utility::localisation::transform::WorldToRobotTransform;
@@ -53,7 +54,24 @@ namespace robot {
         // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
         arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
         arma::vec2 worldVelocity = RobotToWorldTransform(arma::vec2{0,0}, worldRobotHeading, state.rows(kVX, kVY));
-        new_state.rows(kX,kY) += worldVelocity * deltaT;
+        //CONTINUOUS ODOMETRY IS TURNED OFF
+        // new_state.rows(kX,kY) += worldVelocity * deltaT;
+
+        return new_state;
+    }
+
+    //Discrete odometry
+    arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
+        const arma::vec::fixed<RobotModel::size>& state, double deltaT, const DiscreteOdometry& odometry) {
+        arma::vec::fixed<RobotModel::size> new_state = state;
+        // // Velocity in world space:
+        // new_state.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
+
+        // Velocity in robot space:
+        // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
+        arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
+        arma::vec2 worldStep = RobotToWorldTransform(arma::vec2{0,0}, worldRobotHeading, odometry.step);
+        new_state.rows(kX,kY) += worldStep;
 
         return new_state;
     }

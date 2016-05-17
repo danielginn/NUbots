@@ -162,13 +162,13 @@ namespace localisation {
             engine_->OdometryMeasurementUpdate(sensors);
         });
 
-        // on<Every<100, Per<std::chrono::seconds>>,
-        //    With<Sensors>,
-        //    Sync<MMKFRobotLocalisation>>
-        //    .then("MMKFRobotLocalisation Time", [this] (const Sensors& sensors) {
-        //     auto curr_time = NUClear::clock::now();
-        //     engine_->TimeUpdate(curr_time, sensors);
-        // });
+        on<Trigger<OdometryUpdate>,Sync<MMKFRobotLocalisation>,Single>()
+        .then("MMKFRobotLocalisation Discrete Odometry", [this](const OdometryUpdate& odometry){
+
+            emit(graph("Discrete Odometry Measurement Update", odometry.translation()[0], odometry.translation()[1]));
+            auto curr_time = NUClear::clock::now();
+            // engine_->TimeUpdate(curr_time, odometry);
+        });
 
         on<Trigger<std::vector<message::vision::Goal>>
          , With<Sensors>
