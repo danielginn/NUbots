@@ -23,6 +23,12 @@ CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
+cmake/.ninja_deps
+cmake/.ninja_log
+cmake/build.ninja
+cmake/config*/
+cmake/rules.ninja
+cmake/shared*/
 
 # Vagrant & Packer
 .vagrant/
