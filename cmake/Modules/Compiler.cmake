@@ -4,7 +4,6 @@ ADD_COMPILE_OPTIONS(-Wall
                     -Wpedantic
                     -Wextra
                     -Weffc++
-                    -Werror
                     -fnon-call-exceptions)
 
 SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} toolchain/)
