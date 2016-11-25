@@ -22,9 +22,8 @@ void getGrayHorizon(std::unique_ptr<std::vector<float>>& result, const message::
 
   int vsum;
   while (1){
-
 		// Get pixel sum
-    if (x0 % SURF_SUBSAMPLE == 0){		
+    if (x0 % SURF_SUBSAMPLE == 0){
       result->at(x0/SURF_SUBSAMPLE) = 0.0;
       vsum = 0; 
 

@@ -23,7 +23,7 @@ namespace module {
     	SurfDetection::SurfDetection(const message::vision::ClassifiedImage<message::vision::ObjectClass>& frame_2)
 	   				  : frame_p(frame_2)
 	  	{
-	   		int_img->reserve(IMAGE_WIDTH / SURF_SUBSAMPLE);
+	   		//int_img->reserve(IMAGE_WIDTH / SURF_SUBSAMPLE);
 	   	}
 
 		void SurfDetection::findLandmarks(std::unique_ptr<std::vector<Ipoint>>& landmarks_out){
@@ -53,7 +53,7 @@ namespace module {
 				// Extract interest points and store in vector ipts
 				fh.getIpoints();
 			}
-
+			
 			int totaln = landmarks->size();
 			printf("SURF landmarks found: %d\n",totaln);
 
@@ -63,7 +63,7 @@ namespace module {
 				getHorizonDescriptors();
 		    }
 
-
+			
 		    //return landmark
 		    landmarks_out = std::move(landmarks);
 		}

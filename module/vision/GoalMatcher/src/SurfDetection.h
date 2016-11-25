@@ -58,13 +58,13 @@ namespace vision {
 	    //Vocab vocab;
 
 		// Landmarks pointer
-		std::unique_ptr<std::vector<Ipoint>> landmarks; //= std::make_unique<std::vector<Ipoint>>();
+		std::unique_ptr<std::vector<Ipoint>> landmarks = std::make_unique<std::vector<Ipoint>>();
 				
 		// the Classified image structure
 		const message::vision::ClassifiedImage<message::vision::ObjectClass>& frame_p;		
 			
 		// the integral horizon image
-		std::unique_ptr<std::vector<float>> int_img;
+		std::unique_ptr<std::vector<float>> int_img = std::make_unique<std::vector<float>>(IMAGE_WIDTH / SURF_SUBSAMPLE,0.0);
 
 	    //! Index of current Ipoint in the vector
 	    int index;
