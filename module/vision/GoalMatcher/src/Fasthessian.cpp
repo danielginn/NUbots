@@ -136,7 +136,10 @@ void FastHessian::buildHorizonResponseLayer(ResponseLayer *rl)
   float Dxx;
 
   int c, index = 0;
-
+  //if (w == 9){
+    printf("Response Layer for filter size %d is (b = %d, l = %d, w = %d):\n",w,b,l,w);
+  //}
+  
   for (int ac = 0; ac < rl->width; ++ac, index++) {
     // get the image coordinates
     c = ac * step;
@@ -144,14 +147,33 @@ void FastHessian::buildHorizonResponseLayer(ResponseLayer *rl)
     // Compute response components
     Dxx = BoxIntegral(img, c - b, w)
         - BoxIntegral(img, c - l / 2, l)*3;
-
+    //if (w == 9){
+        printf("%2d. Dxx = %0.2f - %0.2f = %0.2f. ",c,BoxIntegral(img, c - b, w),BoxIntegral(img, c - l / 2, l)*3, Dxx);   
+    //} 
     // Normalise the filter responses with respect to their size
     Dxx *= inverse_area;
 
     // Get the determinant of hessian response & laplacian sign
     *responsesIt = (Dxx * Dxx);
     *laplacianIt = (Dxx >= 0 ? 1 : 0);
+
+    // Printing
+    //if (w == 9){
+        printf("Inversed: %f. Rensponse: ", Dxx);
+
+        if (*laplacianIt == 1){
+            printf("(+)");
+        }
+        else{
+            printf("(-)");
+        }
+
+        printf("%0.0f\n",*responsesIt);
+    //}
+    responsesIt++;
+    laplacianIt++;
   }
+  printf("\n\n");
 }
 
 //-------------------------------------------------------

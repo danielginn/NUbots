@@ -1,4 +1,5 @@
 #include <vector>
+#include <stdio.h>
 
 class ResponseLayer
 {
@@ -9,13 +10,17 @@ public:
   std::vector<unsigned char> laplacian;
 
 	ResponseLayer(int width, int step, int filter){
-	  if (width > 0){
-      this->width = width;
-	    this->step = step;
-	    this->filter = filter;
+	  	if (width > 0){
 
-		  responses.reserve(width);
-		  laplacian.reserve(width);
+      		this->width = width;
+	    	this->step = step;
+	    	this->filter = filter;
+
+			responses.reserve(width);
+			laplacian.reserve(width);
+		}
+		else {
+			printf("ERROR: in ResponseLayer constructor: w was not greater than 0\n");
 		}
 	}
 

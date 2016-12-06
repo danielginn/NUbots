@@ -14,7 +14,8 @@ namespace vision {
     private:
     	uint VARIABLES_GO_HERE;
     	std::unique_ptr<std::vector<Ipoint>> landmarks;
-
+    	bool wasInitial;
+    	bool clearMap;
 
 
 	public:

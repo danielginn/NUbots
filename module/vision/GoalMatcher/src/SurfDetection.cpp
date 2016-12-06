@@ -42,7 +42,7 @@ namespace module {
 				Integral(int_img,frame_p,left_horizon,right_horizon);
 
 				// For testing purposes...needs to be deleted
-				for (int i=0;i<10;++i){
+				for (int i=0;i<IMAGE_WIDTH;++i){
 					printf("%0.1f ",int_img->at(i));
 				}
 				printf("\n");
@@ -56,6 +56,9 @@ namespace module {
 			
 			int totaln = landmarks->size();
 			printf("SURF landmarks found: %d\n",totaln);
+			for (int count = 0; count < totaln; count++){
+				printf("Ipoint %d: (%0.1f,%0.1f) scale: %0.1f\n",count+1,landmarks->at(count).x,landmarks->at(count).y,landmarks->at(count).scale);
+			}
 
 			// Check there are Ipoints to be described
     	  	if (totaln > 0){
