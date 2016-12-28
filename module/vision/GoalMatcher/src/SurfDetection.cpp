@@ -20,13 +20,25 @@ namespace module {
     	using message::vision::ObjectClass;
     	using utility::math::geometry::Line;
 
-    	SurfDetection::SurfDetection(const message::vision::ClassifiedImage<message::vision::ObjectClass>& frame_2)
+    	SurfDetection::SurfDetection(const message::vision::ClassifiedImage<message::vision::ObjectClass>& frame_2,std::string filename)
 	   				  : frame_p(frame_2)
 	  	{
 	   		//int_img->reserve(IMAGE_WIDTH / SURF_SUBSAMPLE);
+	   		SurfDetection::loadVocab(filename);
 	   	}
 
-		void SurfDetection::findLandmarks(std::unique_ptr<std::vector<Ipoint>>& landmarks_out){
+
+	   	// Loads vocab ready for use, returns the size of the vocab in use
+		int SurfDetection::loadVocab(std::string vocabFile){
+
+   			vocab.loadVocabFile(vocabFile);
+   			int T = vocab.getSize();
+   			printf("Loaded vocab of %d words\n",T);
+   			return T;
+		}
+
+
+		void SurfDetection::findLandmarks(std::unique_ptr<std::vector<Ipoint>>& landmarks_out,std::unique_ptr<Eigen::VectorXf>& landmark_tf,std::unique_ptr<std::vector< std::vector<float>>>& landmark_pixLoc){
 
 			// Get horizon location
 			uint w,h;
@@ -66,6 +78,13 @@ namespace module {
 				getHorizonDescriptors();
 		    }
 
+		    
+		    // If no vocab loaded, it just finds the raw interest points
+      		if (vocab.getSize() != 0){
+         		// Map the interest points to visual words, if no landmarks it will correctly initialise
+         		*landmark_tf = vocab.mapToVec(landmarks, landmark_pixLoc);
+         		wordMapped = true;    
+      		} 	
 			
 		    //return landmark
 		    landmarks_out = std::move(landmarks);
@@ -83,7 +102,7 @@ namespace module {
 		   {
 		      // Set the Ipoint to be described
 		      index = i;
-		      //getHorizonDescriptor();
+		      getHorizonDescriptor();
 		   }
 
 		}

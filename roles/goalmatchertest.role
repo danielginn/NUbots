@@ -4,8 +4,9 @@ NUCLEAR_ROLE(
     support::SignalCatcher
     support::logging::ConsoleLogHandler
 
-    vision::GoalMatcher
-
+    vision::GoalDetector
+    vision::LUTClassifier
+    support::VirtualCamera
 
 
 )

@@ -7,6 +7,8 @@
 #include "message/vision/ClassifiedImage.h"
 #include "GoalMatcherConstants.h"
 #include "Ipoint.h"
+#include "Vocab.h"
+#include <eigen3/Eigen/Core>
 
 namespace module {
 namespace vision {
@@ -17,18 +19,20 @@ namespace vision {
 
 
 
-	   	SurfDetection(const message::vision::ClassifiedImage<message::vision::ObjectClass>& frame_2);
+	   	SurfDetection(const message::vision::ClassifiedImage<message::vision::ObjectClass>& frame_2,std::string filename);
 	   				  
-
-		void findLandmarks(std::unique_ptr<std::vector<Ipoint>>& landmarks);
+		// find interest points
+		void findLandmarks(std::unique_ptr<std::vector<Ipoint>>& landmarks_out,std::unique_ptr<Eigen::VectorXf>& landmark_tf, std::unique_ptr<std::vector< std::vector<float>>>& landmark_pixLoc);
 	
 	    //! Loads vocab ready for use, returns the size of the vocab
-	    //int loadVocab(std::string vocabFile);
+	    int loadVocab(std::string vocabFile);
+
+	    bool isWordMapped(){return wordMapped;}
 
 	    // is a vocab loaded
 	    //bool vocabLoaded();
 
-		// find interest points
+		
 
 
 	   private:
@@ -55,7 +59,9 @@ namespace vision {
 	    //---------------- Private Variables -----------------//
 
 	    // the Vocab used to map features to visual words 
-	    //Vocab vocab;
+	    Vocab vocab;
+
+	    bool wordMapped = false; // if landmarks are mapped to visual words
 
 		// Landmarks pointer
 		std::unique_ptr<std::vector<Ipoint>> landmarks = std::make_unique<std::vector<Ipoint>>();

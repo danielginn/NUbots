@@ -6,7 +6,7 @@
 #include "utility/math/geometry/Line.h"
 
 #include "GoalMatcher.h"
-
+#include "ClassifyGoalArea.h"
 #include "SurfDetection.h"
 #include <stdio.h>
 
@@ -97,8 +97,10 @@ namespace vision {
         on<Trigger<ClassifiedImage<ObjectClass>>
          , Single>().then("Goal Matcher", [this] (const ClassifiedImage<ObjectClass>& frame) {
 
-            int state = 0; // During programming this variable can be modified here
+            int state = STATE_INITIAL; // During programming this variable can be modified here
 
+            
+            
             Image::Pixel tempPixel;
             uint w,h;
             w = (*frame.image).width;
@@ -117,8 +119,8 @@ namespace vision {
                 printf("\n");
             }
             printf("\n");
-            SurfDetection surf_obj(frame);
-         	surf_obj.findLandmarks(landmarks);
+            SurfDetection surf_obj(frame,filename);
+         	surf_obj.findLandmarks(landmarks,landmark_tf,landmark_pixLoc);
 
             if (state == STATE_INITIAL) {
               wasInitial = true;
@@ -128,9 +130,19 @@ namespace vision {
             }        
 
             /****** TO DO ********/
-            // Don't do anything if you are not really facing a field end  
+            // Don't do anything if you are not really facing a field end 
 
-            
+            //if ((state == STATE_READY) && (wasInitial)){
+                // saving landmarks mode
+            /*
+                if (clearMap) {
+                    tfidf.clearMap();
+                    clearMap = false;
+                    awayMapSize = 0;
+                    homeMapSize = 0;
+                } */
+                ClassifyGoalArea classifyGA;
+                int num_matches = classifyGA.classifyGoalArea(frame, landmarks,landmark_tf,landmark_pixLoc);
 
          });
 

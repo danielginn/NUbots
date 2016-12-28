@@ -36,6 +36,10 @@
 #include "utility/math/coordinates.h"
 #include "message/input/CameraParameters.h"
 
+#include <stdio.h>
+#include "GoalMatcherConstants.h"
+#include "message/input/Image.h"
+
 namespace module {
 namespace vision {
 
@@ -63,6 +67,7 @@ namespace vision {
     using message::vision::ClassifiedImage;
     using message::vision::VisionObject;
     using message::vision::Goal;
+    using message::input::Image;
 
     using message::support::Configuration;
     using message::support::FieldDescription;
@@ -110,6 +115,66 @@ namespace vision {
             MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
         });
 
+        on<Every<1, std::chrono::seconds>>().then([this] {
+
+            /* This is all stuff to make SurfDetection work in isolation. Will need to be deleted when integrated with GoalMatching.cpp */
+            int pixValIt = -1;
+            uint8_t Y = 0;
+            int Yi = 0;
+            NUClear::clock::time_point fake_timestamp = NUClear::clock::now();
+            std::vector<uint8_t> test_image(IMAGE_HEIGHT*IMAGE_WIDTH*2,0);
+            
+            arma::vec2 n({ 0.0, 1.0 });
+            double d = 3;
+            int stripeType = 2; // Don't forget to change IMAGE_WIDTH as well
+
+            // Creating a horizontally stripped grayscale image
+            if (stripeType == 1) {   
+                if ((IMAGE_HEIGHT == 10) && (IMAGE_WIDTH % 2 == 0))
+                {
+                    for (int ypix = 0; ypix < IMAGE_HEIGHT; ++ypix)
+                    {
+                        for (int xpix = 0; xpix < IMAGE_WIDTH; ++xpix)
+                        {
+                            test_image[Yi] = Y;
+                            Yi = Yi + 2;
+                        }
+                        Y = Y+10;
+                    }
+                }
+            }
+            else if (stripeType == 2){
+                uint8_t pixValues[] = {30,200,100,10,230};
+                for (int ypix = 0; ypix < IMAGE_HEIGHT; ++ypix) {
+                    for (int xpix = 0; xpix < IMAGE_WIDTH; ++xpix){
+                        if (Yi%20 == 0){
+                            ++pixValIt;
+                        }
+                        test_image.at(Yi) = pixValues[pixValIt];
+                        Yi = Yi + 2;
+                    }
+                    pixValIt = -1;
+                }
+            }
+            else {
+                for (int ypix = 0; ypix < IMAGE_HEIGHT; ++ypix) {
+                    for (int xpix = 0; xpix < IMAGE_WIDTH; ++xpix){
+                        if ((xpix%IMAGE_WIDTH < (IMAGE_WIDTH/2))&&(ypix == 3)){
+                            test_image.at(Yi) = 255;
+                        }
+                        Yi = Yi + 2;
+                    }
+                }
+            }
+            
+            auto frame = std::make_unique<ClassifiedImage<ObjectClass>>();// Create an empty ClassifiedImage object
+            frame->image = std::make_shared<const Image>((uint)IMAGE_WIDTH,(uint)IMAGE_HEIGHT,fake_timestamp,std::move(test_image));
+            frame->horizon = Line(n,d);
+
+            log("Hello world");
+            emit(std::move(frame));
+        });
+
         on<Trigger<ClassifiedImage<ObjectClass>>
          , With<CameraParameters>
          , With<LookUpTable>
@@ -117,6 +182,7 @@ namespace vision {
                           , const CameraParameters& cam
                           , const LookUpTable& lut) {
 
+            printf("Triggering...\n");
             const auto& image = *rawImage;
             // Our segments that may be a part of a goal
             std::vector<RansacGoalModel::GoalSegment> segments;

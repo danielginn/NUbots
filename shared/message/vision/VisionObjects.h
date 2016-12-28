@@ -85,6 +85,7 @@ namespace message {
                 BASE_NORMAL
             };
 
+            float awayGoalProb = 0.5;
             std::vector<std::pair<MeasurementType, arma::vec3>> measurements;
             utility::math::geometry::Quad quad;
         };

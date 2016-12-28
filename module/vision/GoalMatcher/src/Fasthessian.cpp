@@ -1,7 +1,10 @@
 
 #include "Fasthessian.h"
 #include "Ipoint.h"
+#include <stdio.h>
 #include <vector>
+
+
 
 using namespace std;
 
@@ -148,7 +151,7 @@ void FastHessian::buildHorizonResponseLayer(ResponseLayer *rl)
     Dxx = BoxIntegral(img, c - b, w)
         - BoxIntegral(img, c - l / 2, l)*3;
     //if (w == 9){
-        printf("%2d. Dxx = %0.2f - %0.2f = %0.2f. ",c,BoxIntegral(img, c - b, w),BoxIntegral(img, c - l / 2, l)*3, Dxx);   
+        printf("%2d. Dxx = %7.2f - %7.2f = %8.2f. ",c,BoxIntegral(img, c - b, w),BoxIntegral(img, c - l / 2, l)*3, Dxx);   
     //} 
     // Normalise the filter responses with respect to their size
     Dxx *= inverse_area;
@@ -159,16 +162,15 @@ void FastHessian::buildHorizonResponseLayer(ResponseLayer *rl)
 
     // Printing
     //if (w == 9){
-        printf("Inversed: %f. Rensponse: ", Dxx);
+        printf("Inversed: %7.2f. Rensponse: ", Dxx);
 
         if (*laplacianIt == 1){
-            printf("(+)");
+            printf(ANSI_COLOR_GREEN "(+)%5.0f" ANSI_COLOR_RESET "\n",*responsesIt);
         }
         else{
-            printf("(-)");
+            printf(ANSI_COLOR_RED "(-)%5.0f" ANSI_COLOR_RESET "\n",*responsesIt);
         }
 
-        printf("%0.0f\n",*responsesIt);
     //}
     responsesIt++;
     laplacianIt++;
@@ -212,6 +214,9 @@ inline void FastHessian::saveExtremum(int c, std::vector<ResponseLayer>::iterato
     ipt.scale = static_cast<float>((0.1333f) * m->filter );
     ipt.laplacian = static_cast<int>(m->getLaplacian(c,t));
     ipts->push_back(ipt);
+  }
+  else {
+     printf("Filter Size Error in Fasthessian::saveExtremum!!\n");
   }
   
   
