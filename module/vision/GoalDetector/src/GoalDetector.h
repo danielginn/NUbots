@@ -21,6 +21,9 @@
 #define MODULES_VISION_GOALDETECTOR_H
 
 #include <nuclear>
+#include "Ipoint.h"
+#include <string.h>
+#include <eigen3/Eigen/Core>
 
 namespace module {
 namespace vision {
@@ -43,6 +46,16 @@ namespace vision {
         uint MEASUREMENT_LIMITS_RIGHT;
         uint MEASUREMENT_LIMITS_TOP;
         uint MEASUREMENT_LIMITS_BASE;
+
+        std::unique_ptr<std::vector<Ipoint>>             landmarks;
+        std::unique_ptr<Eigen::VectorXf>                 landmark_tf = std::make_unique<Eigen::VectorXf>(); // term frequency of landmarks
+        std::unique_ptr<std::vector<std::vector<float>>> landmark_pixLoc = std::make_unique<std::vector<std::vector<float>>>(); // the pixel locations of terms in landmark_tf
+        bool wasInitial;
+        int awayMapSize;
+        int homeMapSize;
+        bool clearMap = false;
+        std::string VocabFileName = "/home/vagrant/NUbots/module/vision/GoalDetector/data/words.vocab";
+        std::string MapFileName = "/home/vagrant/NUbots/module/vision/GoalDetector/data/goals.map";
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.

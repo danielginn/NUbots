@@ -32,3 +32,25 @@
 #define STATE_INITIAL 0
 #define STATE_READY   1
 #define STATE_PLAYING 2
+
+/** Field line dimensions */
+#define FIELD_WIDTH 6000
+#define FIELD_LENGTH 9000
+
+#define FIELD_LENGTH_OFFSET 755
+#define FIELD_WIDTH_OFFSET 675
+
+/** Field dimensions including edge offsets */
+#define FULL_FIELD_WIDTH (FIELD_WIDTH + (FIELD_WIDTH_OFFSET * 2))
+#define FULL_FIELD_LENGTH (FIELD_LENGTH + (FIELD_LENGTH_OFFSET * 2))
+
+/**
+ * The number of RANSAC iterations to use when matching feature points between images
+ **/
+#define MATCH_ITERATIONS 20
+
+/**
+ * The error margin to use when RANSAC matching feature points on a line,
+ * In terms of the original image the allowed error is really PIXEL_ERROR_MARGIN * SURF_SUBSAMPLE
+ **/
+#define PIXEL_ERROR_MARGIN 5.0f

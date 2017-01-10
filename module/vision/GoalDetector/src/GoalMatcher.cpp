@@ -1,0 +1,186 @@
+
+#include "GoalMatcher.h"
+#include "GoalMatcherConstants.h"
+#include <stdio.h>
+//#include "AbsCoord.h"
+
+GoalMatcher::GoalMatcher(){
+	vocabLoaded = false;
+	state = STATE_READY;
+
+	wasInitial = true;
+	clearMap = true;
+
+	awayMapSize = 0;
+	homeMapSize = 0;
+
+	while((int) obs.size() < WINDOW_SIZE){
+      obs.push_back(message::vision::Goal::Team::UNKNOWN);
+   }
+}
+
+// Load the visual dictionary for fast matching and starting map of features around the field 
+void GoalMatcher::loadVocab(std::string vocabFile){
+	tfidf.loadVocab(vocabFile);
+	vocabLoaded = true;
+
+}
+
+void GoalMatcher::loadMap(std::string mapFile){
+	if (vocabLoaded) tfidf.loadMap(mapFile);
+}
+
+int GoalMatcher::classifyGoalArea(std::shared_ptr<const message::vision::ClassifiedImage<message::vision::ObjectClass>> frame, 
+								  std::unique_ptr<std::vector<Ipoint>>& landmarks,
+								  std::unique_ptr<Eigen::VectorXf>& landmark_tf,
+								  std::unique_ptr<std::vector<std::vector<float>>>& landmark_pixLoc,
+								  message::vision::Goal::Team &type){
+	
+	//if ((!vocabLoaded) || (!frame.wordMapped)) return 0; // Check valid data
+
+	int num = 0;
+	std::unique_ptr<std::priority_queue<MapEntry>> matches = std::make_unique<std::priority_queue<MapEntry>>();
+  	Eigen::VectorXf query; 
+  	std::vector< std::vector<float> > query_pixLoc;
+    unsigned int *seed = 0; // Not sure what this seed does, but it is supposed to come from the figure.
+    type = message::vision::Goal::Team::UNKNOWN;
+
+  	// Augment landmarks with those from a previous matched frame if possible
+  	
+  	//if(frame.validSurf){
+    	  //query = frame.landmark_tf_aug;
+    	  //query_pixLoc = frame.landmark_pixLoc_aug;
+  	//} else { 
+    	  query = *landmark_tf; 
+    	  query_pixLoc = *landmark_pixLoc;
+    	
+  	//}
+  	
+    tfidf.searchDocument(query, query_pixLoc, matches, seed, SEARCH_POSITIONS);
+
+    num = (int) matches->size();
+    printf("Num = %d\n",num);
+	if (num > MIN_CONSENSUS_DIFF){
+
+		AbsCoord position;
+    	int i=0;
+    	int away_goal_votes = 0;
+
+    	while(!matches->empty() && i<SEARCH_POSITIONS){
+			i++;
+			MapEntry entry = matches->top();
+			matches->pop();
+			position = entry.position;
+
+			if(position.theta() < M_PI/2 && position.theta() > -M_PI/2){
+	          away_goal_votes++;
+	        } else {
+	          away_goal_votes--;
+	        }
+    	}
+    	// Now look for a consensus position 
+	    if (away_goal_votes >= MIN_CONSENSUS_DIFF) {
+	      type = message::vision::Goal::Team::OPPONENT;      
+	      return num;
+	    } else if (away_goal_votes <= -MIN_CONSENSUS_DIFF) {
+	      type = message::vision::Goal::Team::OWN;
+	      return num;
+	    } 
+    }
+    return num;
+}
+
+
+void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage<message::vision::ObjectClass>> frame, 
+						  std::unique_ptr<std::vector<Ipoint>>& landmarks,
+						  std::unique_ptr<Eigen::VectorXf>& landmark_tf,
+						  std::unique_ptr<std::vector<std::vector<float>>>& landmark_pixLoc,
+						  const message::localisation::Self& self,
+						  float &awayGoalProb) {
+
+	// Adjust robotPos for head yaw
+	AbsCoord position(self.position(0),self.position(1),0);
+	printf("Robot is in position: <%0.1f,%0.1f,%0.1f>\n",position.x(),position.y(),position.theta());
+	/*
+	if (isnan(position.x()) || isnan(position.y()) || isnan(position.theta())){
+		return; // Need to already be localised to one side of the field or the other
+	}
+	position.theta() = position.theta() + headYaw;
+	*/
+	if (state == STATE_INITIAL) {
+		wasInitial = true;
+		clearMap = true;
+	} else if (state != STATE_READY) {
+		wasInitial = false;
+	}        
+
+    /****** TO DO ********/
+    // Don't do anything if you are not really facing a field end 
+
+    if ((state == STATE_READY) && (wasInitial)){
+    	// saving landmarks mode
+    	/*
+    	if (clearMap) {
+            tfidf.clearMap();
+            clearMap = false;
+            awayMapSize = 0;
+            homeMapSize = 0;
+        } 
+        */
+		message::vision::Goal::Team type = message::vision::Goal::Team::UNKNOWN;
+		int num_matches = classifyGoalArea(frame, landmarks, landmark_tf, landmark_pixLoc, type);
+		if (num_matches < MIN_SAVE_MATCHES ){
+			// Check which goal we are mapping
+			bool awayGoal = false;
+			if (self.heading[0] > 0){ //This only works if heading is w.r.t. the field and the x-axis is towards the opponent's goal.
+				awayGoal = true;
+			}
+
+			Eigen::VectorXf tf_doc; 
+            std::vector< std::vector<float> > pixLoc;
+            // Augment landmarks with those from a previous matched frame if possible
+            //if(frame.validSurf){
+            //  tf_doc = frame.landmark_tf_aug;
+            //  pixLoc = frame.landmark_pixLoc_aug;
+            //} else {
+              tf_doc = *landmark_tf; 
+              pixLoc = *landmark_pixLoc;
+            //}
+          	if (awayGoal && awayMapSize < MAP_MAX){
+               MapEntry document = MapEntry(position);
+               tfidf.addDocumentToCorpus(document, tf_doc, pixLoc);
+               vocabLoaded = true;
+               printf("awayMapSize: %d\tMapping away goal, position (%.1f, %.1f)\n", awayMapSize, position.x(), position.y()); //theta has been removed temporarily
+               awayMapSize++;
+            } else if (!awayGoal && homeMapSize < MAP_MAX){
+               MapEntry document = MapEntry(position);
+               tfidf.addDocumentToCorpus(document, tf_doc, pixLoc);
+               vocabLoaded = true;
+               printf("homeMapSize: %d\tMapping home goal, position (%.1f, %.1f)\n", awayMapSize, position.x(), position.y()); //theta has been removed temporarily
+               homeMapSize++;
+            } else {
+               printf("I should map this view but the map is already full for awayGoal = ");
+               printf(awayGoal ? "true\n" : "false\n");
+            }
+
+
+
+		}
+	} else { // landmark retrieval and goal classification mode
+		printf("Landmark retrieval mode\n");
+		message::vision::Goal::Team type = message::vision::Goal::Team::UNKNOWN;
+		classifyGoalArea(frame, landmarks, landmark_tf, landmark_pixLoc, type);
+		//frame.goalArea = type;
+
+		obs.insert(obs.begin(), type);
+		obs.pop_back();
+		float away = 1.f;
+		float home = 1.f;
+		for(int i=0; i<(int)obs.size(); i++){
+		 if (obs[i] == message::vision::Goal::Team::OWN) home += 1.f;
+		 if (obs[i] == message::vision::Goal::Team::OPPONENT) away += 1.f;            
+		}
+		awayGoalProb = away / (home + away);
+
+	}
+}

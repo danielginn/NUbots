@@ -39,6 +39,9 @@
 #include <stdio.h>
 #include "GoalMatcherConstants.h"
 #include "message/input/Image.h"
+#include "SurfDetection.h"
+#include "GoalMatcher.h"
+#include "message/localisation/FieldObject.h"
 
 namespace module {
 namespace vision {
@@ -170,19 +173,25 @@ namespace vision {
             auto frame = std::make_unique<ClassifiedImage<ObjectClass>>();// Create an empty ClassifiedImage object
             frame->image = std::make_shared<const Image>((uint)IMAGE_WIDTH,(uint)IMAGE_HEIGHT,fake_timestamp,std::move(test_image));
             frame->horizon = Line(n,d);
+            std::unique_ptr<message::localisation::Self> self = std::make_unique<message::localisation::Self>();
+            self->heading[0] = 1;
+
+
 
             log("Hello world");
+            emit(std::move(self));
             emit(std::move(frame));
         });
 
         on<Trigger<ClassifiedImage<ObjectClass>>
          , With<CameraParameters>
          , With<LookUpTable>
+         , With<message::localisation::Self>
          , Single>().then("Goal Detector", [this] (std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage
                           , const CameraParameters& cam
-                          , const LookUpTable& lut) {
+                          , const LookUpTable& lut
+                          , const message::localisation::Self& self) {
 
-            printf("Triggering...\n");
             const auto& image = *rawImage;
             // Our segments that may be a part of a goal
             std::vector<RansacGoalModel::GoalSegment> segments;
@@ -454,8 +463,45 @@ namespace vision {
                 }
             }
 
-            emit(std::move(goals));
+            Image::Pixel tempPixel;
+            uint w,h;
+            w = rawImage->image->width;
+            h = rawImage->image->height;
+            int right_horizon = rawImage->horizon.y(w-1);
+            printf("%dx%d\n\n",h,w);
 
+            for (uint m = 0;m<h ;++m){
+                for (uint n = 0;n<w;++n){
+                    tempPixel = (*rawImage->image)(n,h-m-1);
+                    printf("%3d ",tempPixel.y);
+                }
+                if ((h-m-1) == right_horizon){
+                    printf("--");
+                }
+                printf("\n");
+            }
+            printf("\n");
+            /********************************************************************
+             * SURF Landmark Extraction - needs Robot Detection                *
+             *******************************************************************/
+            SurfDetection surf_obj(rawImage);
+            surf_obj.loadVocab(VocabFileName);
+            surf_obj.findLandmarks(landmarks,landmark_tf,landmark_pixLoc);
+
+            /********************************************************************
+             * SURF Landmarks used to classify the goal area                   *
+             *******************************************************************/
+            float awayGoalProb = 0.5;
+            GoalMatcher goalMatcher;
+            goalMatcher.loadVocab(VocabFileName);
+            goalMatcher.loadMap(MapFileName);
+            goalMatcher.process(rawImage, landmarks, landmark_tf, landmark_pixLoc, self,awayGoalProb);
+            printf("awayGoalProb = %.1f\n",awayGoalProb);
+            printf("goal size = %d\n",goals->size());
+            for (int j=0;j<goals->size();j++){
+                goals->at(j).awayGoalProb = awayGoalProb;
+            }
+            emit(std::move(goals));
         });
     }
 
