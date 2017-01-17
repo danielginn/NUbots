@@ -32,7 +32,7 @@ namespace module {
 
    			vocab.loadVocabFile(vocabFile);
    			int T = vocab.getSize();
-   			printf("Loaded vocab of %d words\n",T);
+   			printf("Loaded vocab of %d words for SurfDetection\n",T);
    			return T;
 		}
 
@@ -59,10 +59,10 @@ namespace module {
 				Integral(int_img,frame_p,left_horizon,right_horizon);
 
 				// For testing purposes...needs to be deleted
-				for (int i=0;i<IMAGE_WIDTH;++i){
-					printf("%0.1f ",int_img->at(i));
-				}
-				printf("\n");
+				//for (int i=0;i<IMAGE_WIDTH;++i){
+				//	printf("%0.1f ",int_img->at(i));
+				//}
+				//printf("\n");
 				
 				// Create Fast Hessian Object
 				
@@ -73,9 +73,9 @@ namespace module {
 			
 			int totaln = landmarks->size();
 			printf("SURF landmarks found: %d\n",totaln);
-			for (int count = 0; count < totaln; count++){
-				printf("Ipoint %d: (%0.1f,%0.1f) scale: %0.1f\n",count+1,landmarks->at(count).x,landmarks->at(count).y,landmarks->at(count).scale);
-			}
+			//for (int count = 0; count < totaln; count++){
+			//	printf("Ipoint %d: (%0.1f,%0.1f) scale: %0.1f\n",count+1,landmarks->at(count).x,landmarks->at(count).y,landmarks->at(count).scale);
+			//}
 
 			// Check there are Ipoints to be described
     	  	if (totaln > 0){

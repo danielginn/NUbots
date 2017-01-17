@@ -8,6 +8,7 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/serialization/vector.hpp>
 #include <eigen3/Eigen/Core>
+#include "Cluster.h"
 
 #include "GoalMatcherConstants.h"
 #include "Ipoint.h"
@@ -23,6 +24,9 @@ class Vocab {
 	  	int getSize(){
 			return vec_length;
 		}
+
+		//! Learns a set of visual words from larger set of interest points
+  		void learn(std::vector<Ipoint> ipts, int num_words);
 
 		//! Loads a set of visual words for use
   		void loadVocabFile(std::string filename);

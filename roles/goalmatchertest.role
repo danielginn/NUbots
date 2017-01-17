@@ -3,10 +3,11 @@ NUCLEAR_ROLE(
 	support::extension::FileWatcher
     support::SignalCatcher
     support::logging::ConsoleLogHandler
-
+	
+	support::VirtualCamera
     vision::GoalDetector
     vision::LUTClassifier
-    support::VirtualCamera
+    
 
 
 )

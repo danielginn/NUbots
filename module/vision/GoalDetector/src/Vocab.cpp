@@ -6,6 +6,36 @@
 
 #include "Vocab.h"
 
+using namespace Clustering;
+
+// Learn visual words
+void Vocab::learn(std::vector<Ipoint> ipts, int num_words){
+    vec_length = num_words;
+    pos_words.clear();
+    neg_words.clear();
+    pos_stop_words.clear();
+    neg_stop_words.clear();
+
+    Points pos, neg;
+    for (unsigned int j=0; j<ipts.size(); j++){
+      PointND point;
+      for (unsigned int k=0; k<SURF_DESCRIPTOR_LENGTH; k++) point.push_back(ipts[j].descriptor[k]);
+      if(ipts[j].laplacian == 1) {
+      pos.push_back(point);
+    } else {
+      neg.push_back(point);
+    }
+    }
+    PointsSpace pos_ps(pos);
+    Clusters pos_clusters(vec_length/2, pos_ps);
+    pos_clusters.k_means();
+
+    PointsSpace neg_ps(neg);
+    Clusters neg_clusters(vec_length/2, neg_ps);
+    neg_clusters.k_means();
+    
+
+}
 
 void Vocab::loadVocabFile(std::string filename){
   

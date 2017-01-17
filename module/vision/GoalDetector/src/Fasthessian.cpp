@@ -140,7 +140,7 @@ void FastHessian::buildHorizonResponseLayer(ResponseLayer *rl)
 
   int c, index = 0;
   //if (w == 9){
-    printf("Response Layer for filter size %d is (b = %d, l = %d, w = %d):\n",w,b,l,w);
+    //printf("Response Layer for filter size %d is (b = %d, l = %d, w = %d):\n",w,b,l,w);
   //}
   
   for (int ac = 0; ac < rl->width; ++ac, index++) {
@@ -151,7 +151,7 @@ void FastHessian::buildHorizonResponseLayer(ResponseLayer *rl)
     Dxx = BoxIntegral(img, c - b, w)
         - BoxIntegral(img, c - l / 2, l)*3;
     //if (w == 9){
-        printf("%2d. Dxx = %7.2f - %7.2f = %8.2f. ",c,BoxIntegral(img, c - b, w),BoxIntegral(img, c - l / 2, l)*3, Dxx);   
+        //printf("%2d. Dxx = %7.2f - %7.2f = %8.2f. ",c,BoxIntegral(img, c - b, w),BoxIntegral(img, c - l / 2, l)*3, Dxx);   
     //} 
     // Normalise the filter responses with respect to their size
     Dxx *= inverse_area;
@@ -162,20 +162,20 @@ void FastHessian::buildHorizonResponseLayer(ResponseLayer *rl)
 
     // Printing
     //if (w == 9){
-        printf("Inversed: %7.2f. Rensponse: ", Dxx);
+        //printf("Inversed: %7.2f. Rensponse: ", Dxx);
 
-        if (*laplacianIt == 1){
-            printf(ANSI_COLOR_GREEN "(+)%5.0f" ANSI_COLOR_RESET "\n",*responsesIt);
-        }
-        else{
-            printf(ANSI_COLOR_RED "(-)%5.0f" ANSI_COLOR_RESET "\n",*responsesIt);
-        }
+        //if (*laplacianIt == 1){
+        //    printf(ANSI_COLOR_GREEN "(+)%5.0f" ANSI_COLOR_RESET "\n",*responsesIt);
+        //}
+        //else{
+        //    printf(ANSI_COLOR_RED "(-)%5.0f" ANSI_COLOR_RESET "\n",*responsesIt);
+        //}
 
     //}
     responsesIt++;
     laplacianIt++;
   }
-  printf("\n\n");
+  //printf("\n\n");
 }
 
 //-------------------------------------------------------

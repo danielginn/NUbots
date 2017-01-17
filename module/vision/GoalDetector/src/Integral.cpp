@@ -27,22 +27,22 @@ void getGrayHorizon(std::unique_ptr<std::vector<float>>& result, std::shared_ptr
       result->at(x0/SURF_SUBSAMPLE) = 0.0;
       vsum = 0; 
 
-      if (x0 == 0){ // Only going to do this printout on the first time through the loop
-        printf("********** CALCULATING INTEGRAL **************\n");
-      }
+      //if (x0 == 0){ // Only going to do this printout on the first time through the loop
+      //  printf("********** CALCULATING INTEGRAL **************\n");
+      //}
 		  for (int j=-(SURF_HORIZON_WIDTH/2); j<=SURF_HORIZON_WIDTH/2; j+=2){		
 			  if( (y0 + j) >=0 && (y0 + j) < IMAGE_HEIGHT){
           vsum += result->at(x0/SURF_SUBSAMPLE) += (*frame_4->image)(x0,y0+j).y;
-          if (x0 == 0){
-            printf("using row %d, based on y0= %d and j= %d, then the cell is: %d\n",(y0+j),y0,j,(*frame_4->image)(x0,y0+j).y);
-            printf("vsum = %d, and result[] = %0.1f\n",vsum,result->at(x0/SURF_SUBSAMPLE));	
-          }
+          //if (x0 == 0){
+          //  printf("using row %d, based on y0= %d and j= %d, then the cell is: %d\n",(y0+j),y0,j,(*frame_4->image)(x0,y0+j).y);
+          //  printf("vsum = %d, and result[] = %0.1f\n",vsum,result->at(x0/SURF_SUBSAMPLE));	
+          //}
 			  }
 		  }
       result->at(x0/SURF_SUBSAMPLE) = static_cast<float>(vsum);
-      if (x0 == 0){
-        printf("Finally, result[] is set to %0.1f\n",result->at(x0/SURF_SUBSAMPLE));
-      }
+      //if (x0 == 0){
+      //  printf("Finally, result[] is set to %0.1f\n",result->at(x0/SURF_SUBSAMPLE));
+      //}
       
     }
 

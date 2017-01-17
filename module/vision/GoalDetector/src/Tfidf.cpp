@@ -5,7 +5,7 @@
 #include "Ransac.h"
 
 # define VALID_COSINE_SCORE 0.40f // 0.42f
-# define VALID_INLIERS 40 // 50
+# define VALID_INLIERS 1//40 // 50
 
 // Loads vocab ready for use
 void Tfidf::loadVocab(std::string vocabFile){
@@ -17,7 +17,7 @@ void Tfidf::loadVocab(std::string vocabFile){
   vocab.loadVocabFile(vocabFile);
   T = vocab.getSize();
   ni = Eigen::VectorXf::Zero(T);	
-  printf("Loaded vocab of %d words\n",T); 
+  printf("Loaded vocab of %d words for GoalMatcher\n",T); 
 
 }
 
@@ -83,28 +83,61 @@ bool Tfidf::addDocumentToCorpus(MapEntry document){
 bool Tfidf::addDocumentToCorpus(MapEntry document, Eigen::VectorXf tf_doc, std::vector< std::vector<float> > pixLoc){
 
 	bool result = false;
-
+  printf("addDocumentToCorpus:\n");
 	if(vocab.getSize() != 0){
+    printf("vocab size criteria passed.\n");
+		if(tf_doc.sum() != 0){  // don't let an empty document be added
+            printf("Adding tf_doc now (tf_doc sum = %f\n",tf_doc.sum());
 
-		if(tf_doc.sum() != 0){  // don't let an empty document be added;
+            printf("tf_doc = [");
+            int count = 0;
+            for (int j = 0; j < tf_doc.size();j++){
+                if (tf_doc[j] < 0.001){
+                    count++;
+                }
+                else {
+                    if (count > 0) printf("...//%d//...",count);
+                    printf("(%.2f)",tf_doc[j]);
+                    count = 0;
+                }
+            }
+            if (count > 0) printf("...//%d//...",count);
+            printf("]\n\n");
+
 	    tf.push_back(tf_doc);
 			pixels.push_back(pixLoc);
 	    ni = ni + tf_doc;	
 	    N++;  
-	    nd.push_back(tf_doc.sum());
-	
+	    nd.push_back(tf_doc.sum());	
 	    map.push_back(document);
 	    //! Recalculate the inverse document frequency (log(N/ni))
 	    idf = (ni.array().inverse() * N ).log();
-
       // Remove Inf from idf (can occur with random initialised learned words)
       for(int i=0; i<T; i++){
       	if(idf[i] == std::numeric_limits<float>::infinity()){
        		idf[i] = 0.f;
        	}
       }
+            printf("idf = [");
+            count = 0;
+            for (int j = 0; j < idf.size();j++){
+                if (idf[j] > 88.0){
+                    count++;
+                }
+                else {
+                    if (count > 0) printf("...//%d//...",count);
+                    printf("(%.2f)",idf[j]);
+                    count = 0;
+                }
+            }
+            if (count > 0) printf("...//%d//...",count);
+            printf("]\n\n");
       result = true;
+    } else {
+      printf("tf_doc was an empty document\n");
     }
+  } else {
+    printf("vocab size criteria FAILED\n");
   } 
   return result;
 }
@@ -121,17 +154,67 @@ void Tfidf::searchDocument(Eigen::VectorXf tf_query,
 	if(tf_query.sum() != 0 && N != 0){ // checked the document is not empty and corpus not empty
     printf("Running Tfidf::searchDocument now.\n");
 		std::priority_queue<std::pair<MapEntry, std::vector<std::vector<float>>>> queue;
-		Eigen::VectorXf tfidf_query = (tf_query / tf_query.sum() ).array() * idf.array();
+		Eigen::VectorXf tfidf_query = (tf_query / tf_query.sum()).array() * idf.array();
+
+        printf("tf_query =    [");
+        int count = 0;
+        for (int j = 0; j < tf_query.size();j++){
+            if (tf_query[j] < 0.001){
+                count++;
+            }
+            else {
+                if (count > 0) printf("...//%d//...",count);
+                printf("(%.2f)",tf_query[j]);
+                count = 0;
+            }
+        }
+        if (count > 0) printf("...//%d//...",count);
+        printf("]\n\n");
+
+        printf("tfidf_query = [");
+        count = 0;
+        for (int j = 0; j < tfidf_query.size();j++){
+            if (tfidf_query[j] < 0.001){
+                count++;
+            }
+            else {
+                if (count > 0) printf("...//%d//...",count);
+                printf("(%.2f)",tfidf_query[j]);
+                count = 0;
+            }
+        }
+        if (count > 0) printf("...//%d//...",count);
+        printf("]\n\n");
 
     // Now compute the cosines against each document -- inverted index not used since our vectors are not sparse enough
     Eigen::VectorXf tfidf_doc;
     printf("Cosine scores: (for N=%d)\n", N);
     for (int i=0; i<N; i++){
-      tfidf_doc = (tf.at(i) / nd.at(i) ).array() * idf.array(); // nd[i] can't be zero or it wouldn't have been added
-      map.at(i).score = tfidf_query.dot(tfidf_doc) / ( tfidf_query.norm()*tfidf_doc.norm() );
-      printf("%2d. map score: %.2f\n",i,map[i].score);
+      tfidf_doc = (tf[i] / nd[i]).array() * idf.array(); // nd[i] can't be zero or it wouldn't have been added
+
+            printf("nd[i] = %d\n",nd[i]);
+
+            printf("tfidf_doc = [");
+            int count = 0;
+            for (int j = 0; j < tfidf_doc.size();j++){
+                if (tfidf_doc[j] < 0.001){
+                    count++;
+                }
+                else {
+                    if (count > 0) printf("...//%d//...",count);
+                    printf("(%.2f)",tfidf_doc[j]);
+                    count = 0;
+                }
+            }
+            if (count > 0) printf("...//%d//...",count);
+            printf("]\n");
+
+            printf("tfidf_query dot tfidf_doc : %f, tfidf_query norm: %.2f, tfidf_doc norm: %.2f\n",tfidf_query.dot(tfidf_doc),tfidf_query.norm(),tfidf_doc.norm());
+
+      map.at(i).score = tfidf_query.dot(tfidf_doc) / ( std::max(double(tfidf_query.norm()*tfidf_doc.norm()),0.0000000000001));
+      printf("%2d. map score: %f\n",i,map[i].score);
       if (map.at(i).score > VALID_COSINE_SCORE) {
-        printf("Cos: %f, ",map.at(i).score);
+        printf("This is a valid cosine score\n");
         queue.push( std::make_pair(map.at(i), pixels.at(i)));
       }
     }
@@ -140,16 +223,17 @@ void Tfidf::searchDocument(Eigen::VectorXf tf_query,
     // Now do geometric validation on the best until we have enough or the queue is empty
     while(!queue.empty() && matches->size() < (unsigned int)n){
       MapEntry mapEntry = queue.top().first;
-      printf("Validating Cos: %f, ",mapEntry.score);
+      printf("Validating Cos: %f\n",mapEntry.score);
       std::vector< std::vector<float> > pixLoc = queue.top().second;
       queue.pop();
-
+      
       // Do geometric validation - first build the points to run ransac
       std::vector<Point> matchpoints;
       for (int j=0; j<T; j++){
         for(uint32_t m=0; m<pixLoc[j].size(); m++){
           for(uint32_t n=0; n<query_pixLoc[j].size(); n++){
             matchpoints.push_back(Point(pixLoc[j][m], query_pixLoc[j][n]));
+            printf("matchpoints: %.1f, %.1f\n",pixLoc[j][m], query_pixLoc[j][n]);
           }
         }
       }
@@ -164,6 +248,8 @@ void Tfidf::searchDocument(Eigen::VectorXf tf_query,
       bool ransacresult = RANSAC::findLineConstrained(matchpoints, &con, resultLine, MATCH_ITERATIONS, 
           PIXEL_ERROR_MARGIN, min_points, consBuf, seed, slopeConstraint);
 
+      printf("RANSAC result = %d\n",ransacresult);
+      printf("result line = (%.2f,%.2f)(%.2f,%.2f)\n", resultLine.p1[0], resultLine.p1[1], resultLine.p2[0], resultLine.p2[1]);
       if(ransacresult && (resultLine.t2 != 0.f)){  // check t2 but should be fixed by slope constraint anyway
         // count the inliers
         int inliers = 0;
@@ -180,6 +266,7 @@ void Tfidf::searchDocument(Eigen::VectorXf tf_query,
           matches->push(mapEntry);
         }
       } 
+      
     }
   }
   //printf("\nCalculating cosines over " << map.size() << " images, RANSAC geo validation & position adjustments took ";

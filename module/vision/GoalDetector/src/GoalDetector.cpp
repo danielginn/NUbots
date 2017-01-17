@@ -40,8 +40,9 @@
 #include "GoalMatcherConstants.h"
 #include "message/input/Image.h"
 #include "SurfDetection.h"
-#include "GoalMatcher.h"
 #include "message/localisation/FieldObject.h"
+#include "BackgroundImageGen.h"
+#include "TestImageGen.h"
 
 namespace module {
 namespace vision {
@@ -116,6 +117,10 @@ namespace vision {
             MEASUREMENT_LIMITS_RIGHT = config["measurement_limits"]["right"].as<uint>();
             MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
             MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
+
+            goalMatcher.loadVocab(VocabFileName);
+            printf("\n\n\n");
+            //goalMatcher.loadMap(MapFileName);
         });
 
         on<Every<1, std::chrono::seconds>>().then([this] {
@@ -125,13 +130,11 @@ namespace vision {
             uint8_t Y = 0;
             int Yi = 0;
             NUClear::clock::time_point fake_timestamp = NUClear::clock::now();
-            std::vector<uint8_t> test_image(IMAGE_HEIGHT*IMAGE_WIDTH*2,0);
             
-            arma::vec2 n({ 0.0, 1.0 });
-            double d = 3;
-            int stripeType = 2; // Don't forget to change IMAGE_WIDTH as well
+            //int stripeType = 2; // Don't forget to change IMAGE_WIDTH as well
 
             // Creating a horizontally stripped grayscale image
+            /*
             if (stripeType == 1) {   
                 if ((IMAGE_HEIGHT == 10) && (IMAGE_WIDTH % 2 == 0))
                 {
@@ -169,18 +172,52 @@ namespace vision {
                     }
                 }
             }
+            */
+            if (imageNum <= 10) {
+                std::vector<uint8_t> test_image(IMAGE_HEIGHT*IMAGE_WIDTH*2,0);
+                std::unique_ptr<message::localisation::Self> self = std::make_unique<message::localisation::Self>();
             
-            auto frame = std::make_unique<ClassifiedImage<ObjectClass>>();// Create an empty ClassifiedImage object
-            frame->image = std::make_shared<const Image>((uint)IMAGE_WIDTH,(uint)IMAGE_HEIGHT,fake_timestamp,std::move(test_image));
-            frame->horizon = Line(n,d);
-            std::unique_ptr<message::localisation::Self> self = std::make_unique<message::localisation::Self>();
-            self->heading[0] = 1;
+                arma::vec2 n({ 0.0, 1.0 });
+                double d = 0;
+
+                test_image = backgroundImageGen(imageNum, self);
+                auto frame = std::make_unique<ClassifiedImage<ObjectClass>>();// Create an empty ClassifiedImage object
+                frame->image = std::make_shared<const Image>((uint)IMAGE_WIDTH,(uint)IMAGE_HEIGHT,fake_timestamp,std::move(test_image));
+                frame->horizon = Line(n,d);
+                printf("Producing background image #%d\n",imageNum);
+                imageNum++;
+                emit(std::move(self));
+                emit(std::move(frame));
+
+            }
+            else if (imageNum == 11) {
+                printf("Background image loading complete\n");
+                goalMatcher.setWasInitial(false);
+                std::vector<uint8_t> test_image(IMAGE_HEIGHT*IMAGE_WIDTH*2,0);
+                std::unique_ptr<message::localisation::Self> self = std::make_unique<message::localisation::Self>();
+            
+                arma::vec2 n({ 0.0, 1.0 });
+                double d = 0;
+
+                test_image = testImageGen(imageNum, self);
+                auto frame = std::make_unique<ClassifiedImage<ObjectClass>>();// Create an empty ClassifiedImage object
+                frame->image = std::make_shared<const Image>((uint)IMAGE_WIDTH,(uint)IMAGE_HEIGHT,fake_timestamp,std::move(test_image));
+                frame->horizon = Line(n,d);
+                printf("Producing Test image #%d\n",imageNum-10);
+                imageNum++;
+                emit(std::move(self));
+                emit(std::move(frame));
+            }
+            else if (imageNum == 12) {
+                printf("FINISHED...PRESS CTRL + C\n");
+                imageNum++;
+            }
 
 
+            
+            
 
-            log("Hello world");
-            emit(std::move(self));
-            emit(std::move(frame));
+            
         });
 
         on<Trigger<ClassifiedImage<ObjectClass>>
@@ -468,8 +505,8 @@ namespace vision {
             w = rawImage->image->width;
             h = rawImage->image->height;
             int right_horizon = rawImage->horizon.y(w-1);
-            printf("%dx%d\n\n",h,w);
-
+            //printf("%dx%d\n\n",h,w);
+            /*
             for (uint m = 0;m<h ;++m){
                 for (uint n = 0;n<w;++n){
                     tempPixel = (*rawImage->image)(n,h-m-1);
@@ -481,6 +518,7 @@ namespace vision {
                 printf("\n");
             }
             printf("\n");
+            */
             /********************************************************************
              * SURF Landmark Extraction - needs Robot Detection                *
              *******************************************************************/
@@ -492,12 +530,9 @@ namespace vision {
              * SURF Landmarks used to classify the goal area                   *
              *******************************************************************/
             float awayGoalProb = 0.5;
-            GoalMatcher goalMatcher;
-            goalMatcher.loadVocab(VocabFileName);
-            goalMatcher.loadMap(MapFileName);
-            goalMatcher.process(rawImage, landmarks, landmark_tf, landmark_pixLoc, self,awayGoalProb);
-            printf("awayGoalProb = %.1f\n",awayGoalProb);
-            printf("goal size = %d\n",goals->size());
+            goalMatcher.process(rawImage, landmarks, landmark_tf, landmark_pixLoc, self,awayGoalProb,MapFileName);
+            printf("awayGoalProb = %.2f\n",awayGoalProb);
+            printf("goal size = %d\n\n\n",goals->size());
             for (int j=0;j<goals->size();j++){
                 goals->at(j).awayGoalProb = awayGoalProb;
             }

@@ -42,7 +42,7 @@ int GoalMatcher::classifyGoalArea(std::shared_ptr<const message::vision::Classif
 	std::unique_ptr<std::priority_queue<MapEntry>> matches = std::make_unique<std::priority_queue<MapEntry>>();
   	Eigen::VectorXf query; 
   	std::vector< std::vector<float> > query_pixLoc;
-    unsigned int *seed = 0; // Not sure what this seed does, but it is supposed to come from the figure.
+    unsigned int seed = 42; // Not sure what this seed does, but it is supposed to come from the figure.
     type = message::vision::Goal::Team::UNKNOWN;
 
   	// Augment landmarks with those from a previous matched frame if possible
@@ -56,10 +56,10 @@ int GoalMatcher::classifyGoalArea(std::shared_ptr<const message::vision::Classif
     	
   	//}
   	
-    tfidf.searchDocument(query, query_pixLoc, matches, seed, SEARCH_POSITIONS);
+    tfidf.searchDocument(query, query_pixLoc, matches, &seed, SEARCH_POSITIONS);
 
     num = (int) matches->size();
-    printf("Num = %d\n",num);
+    printf("Number of matches = %d\n",num);
 	if (num > MIN_CONSENSUS_DIFF){
 
 		AbsCoord position;
@@ -96,7 +96,8 @@ void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage
 						  std::unique_ptr<Eigen::VectorXf>& landmark_tf,
 						  std::unique_ptr<std::vector<std::vector<float>>>& landmark_pixLoc,
 						  const message::localisation::Self& self,
-						  float &awayGoalProb) {
+						  float &awayGoalProb,
+						  std::string mapFile) {
 
 	// Adjust robotPos for head yaw
 	AbsCoord position(self.position(0),self.position(1),0);
@@ -110,8 +111,10 @@ void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage
 	if (state == STATE_INITIAL) {
 		wasInitial = true;
 		clearMap = true;
+		printf("state was STATE_INITIAL\n");
 	} else if (state != STATE_READY) {
 		wasInitial = false;
+		printf("state was not STATE_READY\n");
 	}        
 
     /****** TO DO ********/
@@ -119,21 +122,28 @@ void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage
 
     if ((state == STATE_READY) && (wasInitial)){
     	// saving landmarks mode
-    	/*
+    	printf("Saving Landmarks mode:...\n");
+    	
     	if (clearMap) {
             tfidf.clearMap();
             clearMap = false;
             awayMapSize = 0;
             homeMapSize = 0;
+            printf("map cleared\n");
         } 
-        */
-		message::vision::Goal::Team type = message::vision::Goal::Team::UNKNOWN;
-		int num_matches = classifyGoalArea(frame, landmarks, landmark_tf, landmark_pixLoc, type);
-		if (num_matches < MIN_SAVE_MATCHES ){
+        
+		//message::vision::Goal::Team type = message::vision::Goal::Team::UNKNOWN;
+		//int num_matches = classifyGoalArea(frame, landmarks, landmark_tf, landmark_pixLoc, type);
+		//if (num_matches < MIN_SAVE_MATCHES ){
+			//printf("This appears to be a unique perspective of the goal\n");
 			// Check which goal we are mapping
 			bool awayGoal = false;
 			if (self.heading[0] > 0){ //This only works if heading is w.r.t. the field and the x-axis is towards the opponent's goal.
 				awayGoal = true;
+				printf("We are looking at the OPPONENT goal\n");
+			}
+			else{
+				printf("We are looking at the OWN goal\n");
 			}
 
 			Eigen::VectorXf tf_doc; 
@@ -150,22 +160,23 @@ void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage
                MapEntry document = MapEntry(position);
                tfidf.addDocumentToCorpus(document, tf_doc, pixLoc);
                vocabLoaded = true;
-               printf("awayMapSize: %d\tMapping away goal, position (%.1f, %.1f)\n", awayMapSize, position.x(), position.y()); //theta has been removed temporarily
+               tfidf.saveMap(mapFile);
+               awayGoalProb = 0.9; //Don't want to use 100% certainty, so 90% is a guess.
+               printf("awayMapSize: %d->%d\tMapping away goal, position (%.1f, %.1f)\n", awayMapSize, awayMapSize+1, position.x(), position.y()); //theta has been removed temporarily
                awayMapSize++;
             } else if (!awayGoal && homeMapSize < MAP_MAX){
                MapEntry document = MapEntry(position);
                tfidf.addDocumentToCorpus(document, tf_doc, pixLoc);
                vocabLoaded = true;
-               printf("homeMapSize: %d\tMapping home goal, position (%.1f, %.1f)\n", awayMapSize, position.x(), position.y()); //theta has been removed temporarily
+               tfidf.saveMap(mapFile);
+               awayGoalProb = 0.1; //Don't want to use 100% certainty, so 10% is a guess.
+               printf("homeMapSize: %d->%d\tMapping home goal, position (%.1f, %.1f)\n", homeMapSize, homeMapSize+1, position.x(), position.y()); //theta has been removed temporarily
                homeMapSize++;
             } else {
                printf("I should map this view but the map is already full for awayGoal = ");
                printf(awayGoal ? "true\n" : "false\n");
             }
-
-
-
-		}
+		//}
 	} else { // landmark retrieval and goal classification mode
 		printf("Landmark retrieval mode\n");
 		message::vision::Goal::Team type = message::vision::Goal::Team::UNKNOWN;
@@ -181,6 +192,5 @@ void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage
 		 if (obs[i] == message::vision::Goal::Team::OPPONENT) away += 1.f;            
 		}
 		awayGoalProb = away / (home + away);
-
 	}
 }

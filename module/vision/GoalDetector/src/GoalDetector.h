@@ -24,6 +24,7 @@
 #include "Ipoint.h"
 #include <string.h>
 #include <eigen3/Eigen/Core>
+#include "GoalMatcher.h"
 
 namespace module {
 namespace vision {
@@ -56,6 +57,8 @@ namespace vision {
         bool clearMap = false;
         std::string VocabFileName = "/home/vagrant/NUbots/module/vision/GoalDetector/data/words.vocab";
         std::string MapFileName = "/home/vagrant/NUbots/module/vision/GoalDetector/data/goals.map";
+        GoalMatcher goalMatcher;
+        uint8_t imageNum = 1;
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.

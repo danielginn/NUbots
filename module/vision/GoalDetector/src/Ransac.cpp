@@ -59,12 +59,14 @@ bool RANSAC::findLineConstrained(const std::vector<Point>  &points,
        * could use dist() here, but since the denominator is consistent, we
        * save time and implement it again here.
        */
+   
       const float denom = sqrt(l.t1*l.t1 + l.t2*l.t2);
       const float newe  = e*denom;
 
       /**
        * Choose the currently unused concensus buffer
        */
+   
       if (best_concensus == &cons_buf[0]) {
          this_concensus = &cons_buf[1];
       } else {
@@ -99,6 +101,7 @@ bool RANSAC::findLineConstrained(const std::vector<Point>  &points,
          //std::cout << result.t1 << " " << result.t2 << " " << result.t3 << " " << result.var << std::endl;
          best_concensus = this_concensus;
       }
+      
    }
 
    if (minerr < std::numeric_limits<float>::max()) {
@@ -107,4 +110,5 @@ bool RANSAC::findLineConstrained(const std::vector<Point>  &points,
    } else {
       return false;
    }
+
 }
