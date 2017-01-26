@@ -178,7 +178,7 @@ namespace vision {
                 std::unique_ptr<message::localisation::Self> self = std::make_unique<message::localisation::Self>();
             
                 arma::vec2 n({ 0.0, 1.0 });
-                double d = 0;
+                double d = IMAGE_HEIGHT/2;
 
                 test_image = backgroundImageGen(imageNum, self);
                 auto frame = std::make_unique<ClassifiedImage<ObjectClass>>();// Create an empty ClassifiedImage object
@@ -197,7 +197,7 @@ namespace vision {
                 std::unique_ptr<message::localisation::Self> self = std::make_unique<message::localisation::Self>();
             
                 arma::vec2 n({ 0.0, 1.0 });
-                double d = 0;
+                double d = IMAGE_HEIGHT/2;
 
                 test_image = testImageGen(imageNum, self);
                 auto frame = std::make_unique<ClassifiedImage<ObjectClass>>();// Create an empty ClassifiedImage object
@@ -509,10 +509,10 @@ namespace vision {
             /*
             for (uint m = 0;m<h ;++m){
                 for (uint n = 0;n<w;++n){
-                    tempPixel = (*rawImage->image)(n,h-m-1);
+                    tempPixel = (*rawImage->image)(n,m);
                     printf("%3d ",tempPixel.y);
                 }
-                if ((h-m-1) == right_horizon){
+                if (m == right_horizon){
                     printf("--");
                 }
                 printf("\n");
@@ -529,6 +529,7 @@ namespace vision {
             /********************************************************************
              * SURF Landmarks used to classify the goal area                   *
              *******************************************************************/
+            
             float awayGoalProb = 0.5;
             goalMatcher.process(rawImage, landmarks, landmark_tf, landmark_pixLoc, self,awayGoalProb,MapFileName);
             printf("awayGoalProb = %.2f\n",awayGoalProb);
@@ -537,6 +538,7 @@ namespace vision {
                 goals->at(j).awayGoalProb = awayGoalProb;
             }
             emit(std::move(goals));
+            
         });
     }
 
