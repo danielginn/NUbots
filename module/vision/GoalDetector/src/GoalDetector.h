@@ -23,8 +23,12 @@
 #include <nuclear>
 #include "Ipoint.h"
 #include <string.h>
-#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 #include "GoalMatcher.h"
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+
 
 namespace module {
 namespace vision {
@@ -59,6 +63,16 @@ namespace vision {
         std::string MapFileName = "/home/vagrant/NUbots/module/vision/GoalDetector/data/goals.map";
         GoalMatcher goalMatcher;
         uint8_t imageNum = 1;
+        Eigen::MatrixXd resultTable = Eigen::MatrixXd::Zero(33*8,6);
+        int awayImages = 1; //1 = AWAY, 0 = HOME
+        
+        int CutoffTableRowCounter = 0;
+        int CutoffTableColCounter = 0;
+        int CutoffTableColMax = 10; // Double the number due to away and home in each column
+        int CutoffTableRowMax = 6;
+        float imageSetSize = 33.0; //float because this number is the denominator in divisions
+        std::ofstream myfile;
+        std::ofstream myfile2;
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.

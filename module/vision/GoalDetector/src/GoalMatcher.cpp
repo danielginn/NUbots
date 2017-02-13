@@ -30,11 +30,20 @@ void GoalMatcher::loadMap(std::string mapFile){
 	if (vocabLoaded) tfidf.loadMap(mapFile);
 }
 
+float GoalMatcher::getValidCosineScore() {return tfidf.getValidCosineScore();}
+
+int GoalMatcher::getValidInliers() {return tfidf.getValidInliers();}
+
+void GoalMatcher::setValidCosineScore(float x) {tfidf.setValidCosineScore(x);}
+
+void GoalMatcher::setValidInliers(int x) {tfidf.setValidInliers(x);}
+
 int GoalMatcher::classifyGoalArea(std::shared_ptr<const message::vision::ClassifiedImage<message::vision::ObjectClass>> frame, 
 								  std::unique_ptr<std::vector<Ipoint>>& landmarks,
 								  std::unique_ptr<Eigen::VectorXf>& landmark_tf,
 								  std::unique_ptr<std::vector<std::vector<float>>>& landmark_pixLoc,
-								  message::vision::Goal::Team &type){
+								  message::vision::Goal::Team &type,
+								  Eigen::MatrixXd *resultTable){
 	
 	//if ((!vocabLoaded) || (!frame.wordMapped)) return 0; // Check valid data
 
@@ -56,7 +65,7 @@ int GoalMatcher::classifyGoalArea(std::shared_ptr<const message::vision::Classif
     	
   	//}
   	
-    tfidf.searchDocument(query, query_pixLoc, matches, &seed, SEARCH_POSITIONS);
+    tfidf.searchDocument(query, query_pixLoc, matches, &seed, SEARCH_POSITIONS, resultTable);
 
     num = (int) matches->size();
     printf("Number of matches = %d\n",num);
@@ -65,7 +74,8 @@ int GoalMatcher::classifyGoalArea(std::shared_ptr<const message::vision::Classif
 		AbsCoord position;
     	int i=0;
     	int away_goal_votes = 0;
-
+    	int away_goal_count = 0;
+    	int home_goal_count = 0;
     	while(!matches->empty() && i<SEARCH_POSITIONS){
 			i++;
 			MapEntry entry = matches->top();
@@ -74,16 +84,20 @@ int GoalMatcher::classifyGoalArea(std::shared_ptr<const message::vision::Classif
 
 			if(position.theta() < M_PI/2 && position.theta() > -M_PI/2){
 	          away_goal_votes++;
+	          away_goal_count++;
 	        } else {
 	          away_goal_votes--;
+	          home_goal_count++;
 	        }
     	}
     	// Now look for a consensus position 
 	    if (away_goal_votes >= MIN_CONSENSUS_DIFF) {
-	      type = message::vision::Goal::Team::OPPONENT;      
+	      type = message::vision::Goal::Team::OPPONENT;  
+	      printf("This is the Opponent's goal. Away/Home votes: %d/%d\n",away_goal_count,home_goal_count);  
 	      return num;
 	    } else if (away_goal_votes <= -MIN_CONSENSUS_DIFF) {
 	      type = message::vision::Goal::Team::OWN;
+	      printf("This is our own goal. Away/Home votes: %d/%d\n",away_goal_count,home_goal_count);
 	      return num;
 	    } 
     }
@@ -97,10 +111,11 @@ void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage
 						  std::unique_ptr<std::vector<std::vector<float>>>& landmark_pixLoc,
 						  const message::localisation::Self& self,
 						  float &awayGoalProb,
-						  std::string mapFile) {
+						  std::string mapFile,
+						  Eigen::MatrixXd *resultTable) {
 
 	// Adjust robotPos for head yaw
-	AbsCoord position(self.position(0),self.position(1),0);
+	AbsCoord position(self.position(0),self.position(1),atan2(self.heading[1],self.heading[0]));
 	printf("Robot is in position: <%0.1f,%0.1f,%0.1f>\n",position.x(),position.y(),position.theta());
 	/*
 	if (isnan(position.x()) || isnan(position.y()) || isnan(position.theta())){
@@ -180,7 +195,7 @@ void GoalMatcher::process(std::shared_ptr<const message::vision::ClassifiedImage
 	} else { // landmark retrieval and goal classification mode
 		printf("Landmark retrieval mode\n");
 		message::vision::Goal::Team type = message::vision::Goal::Team::UNKNOWN;
-		classifyGoalArea(frame, landmarks, landmark_tf, landmark_pixLoc, type);
+		classifyGoalArea(frame, landmarks, landmark_tf, landmark_pixLoc, type, resultTable);
 		//frame.goalArea = type;
 
 		obs.insert(obs.begin(), type);

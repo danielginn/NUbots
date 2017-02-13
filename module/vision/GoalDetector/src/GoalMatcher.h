@@ -13,8 +13,9 @@
 #include <stdio.h>
 #include "message/localisation/FieldObject.h"
 #include "message/vision/VisionObjects.h"
+#include <eigen3/Eigen/Dense>
 #define SEARCH_POSITIONS 8 // how many of the top responses to look at
-#define MIN_CONSENSUS_DIFF 0 //2 // eg. 4 against 2 if search positions == 6
+#define MIN_CONSENSUS_DIFF 2 // eg. 4 against 2 if search positions == 6
 #define MIN_SAVE_MATCHES 4 // How many hits you need to stop you saving the image again
 #define MAP_MAX 40 // maximum number of images to map for each goal
 #define WINDOW_SIZE 10 // how big our rolling window of observations is, not so big that it could possibly
@@ -28,6 +29,10 @@ class GoalMatcher {
 		// Load a saved visual dictionary for fast matching and starting map of features around the field
 		void loadVocab(std::string vocabFile);
 		void loadMap(std::string mapFile);
+		float getValidCosineScore();
+		int   getValidInliers();
+		void setValidCosineScore(float x);
+		void setValidInliers(int x);
 
 		// Tries to classify which end the visible goals are at, based on background landmarks, or learns 
    		// landmarks if in first ready state for the half
@@ -37,7 +42,8 @@ class GoalMatcher {
 					 std::unique_ptr<std::vector<std::vector<float>>>& landmark_pixLoc,
 					 const message::localisation::Self& self,
 					 float &awayGoalProb,
-					 std::string mapFile);
+					 std::string mapFile,
+					 Eigen::MatrixXd *resultTable);
 
    		void setWasInitial(bool x) {
    			wasInitial = x;
@@ -54,7 +60,8 @@ class GoalMatcher {
 							 std::unique_ptr<std::vector<Ipoint>>& landmarks,
 							 std::unique_ptr<Eigen::VectorXf>& landmark_tf,
 							 std::unique_ptr<std::vector<std::vector<float>>>& landmark_pixLoc,
-							 message::vision::Goal::Team &type);
+							 message::vision::Goal::Team &type,
+							 Eigen::MatrixXd *resultTable);
 
 		Tfidf tfidf;
 

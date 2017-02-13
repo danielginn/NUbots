@@ -1,10 +1,10 @@
 #pragma once
 
-#define IMAGE_WIDTH 2048   // This is taken from NUbots/module/input/LinuxCamera/data/config/LinuxCamera.yaml  (rUNSWift is using 1280!!!!!!!!!)
-#define IMAGE_HEIGHT 1152
-#define SURF_SUBSAMPLE 8  // Reduced from 8, since we are using 1/4 of the resolution that rUNSWift is using
-#define INIT_SAMPLE 1
-#define SURF_HORIZON_WIDTH 100
+#define IMAGE_WIDTH 320   // This is taken from NUbots/module/input/LinuxCamera/data/config/LinuxCamera.yaml  (rUNSWift is using 1280!!!!!!!!!)
+#define IMAGE_HEIGHT 240
+#define SURF_SUBSAMPLE 1  // Reduced from 8, since we are using 1/4 of the resolution that rUNSWift is using
+#define INIT_SAMPLE 1	  // The initial subsample of the integral (which itself has already been subsampled)
+#define SURF_HORIZON_WIDTH 10// Reduced by 1/4 from 60
 
 /**
  * The size of the SURF feature point descriptor in floats, must be even number
@@ -14,7 +14,7 @@
 /**
  * The number of scale space octaves used when searching for features
  **/
-#define OCTAVES 5
+#define OCTAVES 4
 
 /**
  * The threshold value for interest points

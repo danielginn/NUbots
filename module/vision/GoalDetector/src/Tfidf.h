@@ -1,4 +1,4 @@
-#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 
 #include <nuclear>
@@ -22,7 +22,12 @@ class Tfidf {
 		}
 
 		//! find out how many entries in map
-		int getSize();
+		int   getSize();
+		float getValidCosineScore();
+		int   getValidInliers(); 
+
+		void setValidCosineScore(float x);
+		void setValidInliers(int x);
 
 		void loadVocab(std::string vocabFile);
 		void loadMap(std::string mapFile);
@@ -42,7 +47,8 @@ class Tfidf {
                       		std::vector< std::vector<float> > query_pixLoc, // pixel locations of the words 
                       		std::unique_ptr<std::priority_queue<MapEntry>>& matches, 
                       		unsigned int *seed, 
-                      		int n);
+                      		int n,
+                      		Eigen::MatrixXd *resultTable);
 
 
 
@@ -56,6 +62,10 @@ class Tfidf {
 			pixels.clear();
 		}
 
+		float cosineScore(Eigen::VectorXf a,Eigen::VectorXf b);
+		float PearsonsCorrelation(Eigen::VectorXf a,Eigen::VectorXf b);
+
+
 		Vocab vocab;
 		int N; 	// number of documents
 		int T;	// number of terms
@@ -65,4 +75,7 @@ class Tfidf {
 		Eigen::VectorXf	 ni;	// term count by word;
 		std::vector<MapEntry> 	map;
 		Eigen::VectorXf idf;	// corpus inverse document frequency
+
+		float VALID_COSINE_SCORE = 0.40; // 0.42f
+		int VALID_INLIERS = 0;//40 // 50
 };
